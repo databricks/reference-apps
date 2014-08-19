@@ -1,0 +1,44 @@
+<project>
+    <groupId>com.databricks.apps.logs</groupId>
+    <artifactId>log-analyzer</artifactId>
+    <modelVersion>4.0.0</modelVersion>
+    <name>Databricks Spark Logs Analyzer</name>
+    <packaging>jar</packaging>
+    <version>1.0</version>
+    <repositories>
+        <repository>
+            <id>Akka repository</id>
+            <url>http://repo.akka.io/releases</url>
+        </repository>
+    </repositories>
+    <dependencies>
+        <dependency> <!-- Spark -->
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-core_2.10</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <dependency> <!-- Spark SQL -->
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-sql_2.10</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <dependency> <!-- Spark Streaming -->
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-streaming_2.10</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
