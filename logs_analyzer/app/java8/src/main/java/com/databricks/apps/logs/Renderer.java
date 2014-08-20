@@ -16,7 +16,7 @@ public class Renderer implements Serializable {
       throws Exception {
     if (fileTemplate == null) {
       fileTemplate = Files.toString(
-          new File(LogAnalyzerAppMain.Flags.getInstance().getIndexHtmlTemplate()),
+          new File(Flags.getInstance().getIndexHtmlTemplate()),
           Charsets.UTF_8);
     }
 
@@ -29,7 +29,7 @@ public class Renderer implements Serializable {
     output = output.replace("${frequentIpAddressTable}", frequentIpAddressTable(allOfTime, lastWindow));
 
     Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
-        LogAnalyzerAppMain.Flags.getInstance().getOutputHtmlFile())));
+        Flags.getInstance().getOutputHtmlFile())));
     out.write(output);
     out.close();
   }

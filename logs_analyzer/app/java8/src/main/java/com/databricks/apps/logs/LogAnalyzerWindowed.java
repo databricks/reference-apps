@@ -13,10 +13,9 @@ public class LogAnalyzerWindowed implements Serializable {
   private LogStatistics logStatistics;
 
   public void processAccessLogs(JavaDStream<ApacheAccessLog> accessLogsDStream) {
-
     JavaDStream<ApacheAccessLog> windowDStream = accessLogsDStream.window(
-        LogAnalyzerAppMain.Flags.getInstance().getWindowLength(),
-        LogAnalyzerAppMain.Flags.getInstance().getSlideInterval());
+        Flags.getInstance().getWindowLength(),
+        Flags.getInstance().getSlideInterval());
     windowDStream.foreachRDD(accessLogs -> {
       JavaRDD<Long> contentSizes =
           accessLogs.map(ApacheAccessLog::getContentSize).cache();

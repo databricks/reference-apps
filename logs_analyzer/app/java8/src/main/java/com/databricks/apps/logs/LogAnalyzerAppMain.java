@@ -1,8 +1,9 @@
 package com.databricks.apps.logs;
 
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.streaming.Duration;
 import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 
@@ -22,64 +23,50 @@ import java.io.IOException;
  * Then open your output text file, perhaps in a web browser, and refresh
  * that page to see more stats come in.
  *
- * Modify the hardcoded FLAGS variables to the values of your choosing.
+ * Modify the command line flags to the values of your choosing.
+ * Notice how they come after you specify the jar when using spark-submit.
  *
  * Example command to run:
  * %  ${YOUR_SPARK_HOME}/bin/spark-submit
  *     --class "com.databricks.apps.logs.LogAnalyzerAppMain"
  *     --master local[4]
- *     target/log-analyzer-1.0.jar
+ *     target/uber-log-analyzer-1.0.jar
+ *     --logs_directory /tmp/logs
+ *     --output_html_file /tmp/log_stats.html
+ *     --index_html_template ./src/main/resources/index.html.template
  */
 public class LogAnalyzerAppMain {
-  public static class Flags {
-    private static final Flags THE_INSTANCE = new Flags();
+  public static final String WINDOW_LENGTH = "window_length";
+  public static final String SLIDE_INTERVAL = "slide_interval";
+  public static final String LOGS_DIRECTORY = "logs_directory";
+  public static final String OUTPUT_HTML_FILE = "output_html_file";
+  public static final String CHECKPOINT_DIRECTORY = "checkpoint_directory";
+  public static final String INDEX_HTML_TEMPLATE = "index_html_template";
 
-    private final Duration windowLength = new Duration(30 * 1000);
-    private final Duration slideInterval = new Duration(5 * 1000);
+  private static final Options THE_OPTIONS = createOptions();
+  private static Options createOptions() {
+    Options options = new Options();
 
-    private final String logsDirectory = "/tmp/logs";
-    private final String outputHtmlFile = "/tmp/log_stats.html";
+    options.addOption(
+        new Option(WINDOW_LENGTH, false, "The window length in seconds"));
+    options.addOption(
+        new Option(SLIDE_INTERVAL, false, "The slide interval in seconds"));
+    options.addOption(
+        new Option(LOGS_DIRECTORY, true, "The directory where logs are written"));
+    options.addOption(
+        new Option(OUTPUT_HTML_FILE, false, "Where to write output html file"));
+    options.addOption(
+        new Option(CHECKPOINT_DIRECTORY, false, "The checkpoint directory."));
+    options.addOption(new Option(INDEX_HTML_TEMPLATE, true,
+            "path to the index.html.template file - accessible from all workers"));
 
-    private final String checkpointDirectory =
-        "/tmp/log-analyzer-streaming";
-
-    // The path to this project's index.html.template
-    // This file needs to be accessible to all Spark workers.
-    private final String indexHtmlTemplate =
-        "./src/main/resources/index.html.template";
-
-    private Flags() {}
-
-    public static Flags getInstance() {
-      return THE_INSTANCE;
-    }
-
-    public Duration getWindowLength() {
-      return windowLength;
-    }
-
-    public Duration getSlideInterval() {
-      return slideInterval;
-    }
-
-    public String getLogsDirectory() {
-      return logsDirectory;
-    }
-
-    public String getOutputHtmlFile() {
-      return outputHtmlFile;
-    }
-
-    public String getCheckpointDirectory() {
-      return checkpointDirectory;
-    }
-
-    public String getIndexHtmlTemplate() {
-      return indexHtmlTemplate;
-    }
+    return options;
   }
 
   public static void main(String[] args) throws IOException {
+    Flags.setFromCommandLineArgs(THE_OPTIONS, args);
+
+    // Startup the Spark Conf.
     SparkConf conf = new SparkConf()
         .setAppName("A Databricks Reference Application: Logs Analysis with Spark");
     JavaSparkContext sc = new JavaSparkContext(conf);
