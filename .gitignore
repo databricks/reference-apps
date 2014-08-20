@@ -7,3 +7,4 @@ out/**
 **/target/**
 **/project/**
 **/.DS_Store
+**/META-INF/**
