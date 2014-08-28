@@ -1,7 +1,7 @@
 # Spark SQL
 
-The [Spark SQL Guide](https://spark.apache.org/docs/latest/sql-programming-guide.html)
-is a useful reference for this section.
+You should go through the [Spark SQL Guide](https://spark.apache.org/docs/latest/sql-programming-guide.html)
+before beginning this section.
 
 For those of you who are familiar with SQL, the same statistics we calculated
 in the previous example can be done using Spark SQL rather than calling
@@ -43,7 +43,8 @@ box.  Or you can also refer to the
 [Spark SQL Guide on Data Sources](https://spark.apache.org/docs/latest/sql-programming-guide.html#data-sources)
 for more details.)
 ```java
-JavaSchemaRDD schemaRDD = sqlContext.applySchema(accessLogs, ApacheAccessLog.class).cache();
+JavaSchemaRDD schemaRDD = sqlContext.applySchema(accessLogs,
+    ApacheAccessLog.class).cache();
 schemaRDD.registerAsTable("logs");
 ```
 
@@ -83,6 +84,6 @@ List<Tuple2<String, Long>> topEndpoints = sqlContext
 System.out.println(String.format("Top Endpoints: %s", topEndpoints));
 ```
 
-One thing to note though is that Spark SQL does not allow using reserved keyworks as alias names.  In other words, ```SELECT COUNT(*) AS count``` will not work, but ```SELECT COUNT(*) AS the_count``` does.
+Note that Spark SQL does not allow using reserved keyworks as alias names.  In other words, ```SELECT COUNT(*) AS count``` will cause errors, but ```SELECT COUNT(*) AS the_count``` runs fine.
 
 Try running [LogAnalyzerSQL.java](java8/src/main/java/com/databricks/apps/logs/chapter1/LogAnalyzerSQL.java) now.

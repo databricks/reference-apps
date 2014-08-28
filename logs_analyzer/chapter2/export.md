@@ -1,7 +1,6 @@
 ## Exporting Data out of Spark
 
-This section contains methods for exporting data out of Spark into your
-other production systems.  First, you'll have to figure out if your output data
+This section contains methods for exporting data out of Spark into systems.  First, you'll have to figure out if your output data
 is small (meaning can fit on memory on one machine) or large
 (too big to fit into memory on one machine).  Consult these two sections
 based on your use case.

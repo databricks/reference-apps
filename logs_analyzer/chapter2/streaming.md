@@ -11,9 +11,9 @@ receiving new logs data, processing the data, and computing log stats.
 
 ## Built in Methods for Streaming Import
 
-The StreamingContext has many built in methods for importing data for streaming.
-We used ```socketTextStream``` in the previous chapter, and we'll use ```textFileStream```
-here.  The ```textFileStream``` method monitors any Hadoop-compatible filesystem directory for new
+The StreamingContext has many built in methods for importing data to streaming.
+```socketTextStream``` was introduced in the previous chapter, and ```textFileStream```
+is introduced here.  The ```textFileStream``` method monitors any Hadoop-compatible filesystem directory for new
 files and when it detects a new file - reads it into Spark Streaming.
 Just replace the call to ```socketTextStream``` with ```textFileStream```,
 and pass in the directory to monitor for log files.
@@ -26,7 +26,7 @@ JavaDStream<String> logData = jssc.textFileStream(directory);
 
 Try running [LogAnalyzerStreamingImportDirectory.java](java8/src/main/java/com/databricks/apps/logs/chapter2/LogAnalyzerStreamingImportDirectory.java)
 by specifying a directory.   You'll also need to drop or copy some new log files
-into that directory while the program is running.
+into that directory while the program is running to see the calculated values update.
 
 There are more built-in input methods for streaming - check them out in the
 reference API documents for the StreamingContext.
@@ -35,10 +35,10 @@ reference API documents for the StreamingContext.
 
 While the previous example picks up new log files right away - the log
 files aren't copied over until a long time after the HTTP requests in the logs
-actually occurred, so we don't get up to date log statistics.  To get real time
+actually occurred.  While that enables auto-refresh of log data, that's still not realtime.  To get realtime
 logs processing, we need a way to send over log lines immediately.  Kafka is a
-high-throughput distributed message system that is perfect for that use case.  There
-is an external module of Spark for Kafka import.
+high-throughput distributed message system that is perfect for that use case.  Spark
+contains an external module importing data from Kafka.
 
 Here is some useful documentation to set up Kafka for Spark Streaming:
 

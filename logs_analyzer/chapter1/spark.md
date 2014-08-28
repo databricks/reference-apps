@@ -1,10 +1,10 @@
 # A First Log Analyzer in Spark
 
-It would be helpful to go through the [Spark Quick Start](https://spark.apache.org/docs/latest/quick-start.html)
-and skim the [Spark Programming Guide](https://spark.apache.org/docs/latest/programming-guide.html)
-before beginning this section.
+Before beginning this section, go through [Spark Quick Start](https://spark.apache.org/docs/latest/quick-start.html)
+and familiarize with the [Spark Programming Guide](https://spark.apache.org/docs/latest/programming-guide.html)
+first.
 
-Before we start, we need two things:
+Before we can begin, we need two things:
 
 * *An Apache access log file*: If you have one, it's more interesting to use real
 data.  If not, you can use the sample one provided at
@@ -13,7 +13,7 @@ data.  If not, you can use the sample one provided at
  [ApacheAccessLog.java](java8/src/main/java/com/databricks/apps/logs/ApacheAccessLog.java).
 
 The example code uses an Apache access log file since that's a well known
-and common log format.  It would be easy to rewrite the parser for a different log format if needed.
+and common log format.  It would be easy to rewrite the parser for a different log format if you have data in another log format.
 
 The following statistics will be computed:
 
@@ -22,11 +22,11 @@ The following statistics will be computed:
 * All IPAddresses that have accessed this server more than N times.
 * The top endpoints requested by count.
 
-Before we run anything, let's understand the code.
+Let's understand the code first before running the example.
 
 The main body of a simple Spark application is below.
-The first step is to bring up a Spark context.  Then  the Spark context
-can load data from a text file as an RDD, which can then process.  Finally, before exiting the function, we stop the Spark context.
+The first step is to bring up a Spark context.  Then the Spark context
+can load data from a text file as an RDD, which can then process.  Finally, before exiting the function, the Spark context is stopped.
 
 ```java
 public class LogAnalyzer {
@@ -62,7 +62,7 @@ JavaRDD<ApacheAccessLog> accessLogs =
     logLines.map(ApacheAccessLog::parseFromLogLine).cache();
 ```
 
-First, we'll define a sum reducer - this is a function that takes in
+It's useful to define a sum reducer - this is a function that takes in
 two integers and returns their sum.  This is used all over our example.
 ```java
 private static Function2<Long, Long, Long> SUM_REDUCER = (a, b) -> a + b;
@@ -71,7 +71,7 @@ private static Function2<Long, Long, Long> SUM_REDUCER = (a, b) -> a + b;
 Next, let's calculate the average, minimum, and maximum content size of the
 response returned.  A ```map``` transformation extracts the content sizes, and
 then different actions (```reduce```, ```count```, ```min```, and ```max```) are called to output
-various stats.  Again, call ```cache``` the context size RDD to avoid repeating computation.
+various stats.  Again, call ```cache``` on the context size RDD to avoid recalculating those values for each action called on it.
 
 ```java
 // Calculate statistics based on the content size.
@@ -92,15 +92,15 @@ That's just to be safe since it could take a really long time to call
 
 ```java
 // Compute Response Code to Count.
-List<Tuple2<Integer, Long>> responseCodeToCount =
-    accessLogs.mapToPair(log -> new Tuple2<>(log.getResponseCode(), 1L))
+List<Tuple2<Integer, Long>> responseCodeToCount = accessLogs
+        .mapToPair(log -> new Tuple2<>(log.getResponseCode(), 1L))
         .reduceByKey(SUM_REDUCER)
         .take(100);
 System.out.println(String.format("Response code counts: %s", responseCodeToCount));
 ```
 
 To compute any IPAddress that has accessed this server more than 10 times,
-we call the ```filter``` tranformation and then ```map``` to retrieve only the IPAddress and not the count.  Again we use ```take(100)``` to retrieve the values.
+we call the ```filter``` tranformation and then ```map``` to retrieve only the IPAddress and discard the count.  Again we use ```take(100)``` to retrieve the values.
 ```java
 List<String> ipAddresses =
     accessLogs.mapToPair(log -> new Tuple2<>(log.getIpAddress(), 1L))
@@ -111,7 +111,7 @@ List<String> ipAddresses =
 System.out.println(String.format("IPAddresses > 10 times: %s", ipAddresses));
 ```
 
-Last let's calculate the top endpoints requested in this log file. We define
+Last, let's calculate the top endpoints requested in this log file. We define
 an inner class, ```ValueComparator``` to help with that.  This function tells us,
 given two tuples, which one is first in ordering.  The key of the tuple is ignored, and ordering is based just on the values.
 

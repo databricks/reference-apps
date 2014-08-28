@@ -37,5 +37,5 @@ out.write(String.format("Top Endpoints: %s\n", topEndpoints));
 out.close();
 ```
 
-Now, run [LogAnalyzerExportSmallData.java](java8/src/main/java/com/databricks/apps/logs/chapter2/LogAnalyzerExportSmallData.java).
+Now, run [LogAnalyzerExportSmallData.java](java8/src/main/java/com/databricks/apps/logs/chapter2/LogAnalyzerExportSmallData.java).  Try modifying it to write to a database of your own choosing.
 

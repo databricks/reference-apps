@@ -1,7 +1,7 @@
 # Windowed Calculations
 
 A typical use case for logs analysis is for monitoring a web server,
-in which case we may only be interested in what's happened for the last one hour of time, and we want those statistics to refresh every minute.  One hour is called
+in which case you may only be interested in what's happened for the last one hour of time, and want those statistics to refresh every minute.  One hour is
 the *window length*, while one minute is the *slide interval*.  In this
 example, we use a window length of 30 seconds and a slide interval of
 10 seconds as a comfortable choice for development.
@@ -9,7 +9,7 @@ example, we use a window length of 30 seconds and a slide interval of
 The windows feature of Spark Streaming makes it very easy to compute
 stats for a window of time, using the `window` function.
 
-The first step is initalize the SparkConf and context objects, in particular a streaming context.  Note how only one Spark context is created from the conf and the streaming and sql contexts are created from those.  Next, the main body should be written.  Finally, the example calls ```start()``` on the streaming context, and ```awaitTermination() ```to keep the streaming context running.
+The first step is initalize the SparkConf and context objects - in particular a streaming context.  Note how only one Spark context is created from the conf and the streaming and sql contexts are created from those.  Next, the main body should be written.  Finally, the example calls ```start()``` on the streaming context, and ```awaitTermination() ```to keep the streaming context running and accepting streaming input.
 
 ```java
 public class LogAnalyzerStreamingSQL {
@@ -54,15 +54,16 @@ JavaDStream<ApacheAccessLog> windowDStream =
 
 Then call ```foreachRDD``` on the windowDStream.  The function
 passed into ```forEachRDD``` is called on each new RDD in the windowDStream as the RDD
-is created, so every slide_interval.  The RDD passed into the function contains
-all the input for the last window_length of time.  Now that we have
-an RDD of ApacheAccessLogs, you can simply reuse code from either two batch examples (regular or SQL).  In this example, the code was just copied and pasted, but you could refactor this code into one place nicely for reuse in your production code base - no need to write new processing code just for streaming!
+is created, so every *slide_interval*.  The RDD passed into the function contains
+all the input for the last *window_length* of time.  Now that there is
+an RDD of ApacheAccessLogs, simply reuse code from either two batch examples (regular or SQL).  In this example, the code was just copied and pasted, but you could refactor this code into one place nicely for reuse in your production code base - you can reuse all your batch processing code for streaming!
 ```java
 windowDStream.foreachRDD(accessLogs -> {
   if (accessLogs.count() == 0) {
     System.out.println("No access logs in this time interval");
     return null;
   }
+
   // Insert code verbatim from LogAnalyzer.java or LogAnalyzerSQL.java here.
 
   // Calculate statistics based on the content size.
@@ -79,4 +80,4 @@ windowDStream.foreachRDD(accessLogs -> {
 
 Now that we've walked through the code, run
  [LogAnalyzerStreaming.java](java8/src/main/java/com/databricks/apps/logs/chapter1/LogAnalyzerStreaming.java)
-and/or [LogAnalyzerStreamingSQL.java](java8/src/main/java/com/databricks/apps/logs/chapter1/LogAnalyzerStreamingSQL.java) now.
+and/or [LogAnalyzerStreamingSQL.java](java8/src/main/java/com/databricks/apps/logs/chapter1/LogAnalyzerStreamingSQL.java) now. Use the `cat` command as explained before to add data to the log file periodically once you have your program up.

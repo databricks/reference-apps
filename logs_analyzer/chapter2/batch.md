@@ -11,14 +11,14 @@ kick off a batch job each night to process the last day's worth of log files and
 To support batch import of data on a Spark cluster, the data needs to be accessible by all machines on the cluster.  Files that are only accessible on one worker machine
 and cannot be read by the others will cause failures.
 
-If you have a small dataset that can fit on one machine, you could manually copy your files onto all the nodes on your Spark cluster, perhaps using *rsync* to make that easier.
+If you have a small dataset that can fit on one machine, you could manually copy your files onto all the nodes on your Spark cluster, perhaps using `rsync` to make that easier.
 
-*NFS* or some other network file system makes sure all your machines can access the same files without require you to copy the files around.  But NFS isn't fault tolerant
+**NFS** or some other network file system makes sure all your machines can access the same files without requiring you to copy the files around.  But NFS isn't fault tolerant
 to machine failures and if your dataset is too
 big to fit on one NFS volume - you'd have to store the data on multiple volumes
 and figure out which volume a particular file is on - which could get cumbersome.
 
-HDFS and S3 are great file systems for massive datasets - built
+**HDFS** and **S3** are great file systems for massive datasets - built
 to store a lot of data and give all the machines on the cluster
 access to those files, while still being fault tolerant.  We give a few more tips on running Spark with these file systems since they are recommended.
 
@@ -42,20 +42,25 @@ transfer prices differ if you read data within AWS vs. to somewhere else on the
 internet).
 
 See [running Spark on EC2](https://spark.apache.org/docs/latest/ec2-scripts.html)
-if you want to launch a Spark cluster on AWS - charges may apply.
+if you want to launch a Spark cluster on AWS - charges apply.
 
 If you choose to run this example with a local Spark cluster on your machine rather
-than EC2 compute nodes to read the files in S3, use a small data input source.
+than EC2 compute nodes to read the files in S3, use a small data input source!
 
 1. Sign up for an [Amazon Web Services](https://aws.amazon.com/) Account.
-* Load an example logs file to s3.
+* Load example log files to s3.
   * Log into the [AWS console for S3](https://console.aws.amazon.com/s3/)
   * Create an S3 bucket.
   * Upload a couple of example log files to that bucket.
   * Your files will be at the path: s3n://YOUR_BUCKET_NAME/YOUR_LOGFILE.log
 * Configure your security credentials for AWS:
   * Create and [download your security credentials](https://console.aws.amazon.com/iam/home?#security_credential)
-  * Set the environment variables AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY to the correct values on all machines on your cluster.  These can also be set in the SparkConf object programmatically.
+  * Set the environment variables AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY to the correct values on all machines on your cluster.  These can also be set in your SparkContext object programmatically like this:
+
+```java
+jssc.hadoopConfiguration().set("fs.s3n.awsAccessKeyId", YOUR_ACCESS_KEY)
+jssc.hadoopConfiguration().set("fs.s3n.awsSecretAccessKey", YOUR_SECRET_KEY)
+```
 
 Now, run [LogAnalyzerBatchImport.java](java8/src/main/java/com/databricks/apps/logs/chapter2/LogAnalyzerBatchImport.java)
 passing in the s3n path to your files.
@@ -70,7 +75,7 @@ read files.  The Spark binary you run on your clusters must be compiled with the
 same HDFS version as the one you wish to use.
 
 There are many ways to install HDFS, but heading to the [Hadoop homepage](http://hadoop.apache.org/)
-is one way to get started.
+is one way to get started and run hdfs locally on your machine.
 
 Run [LogAnalyzerBatchImport.java](java8/src/main/java/com/databricks/apps/logs/chapter2/LogAnalyzerBatchImport.java)
 on any file pattern on your hdfs directory.
