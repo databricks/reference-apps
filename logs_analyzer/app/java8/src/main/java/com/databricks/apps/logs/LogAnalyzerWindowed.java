@@ -1,6 +1,6 @@
 package com.databricks.apps.logs;
 
-import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.streaming.api.java.JavaDStream;
 import scala.Tuple2;
 import scala.Tuple4;
@@ -17,36 +17,20 @@ public class LogAnalyzerWindowed implements Serializable {
         Flags.getInstance().getWindowLength(),
         Flags.getInstance().getSlideInterval());
     windowDStream.foreachRDD(accessLogs -> {
-      JavaRDD<Long> contentSizes =
-          accessLogs.map(ApacheAccessLog::getContentSize).cache();
+      Tuple4<Long, Long, Long, Long> contentSizeStats =
+          Functions.contentSizeStats(accessLogs);
 
-      long count = contentSizes.count();
-      if (count == 0) {
-        logStatistics = LogStatistics.EMPTY_LOG_STATISTICS;
-        return null;
-      }
-
-      Tuple4<Long, Long, Long, Long> contentSizeStats = new Tuple4<>(
-          contentSizes.reduce(Functions.SUM_REDUCER),
-          count,
-          contentSizes.min(Comparator.naturalOrder()),
-          contentSizes.max(Comparator.naturalOrder()));
-
-      List<Tuple2<Integer, Long>> responseCodeToCount = accessLogs.mapToPair(
-          log -> new Tuple2<>(log.getResponseCode(), 1L))
-          .reduceByKey(Functions.SUM_REDUCER)
+      List<Tuple2<Integer, Long>> responseCodeToCount =
+          Functions.responseCodeCount(accessLogs)
           .take(100);
 
-      List<String> ipAddresses = accessLogs
-          .mapToPair(log -> new Tuple2<>(log.getIpAddress(), 1L))
-          .reduceByKey(Functions.SUM_REDUCER)
-          .filter(tuple -> tuple._2() > 10)
-          .map(Tuple2::_1)
+      JavaPairRDD<String, Long> ipAddressCounts =
+          Functions.ipAddressCount(accessLogs);
+      List<String> ipAddresses = Functions.filterIPAddress(ipAddressCounts)
           .take(100);
 
-      List<Tuple2<String, Long>> topEndpoints = accessLogs
-          .mapToPair(log -> new Tuple2<>(log.getEndpoint(), 1L))
-          .reduceByKey(Functions.SUM_REDUCER)
+      List<Tuple2<String, Long>> topEndpoints =
+          Functions.endpointCount(accessLogs)
           .top(10, new Functions.ValueComparator<>(Comparator.<Long>naturalOrder()));
 
       logStatistics = new LogStatistics(contentSizeStats, responseCodeToCount,

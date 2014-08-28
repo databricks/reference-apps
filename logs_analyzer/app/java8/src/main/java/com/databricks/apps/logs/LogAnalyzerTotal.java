@@ -22,24 +22,22 @@ public class LogAnalyzerTotal implements Serializable {
 
   public void processAccessLogs(JavaDStream<ApacheAccessLog> accessLogsDStream) {
     // Calculate statistics based on the content size, and update the static variables to track this.
-    JavaDStream<Long> contentSizeDStream =
-        accessLogsDStream.map(ApacheAccessLog::getContentSize).cache();
-    contentSizeDStream.foreachRDD(rdd -> {
-      if (rdd.count() > 0) {
-        runningSum.getAndAdd(rdd.reduce(Functions.SUM_REDUCER));
-        runningCount.getAndAdd(rdd.count());
-        runningMin.set(Math.min(runningMin.get(),
-            rdd.min(Comparator.naturalOrder())));
-        runningMax.set(Math.max(runningMax.get(),
-            rdd.max(Comparator.naturalOrder())));
-      }
-      return null;
-    });
+    accessLogsDStream.foreachRDD(accessLogs -> {
+          Tuple4<Long, Long, Long, Long> stats =
+              Functions.contentSizeStats(accessLogs);
+          if (stats != null) {
+            runningCount.getAndAdd(stats._1());
+            runningSum.getAndAdd(stats._2());
+            runningMin.set(Math.min(runningMin.get(), stats._3()));
+            runningMax.set(Math.max(runningMax.get(), stats._4()));
+          }
+          return null;
+        }
+    );
 
     // A DStream of Resonse Code Counts;
     JavaPairDStream<Integer, Long> responseCodeCountDStream = accessLogsDStream
-        .mapToPair(s -> new Tuple2<>(s.getResponseCode(), 1L))
-        .reduceByKey(Functions.SUM_REDUCER)
+        .transformToPair(Functions::responseCodeCount)
         .updateStateByKey(Functions.COMPUTE_RUNNING_SUM);
     responseCodeCountDStream.foreachRDD(rdd -> {
       currentResponseCodeCounts = rdd.take(100);
@@ -48,11 +46,9 @@ public class LogAnalyzerTotal implements Serializable {
 
     // A DStream of ipAddressCounts.
     JavaDStream<String> ipAddressesDStream = accessLogsDStream
-        .mapToPair(s -> new Tuple2<>(s.getIpAddress(), 1L))
-        .reduceByKey(Functions.SUM_REDUCER)
+        .transformToPair(Functions::ipAddressCount)
         .updateStateByKey(Functions.COMPUTE_RUNNING_SUM)
-        .filter(tuple -> tuple._2() > 10)
-        .map(Tuple2::_1);
+        .transform(Functions::filterIPAddress);
     ipAddressesDStream.foreachRDD(rdd -> {
       currentIPAddresses = rdd.take(100);
       return null;
@@ -60,8 +56,7 @@ public class LogAnalyzerTotal implements Serializable {
 
     // A DStream of endpoint to count.
     JavaPairDStream<String, Long> endpointCountsDStream = accessLogsDStream
-        .mapToPair(s -> new Tuple2<>(s.getEndpoint(), 1L))
-        .reduceByKey(Functions.SUM_REDUCER)
+        .transformToPair(Functions::endpointCount)
         .updateStateByKey(Functions.COMPUTE_RUNNING_SUM);
     endpointCountsDStream.foreachRDD(rdd -> {
       currentTopEndpoints = rdd.takeOrdered(10,
@@ -75,8 +70,8 @@ public class LogAnalyzerTotal implements Serializable {
       return LogStatistics.EMPTY_LOG_STATISTICS;
     }
 
-    return new LogStatistics(new Tuple4<>(runningSum.get(), runningCount.get(),
-            runningMin.get(), runningMax.get()),
+    return new LogStatistics(new Tuple4<>(runningCount.get(), runningSum.get(),
+        runningMin.get(), runningMax.get()),
         currentResponseCodeCounts, currentIPAddresses, currentTopEndpoints);
   }
 }

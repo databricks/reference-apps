@@ -37,9 +37,9 @@ public class Renderer implements Serializable {
   public String logLinesTable(LogStatistics allOfTime, LogStatistics lastWindow) {
     return "<table class=\"table table-striped\">" +
         String.format("<tr><th>All Of Time:</th><td>%s</td></tr>",
-            allOfTime.getContentSizeStats()._2()) +
+            allOfTime.getContentSizeStats()._1()) +
         String.format("<tr><th>Last Time Window:</th><td>%s</td></tr>",
-            lastWindow.getContentSizeStats()._2()) +
+            lastWindow.getContentSizeStats()._1()) +
         "</table>";
   }
 
@@ -50,14 +50,14 @@ public class Renderer implements Serializable {
     Tuple4<Long, Long, Long, Long> totalStats = allOfTime.getContentSizeStats();
     Tuple4<Long, Long, Long, Long> lastStats = lastWindow.getContentSizeStats();
     builder.append(String.format("<tr><th>Avg:</th><td>%s</td><td>%s</td>",
-        totalStats._2() > 0 ? totalStats._1() / totalStats._2() : "-",
-        lastStats._2() > 0 ? lastStats._1() / lastStats._2() : "-"));
+        totalStats._1() > 0 ? totalStats._2() / totalStats._1() : "-",
+        lastStats._1() > 0 ? lastStats._2() / lastStats._1() : "-"));
     builder.append(String.format("<tr><th>Min:</th><td>%s</td><td>%s</td>",
-        totalStats._2() > 0 ? totalStats._3() : "-",
-        lastStats._2() > 0 ? lastStats._3() : "-"));
+        totalStats._1() > 0 ? totalStats._3() : "-",
+        lastStats._1() > 0 ? lastStats._3() : "-"));
     builder.append(String.format("<tr><th>Max:</th><td>%s</td><td>%s</td>",
-        totalStats._2() > 0 ? totalStats._4() : "-",
-        lastStats._2() > 0 ? lastStats._4() : "-"));
+        totalStats._1() > 0 ? totalStats._4() : "-",
+        lastStats._1() > 0 ? lastStats._4() : "-"));
     builder.append("</table>");
     return builder.toString();
   }
