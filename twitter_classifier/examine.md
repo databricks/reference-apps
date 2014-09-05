@@ -7,7 +7,7 @@ First, here is code to pretty print 5 sample tweets so that they are
 more humun readable.
 
 ```scala
-val tweets = sc.textFile(tweetDirectory)
+val tweets = sc.textFile(tweetInput)
 for (tweet <- tweets.take(5)) {
   println(gson.toJson(jsonParser.parse(tweet)))
 }
@@ -17,7 +17,7 @@ Spark SQL can load JSON files and infer the schema based on that data.  Here is
 the code to load the json files, register the data in the temp table called "tweetTable" and print out the schema based on that.
 
 ```scala
-val tweetTable = sqlContext.jsonFile(tweetDirectory)
+val tweetTable = sqlContext.jsonFile(tweetInput)
 tweetTable.registerTempTable("tweetTable")
 tweetTable.printSchema()
 ```

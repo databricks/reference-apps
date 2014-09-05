@@ -8,28 +8,31 @@ of the interesting bits now.
 Collect.scala takes in the following argument list:
 
 1. *outputDirectory* - the output directory for writing the tweets.  The files will be named 'part-%05d'
-*  *intervalInSeconds* - write out a new file of tweets every interval.
 *  *numTweetsToCollect* - this is the minimum number of tweets to collect before the program exits.
+*  *intervalInSeconds* - write out a new set of tweets every interval.
+*  *partitionsEachInterval* - this is used to control the number of output files written for each interval
 
 Collect.scala will also require [Twitter API Credentials](https://apps.twitter.com/).  If you have never signed up for a Twitter Api Credentials, follow these steps [here](https://databricks-training.s3.amazonaws.com/realtime-processing-with-spark-streaming.html#twitter-credential-setup).  The Twitter credentials are passed in through command line flags.
 
-Below is an abbreviated snippet of the actual code in Collect.scala.  The code calls TwitterUtils in the Spark Streaming Twitter library to get a DStream of tweets.  We then call foreachRDD on the DStream, which will be called on the RDD of tweets which gets created each time interval.  We can then create an output file, collect all the tweets, and write them all out to file in json format.
+Below is a snippet of the actual code in Collect.scala.  The code calls TwitterUtils in the Spark Streaming Twitter library to get a DStream of tweets.  Then, map is called to convert the tweets to JSON format.  Finally, call for each RDD on the DStream.  This example repartitions the RDD to write out so that you can control the number of output files.
 
 ```scala
-val tweetStream = TwitterUtils.createStream(ssc, Utils.getAuth)
+ val tweetStream = TwitterUtils.createStream(ssc, Utils.getAuth)
+  .map(gson.toJson(_))
 
-tweetStream.foreachRDD(rdd => {
+tweetStream.foreachRDD((rdd, time) => {
   val count = rdd.count()
   if (count > 0) {
-    val writer = new PrintWriter("%s/part-%05d".format(outputDirectory,
-        partNum), "UTF-8")
-    val tweetJsonArray = rdd.collect()
-    for (tweetJson <- tweetJsonArray) {
-      writer.println(gson.toJson(tweetJson))
+    val outputRDD = rdd.repartition(partitionsEachInterval)
+    outputRDD.saveAsTextFile(
+      outputDirectory + "/tweets_" + time.milliseconds.toString)
+    numTweetsCollected += count
+    if (numTweetsCollected > numTweetsToCollect) {
+      System.exit(0)
     }
-    writer.close()
   }
 })
+
 ```
 
 Run [Collect.scala](scala/src/main/scala/com/databricks/apps/twitter_classifier/Collect.scala) yourself to collect a dataset of tweets:
@@ -40,8 +43,9 @@ Run [Collect.scala](scala/src/main/scala/com/databricks/apps/twitter_classifier/
      --master ${YOUR_SPARK_MASTER:-local[4]} \
      target/scala-2.10/spark-twitter-lang-classifier-assembly-1.0.jar \
      ${YOUR_OUTPUT_DIR:-/tmp/tweets} \
-     ${OUTPUT_FILE_INTERVAL_IN_SECS:-10} \
      ${NUM_TWEETS_TO_COLLECT:-10000} \
+     ${OUTPUT_FILE_INTERVAL_IN_SECS:-10} \
+     ${OUTPUT_FILE_PARTITIONS_EACH_INTERVAL:-1} \
      --consumerKey ${YOUR_TWITTER_CONSUMER_KEY} \
      --consumerSecret ${YOUR_TWITTER_CONSUMER_SECRET} \
      --accessToken ${YOUR_TWITTER_ACCESS_TOKEN}  \

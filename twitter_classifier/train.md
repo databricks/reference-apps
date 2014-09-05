@@ -37,8 +37,7 @@ val texts = sqlContext.sql("SELECT text from tweetTable").map(_.head.toString)
 val vectors = texts.map(Utils.featurize).cache()
 vectors.count()  // Calls an action to create the cache.
 val model = KMeans.train(vectors, numClusters, numIterations)
-sc.makeRDD(model.clusterCenters, numClusters).saveAsObjectFile(
-    "%s/%s".format(tweetDirectory, "model"))
+sc.makeRDD(model.clusterCenters, numClusters).saveAsObjectFile(outputModelDir)
 ```
 
 Last, here is some code to take a sample set of tweets and print them out by cluster, we can see what language clusters our model contains.  Pick your favorite to use for part 3.

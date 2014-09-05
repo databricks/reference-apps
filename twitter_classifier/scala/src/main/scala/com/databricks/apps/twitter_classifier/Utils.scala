@@ -1,6 +1,6 @@
 package com.databricks.apps.twitter_classifier
 
-import org.apache.commons.cli.{ParseException, Options, PosixParser}
+import org.apache.commons.cli.{Options, ParseException, PosixParser}
 import org.apache.spark.mllib.linalg.{Vector, Vectors}
 import twitter4j.auth.OAuthAuthorization
 import twitter4j.conf.ConfigurationBuilder

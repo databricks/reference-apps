@@ -1,9 +1,8 @@
 package com.databricks.apps.twitter_classifier
 
-import java.io.{File, PrintWriter}
+import java.io.File
 
 import com.google.gson.Gson
-import org.apache.spark.sql.SQLContext
 import org.apache.spark.streaming.twitter.TwitterUtils
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.{SparkConf, SparkContext}
@@ -20,10 +19,10 @@ object Collect {
     // Process program arguments and set properties
     if (args.length < 3) {
       System.err.println("Usage: " + this.getClass.getSimpleName +
-        "<outputDirectory> <intervalInSeconds> <numTweetsToCollect>")
+        "<outputDirectory> <numTweetsToCollect> <intervalInSeconds> <partitionsEachInterval>")
       System.exit(1)
     }
-    val Array(outputDirectory, Utils.IntParam(intervalSecs), Utils.IntParam(numTweetsToCollect)) =
+    val Array(outputDirectory, Utils.IntParam(numTweetsToCollect),  Utils.IntParam(intervalSecs), Utils.IntParam(partitionsEachInterval)) =
       Utils.parseCommandLineWithTwitterCredentials(args)
     val outputDir = new File(outputDirectory.toString)
     if (outputDir.exists()) {
@@ -37,36 +36,18 @@ object Collect {
     val conf = new SparkConf().setAppName(this.getClass.getSimpleName)
     val sc = new SparkContext(conf)
     val ssc = new StreamingContext(sc, Seconds(intervalSecs))
-    @transient val sqlContext = new SQLContext(sc)
 
     val tweetStream = TwitterUtils.createStream(ssc, Utils.getAuth)
+      .map(gson.toJson(_))
+      .filter(!_.contains("boundingBoxCoordinates")) // TODO(vida): Remove this workaround when SPARK-3390 is fixed.
 
-    tweetStream.foreachRDD(rdd => {
+    tweetStream.foreachRDD((rdd, time) => {
       val count = rdd.count()
       if (count > 0) {
-        val writer = new PrintWriter("%s/part-%05d".format(outputDirectory, partNum), "UTF-8")
-        val tweetJsonArray = rdd.collect()
-        for (tweetJson <- tweetJsonArray) {
-            try {
-              val jsonString = gson.toJson(tweetJson)
-
-              // TODO(vida): Remove this workaround when SPARK-3390 is fixed.
-              val rdd = sc.parallelize(jsonString :: Nil)
-              sqlContext.jsonRDD(rdd).count()
-
-              writer.println(jsonString)
-              numTweetsCollected = numTweetsCollected + 1
-            } catch {
-              case e: Exception =>
-                println("***** Triggered SPARK-3390, ignoring.")
-            }
-          }
-        writer.close()
-
-        partNum = partNum + 1
-        println("The current count of tweets is: %s".format(numTweetsCollected))
+        val outputRDD = rdd.repartition(partitionsEachInterval)
+        outputRDD.saveAsTextFile(outputDirectory + "/tweets_" + time.milliseconds.toString)
+        numTweetsCollected += count
         if (numTweetsCollected > numTweetsToCollect) {
-          println("Collected the necessary number of tweets, exiting")
           System.exit(0)
         }
       }

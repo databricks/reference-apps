@@ -16,23 +16,23 @@ object ExamineAndTrain {
     // Process program arguments and set properties
     if (args.length < 3) {
       System.err.println("Usage: " + this.getClass.getSimpleName +
-        " <tweetDirectory> <numClusters> <numIterations>")
+        " <tweetInput> <outputModelDir> <numClusters> <numIterations>")
       System.exit(1)
     }
-    val Array(tweetDirectory, Utils.IntParam(numClusters), Utils.IntParam(numIterations)) = args
+    val Array(tweetInput, outputModelDir, Utils.IntParam(numClusters), Utils.IntParam(numIterations)) = args
 
     val conf = new SparkConf().setAppName(this.getClass.getSimpleName)
     val sc = new SparkContext(conf)
     val sqlContext = new SQLContext(sc)
 
     // Pretty print some of the tweets.
-    val tweets = sc.textFile(tweetDirectory)
+    val tweets = sc.textFile(tweetInput)
     println("------------Sample JSON Tweets-------")
     for (tweet <- tweets.take(5)) {
       println(gson.toJson(jsonParser.parse(tweet)))
     }
 
-    val tweetTable = sqlContext.jsonFile(tweetDirectory)
+    val tweetTable = sqlContext.jsonFile(tweetInput)
     tweetTable.registerTempTable("tweetTable")
 
     println("------Tweet table Schema---")
@@ -53,7 +53,7 @@ object ExamineAndTrain {
     val vectors = texts.map(Utils.featurize).cache()
     vectors.count()  // Calls an action on the RDD to populate the vectors cache.
     val model = KMeans.train(vectors, numClusters, numIterations)
-    sc.makeRDD(model.clusterCenters, numClusters).saveAsObjectFile("%s/%s".format(tweetDirectory, "model"))
+    sc.makeRDD(model.clusterCenters, numClusters).saveAsObjectFile(outputModelDir)
 
     val some_tweets = texts.take(100)
     println("----Example tweets from the clusters")
