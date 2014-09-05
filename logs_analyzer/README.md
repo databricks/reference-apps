@@ -12,14 +12,6 @@ quick and simple way to process them.  We hope this project will show you to use
 Apache Spark on your organization's production logs and fully harness the power
 of that data.  Logs data can be used for monitoring your servers, improving business and customer intelligence, building recommendation systems, preventing fraud, and much more.
 
-This project will also appeal to those who want to learn Spark and
-learn better by example.  Those readers can browse the chapters, see
-what features of the logs analyzer is similar to their use case, and
-refashion the code samples for their needs.
-
-Additionally, this is meant to be a practical guide for using Spark in your
-systems, so we'll even reference other technologies that are compatible with Spark - such as file systems that are suitable for large datasets.
-
 ## How to use this project
 
 This project is broken up into chapters with bite-sized examples for
