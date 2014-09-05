@@ -1,4 +1,4 @@
-# Windowed Calculations
+# Windowed Calculations: window()
 
 A typical use case for logs analysis is for monitoring a web server,
 in which case you may only be interested in what's happened for the last one hour of time, and want those statistics to refresh every minute.  One hour is

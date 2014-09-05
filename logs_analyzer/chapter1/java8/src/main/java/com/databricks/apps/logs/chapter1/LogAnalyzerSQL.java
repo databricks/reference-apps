@@ -6,8 +6,8 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.api.java.JavaSQLContext;
 import org.apache.spark.sql.api.java.JavaSchemaRDD;
+import org.apache.spark.sql.api.java.Row;
 import scala.Tuple2;
-import scala.Tuple4;
 
 import java.util.List;
 
@@ -42,27 +42,27 @@ public class LogAnalyzerSQL {
     schemaRDD.registerAsTable("logs");
 
     // Calculate statistics based on the content size.
-    Tuple4<Long, Long, Long, Long> contentSizeStats =
+    Row contentSizeStats =
         sqlContext.sql("SELECT SUM(contentSize), COUNT(*), MIN(contentSize), MAX(contentSize) FROM logs")
-            .map(row -> new Tuple4<>(row.getLong(0), row.getLong(1), row.getLong(2), row.getLong(3)))
-            .first();
+            .collect()
+            .get(0);
     System.out.println(String.format("Content Size Avg: %s, Min: %s, Max: %s",
-        contentSizeStats._1() / contentSizeStats._2(),
-        contentSizeStats._3(),
-        contentSizeStats._4()));
+        contentSizeStats.getLong(0) / contentSizeStats.getLong(1),
+        contentSizeStats.getLong(2),
+        contentSizeStats.getLong(3)));
 
     // Compute Response Code to Count.
     List<Tuple2<Integer, Long>> responseCodeToCount = sqlContext
-        .sql("SELECT responseCode, COUNT(*) FROM logs GROUP BY responseCode")
+        .sql("SELECT responseCode, COUNT(*) FROM logs GROUP BY responseCode LIMIT 1000")
         .mapToPair(row -> new Tuple2<>(row.getInt(0), row.getLong(1)))
         .take(1000);
     System.out.println(String.format("Response code counts: %s", responseCodeToCount));
 
     // Any IPAddress that has accessed the server more than 10 times.
     List<String> ipAddresses = sqlContext
-        .sql("SELECT ipAddress, COUNT(*) AS total FROM logs GROUP BY ipAddress HAVING total > 10")
+        .sql("SELECT ipAddress, COUNT(*) AS total FROM logs GROUP BY ipAddress HAVING total > 10 LIMIT 100")
         .map(row -> row.getString(0))
-        .take(100);  // Take only 100 in case this is a super large data set.
+        .collect();
     System.out.println(String.format("IPAddresses > 10 times: %s", ipAddresses));
 
     // Top Endpoints.

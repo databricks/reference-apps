@@ -63,17 +63,19 @@ System.out.println(String.format("Content Size Avg: %s, Min: %s, Max: %s",
     contentSizeStats._4()));
 
 // Compute Response Code to Count.
+// Note the use of "LIMIT 1000" since the number of responseCodes
+// can potentially be too large to fit in memory.
 List<Tuple2<Integer, Long>> responseCodeToCount = sqlContext
-    .sql("SELECT responseCode, COUNT(*) FROM logs GROUP BY responseCode")
-    .mapToPair(row -> new Tuple2<>(row.getInt(0), row.getLong(1)))
-    .take(1000);
-System.out.println(String.format("Response code counts: %s", responseCodeToCount));
+    .sql("SELECT responseCode, COUNT(*) FROM logs GROUP BY responseCode LIMIT 1000")
+    .mapToPair(row -> new Tuple2<>(row.getInt(0), row.getLong(1)));
+System.out.println(String.format("Response code counts: %s", responseCodeToCount))
+    .collect();
 
 // Any IPAddress that has accessed the server more than 10 times.
 List<String> ipAddresses = sqlContext
-    .sql("SELECT ipAddress, COUNT(*) AS total FROM logs GROUP BY ipAddress HAVING total > 10")
+    .sql("SELECT ipAddress, COUNT(*) AS total FROM logs GROUP BY ipAddress HAVING total > 10 LIMIT 100")
     .map(row -> row.getString(0))
-    .take(100);  // Take only 100 in case this is a super large data set.
+    .collect();
 System.out.println(String.format("IPAddresses > 10 times: %s", ipAddresses));
 
 // Top Endpoints.
@@ -84,6 +86,6 @@ List<Tuple2<String, Long>> topEndpoints = sqlContext
 System.out.println(String.format("Top Endpoints: %s", topEndpoints));
 ```
 
-Note that Spark SQL does not allow using reserved keyworks as alias names.  In other words, ```SELECT COUNT(*) AS count``` will cause errors, but ```SELECT COUNT(*) AS the_count``` runs fine.
+Note that the default SQL dialect does not allow using reserved keyworks as alias names.  In other words, ```SELECT COUNT(*) AS count``` will cause errors, but ```SELECT COUNT(*) AS the_count``` runs fine.  If you use the HiveQL parser though, then you should be able to use anything as an identifier.
 
 Try running [LogAnalyzerSQL.java](java8/src/main/java/com/databricks/apps/logs/chapter1/LogAnalyzerSQL.java) now.
