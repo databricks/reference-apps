@@ -4,7 +4,7 @@ In this reference application, we show how you can use Apache Spark for training
 
 This reference application was demo-ed at a meetup which is taped here - the link skips straight to demo time, but the talk before that is useful too:
 
-[![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/FjhRkfAuU7I/0.jpg)](https://www.youtube.com/watch?v=FjhRkfAuU7I#t=2030)
+[![Aaron Davidson doing his magic](aaron-yaaay.png)](https://www.youtube.com/watch?v=FjhRkfAuU7I#t=2035)
 
 Here are 5 typical stages for creating a production ready classifer - oftentimes each stage is done with a different set of tools and even by different engineering teams:
 
