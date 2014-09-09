@@ -1,9 +1,5 @@
 # Logs Analyzer in Spark
 
-This README is published in a more reader friendly format in GitBook [here](http://databricks.gitbooks.io/databricks-reference-app-log-analyzer-in-spark/).
-
-The code for the project is in this [github repo](https://github.com/databricks/reference-apps).
-
 This project demonstrates how easy it is to do logs analysis with Apache Spark.
 
 Logs analysis is an ideal use case for Spark.  It's a very large, common data source and contains a rich set of information.  Spark allows you to store your logs
