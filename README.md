@@ -2,8 +2,8 @@
 
 At Databricks, we are developing a set of reference applications that demonstrate how to use Apache Spark.  This book will explains them.
 
-* [Code examples are found in this github repo.](https://github.com/databricks/reference-apps).
-* [Click here to read this content one in html format.](http://databricks.gitbooks.io/databricks-spark-reference-applications/).
+* [Code examples are found in this github repo.](https://github.com/databricks/reference-apps)
+* [Click here to read this content one in html format.](http://databricks.gitbooks.io/databricks-spark-reference-applications/)
 * [Please submit feedback or any issues you've run into by filing a github issue.](https://github.com/databricks/reference-apps/issues)
 
 The reference applications will appeal to those who want to learn Spark and learn better by example.  Browse the applications, see
