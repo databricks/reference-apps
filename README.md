@@ -4,7 +4,7 @@ At Databricks, we are developing a set of reference applications that demonstrat
 
 * [Code discussed in this book is here](https://github.com/databricks/reference-apps).
 * [This documentation is published in a readable format here](http://databricks.gitbooks.io/databricks-spark-reference-applications/).
-* [Please give us your feedback or submit any issues you've run into here](https://github.com/databricks/reference-apps/issues)
+* [Please give us your feedback or submit any issues you've run into here.](https://github.com/databricks/reference-apps/issues)
 
 The reference applications will appeal to those who want to learn Spark and learn better by example.  Browse the applications, see
 what features of the reference applications are similar to the features you want to build, and
