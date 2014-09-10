@@ -1,6 +1,6 @@
-# Chapter 2: Importing and Exporting Data
+# Section 2: Importing and Exporting Data
 
-In the last chapter we covered how to get started with Spark for logs analysis,
+In the last section we covered how to get started with Spark for log analysis,
 but in those examples, data was just pulled in from a local file and the statistics were printed to standard out.  In this chapter, we cover techniques for
 loading and exporting data that is suitable for a production system.  In particular, the techniques must scale to handle large production volumes of logs.
 
