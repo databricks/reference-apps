@@ -32,7 +32,7 @@ object ExamineAndTrain {
       println(gson.toJson(jsonParser.parse(tweet)))
     }
 
-    val tweetTable = sqlContext.jsonFile(tweetInput)
+    val tweetTable = sqlContext.jsonFile(tweetInput).cache()
     tweetTable.registerTempTable("tweetTable")
 
     println("------Tweet table Schema---")

@@ -28,10 +28,10 @@ perhaps you only care about what has happened in the last hour.
    * Spark Streaming conveniently
 splits the input data into the desired time windows for easy processing, using the `window` function of the streaming library.
    * The `forEachRDD` function allows you to access the RDD's created each time interval.
-1. [Cumulative Calculations](total.md) means that you want to keep cumulative
+* [Cumulative Calculations](total.md) means that you want to keep cumulative
 statistics, while streaming in new data to refresh those statistics.  In that
 case, you need to maintain the state for those statistics.
-   * The Spark
-Streaming library has some convenient functions for maintaining state
+   * The Spark Streaming library has some convenient functions for maintaining state
 to support this use case, `updateStateByKey`.
-   * `tranform` is also introduced to allow code reuse.
+* [Reusing code from Batching](reuse.md) covers how to should organize business logic code from the batch examples so that code can be reused in Spark Streaming.
+   * The Spark Streaming library has `transform` functions which allow you to apply arbitrary RDD-to-RDD functions, and thus to reuse code from the batch mode of Spark.

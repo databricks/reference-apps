@@ -9,39 +9,7 @@ used, there is no longer the need for a nightly batch job to process logs,
 but instead - this logs processing program can be long-lived - continuously
 receiving new logs data, processing the data, and computing log stats.
 
-## Built in Methods for Streaming Import
+1. [Built In Methods for Streaming Import](logs_analyzer/chapter2/built_in.md)
+               * [Kafka](logs_analyzer/chapter2/kafka.md)
 
-The StreamingContext has many built in methods for importing data to streaming.
-```socketTextStream``` was introduced in the previous chapter, and ```textFileStream```
-is introduced here.  The ```textFileStream``` method monitors any Hadoop-compatible filesystem directory for new
-files and when it detects a new file - reads it into Spark Streaming.
-Just replace the call to ```socketTextStream``` with ```textFileStream```,
-and pass in the directory to monitor for log files.
 
-```java
-// This methods monitors a directory for new files
-// to read in for streaming.
-JavaDStream<String> logData = jssc.textFileStream(directory);
-```
-
-Try running [LogAnalyzerStreamingImportDirectory.java](java8/src/main/java/com/databricks/apps/logs/chapter2/LogAnalyzerStreamingImportDirectory.java)
-by specifying a directory.   You'll also need to drop or copy some new log files
-into that directory while the program is running to see the calculated values update.
-
-There are more built-in input methods for streaming - check them out in the
-reference API documents for the StreamingContext.
-
-## Kafka
-
-While the previous example picks up new log files right away - the log
-files aren't copied over until a long time after the HTTP requests in the logs
-actually occurred.  While that enables auto-refresh of log data, that's still not realtime.  To get realtime
-logs processing, we need a way to send over log lines immediately.  Kafka is a
-high-throughput distributed message system that is perfect for that use case.  Spark
-contains an external module importing data from Kafka.
-
-Here is some useful documentation to set up Kafka for Spark Streaming:
-
-* [Kafka Documentation](http://kafka.apache.org/documentation.html)
-* [KafkaUtils class in the external module of the Spark project](https://github.com/apache/spark/blob/master/external/kafka/src/main/scala/org/apache/spark/streaming/kafka/KafkaUtils.scala) - This is the external module that has been written that imports data from Kafka into Spark Streaming.
-* [Spark Streaming Example of using Kafka](https://github.com/apache/spark/blob/master/examples/src/main/java/org/apache/spark/examples/streaming/JavaKafkaWordCount.java) - This is an example that demonstrates how to call KafkaUtils.

@@ -38,16 +38,16 @@ object LogAnalyzerSQL {
 
     // Compute Response Code to Count.
     val responseCodeToCount = sqlContext
-      .sql("SELECT responseCode, COUNT(*) FROM com.databricks.app.logs GROUP BY responseCode")
+      .sql("SELECT responseCode, COUNT(*) FROM com.databricks.app.logs GROUP BY responseCode LIMIT 1000")
       .map(row => (row.getInt(0), row.getLong(1)))
-      .take(1000)
+      .collect()
     println(s"""Response code counts: ${responseCodeToCount.mkString("[", ",", "]")}""")
 
     // Any IPAddress that has accessed the server more than 10 times.
     val ipAddresses =sqlContext
-      .sql("SELECT ipAddress, COUNT(*) AS total FROM com.databricks.app.logs GROUP BY ipAddress HAVING total > 10")
+      .sql("SELECT ipAddress, COUNT(*) AS total FROM com.databricks.app.logs GROUP BY ipAddress HAVING total > 10 LIMIT 1000")
       .map(row => row.getString(0))
-      .take(100)
+      .collect()
     println(s"""IPAddresses > 10 times: ${ipAddresses.mkString("[", ",", "]")}""")
 
     val topEndpoints = sqlContext

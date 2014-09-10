@@ -39,16 +39,16 @@ print "Content Size Avg: %i, Min: %i, Max: %s" % (
 
 # Response Code to Count
 responseCodeToCount = (sqlContext
-                       .sql("SELECT responseCode, COUNT(*) AS theCount FROM logs GROUP BY responseCode")
+                       .sql("SELECT responseCode, COUNT(*) AS theCount FROM logs GROUP BY responseCode LIMIT 100")
                        .map(lambda row: (row['responseCode'], row['theCount']))
-                       .take(100))
+                       .collect())
 print "Response Code Counts: %s" % (responseCodeToCount)
 
 # Any IPAddress that has accessed the server more than 10 times.
 ipAddresses = (sqlContext
-               .sql("SELECT ipAddress, COUNT(*) AS total FROM logs GROUP BY ipAddress HAVING total > 10")
+               .sql("SELECT ipAddress, COUNT(*) AS total FROM logs GROUP BY ipAddress HAVING total > 10 LIMIT 100")
                .map(lambda row: row['ipAddress'])
-               .take(100))
+               .collect())
 print "All IPAddresses > 10 times: %s" % ipAddresses
 
 # Top Endpoints
