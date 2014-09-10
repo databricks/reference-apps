@@ -1,4 +1,4 @@
-# A First Log Analyzer in Spark
+# First Logs Analyzer in Spark
 
 Before beginning this section, go through [Spark Quick Start](https://spark.apache.org/docs/latest/quick-start.html)
 and familiarize with the [Spark Programming Guide](https://spark.apache.org/docs/latest/programming-guide.html)
@@ -26,7 +26,7 @@ Let's understand the code first before running the example.
 
 The main body of a simple Spark application is below.
 The first step is to bring up a Spark context.  Then the Spark context
-can load data from a text file as an RDD, which can then process.  Finally, before exiting the function, the Spark context is stopped.
+can load data from a text file as an RDD, which it can then process.  Finally, before exiting the function, the Spark context is stopped.
 
 ```java
 public class LogAnalyzer {

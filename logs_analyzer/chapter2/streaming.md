@@ -10,6 +10,6 @@ but instead - this logs processing program can be long-lived - continuously
 receiving new logs data, processing the data, and computing log stats.
 
 1. [Built In Methods for Streaming Import](logs_analyzer/chapter2/built_in.md)
-               * [Kafka](logs_analyzer/chapter2/kafka.md)
+* [Kafka](logs_analyzer/chapter2/kafka.md)
 
 

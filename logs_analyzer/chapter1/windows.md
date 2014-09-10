@@ -1,7 +1,7 @@
 # Windowed Calculations: window()
 
-A typical use case for logs analysis is for monitoring a web server,
-in which case you may only be interested in what's happened for the last one hour of time, and want those statistics to refresh every minute.  One hour is
+A typical use case for log analysis is monitoring a web server,
+in which case you may only be interested in what's happened for the last one hour of time and want those statistics to refresh every minute.  One hour is
 the *window length*, while one minute is the *slide interval*.  In this
 example, we use a window length of 30 seconds and a slide interval of
 10 seconds as a comfortable choice for development.
@@ -9,7 +9,7 @@ example, we use a window length of 30 seconds and a slide interval of
 The windows feature of Spark Streaming makes it very easy to compute
 stats for a window of time, using the `window` function.
 
-The first step is initalize the SparkConf and context objects - in particular a streaming context.  Note how only one Spark context is created from the conf and the streaming and sql contexts are created from those.  Next, the main body should be written.  Finally, the example calls ```start()``` on the streaming context, and ```awaitTermination() ```to keep the streaming context running and accepting streaming input.
+The first step is to initalize the SparkConf and context objects - in particular a streaming context.  Note how only one SparkContext is created from the conf and the streaming and sql contexts are created from those.  Next, the main body should be written.  Finally, the example calls ```start()``` on the streaming context, and ```awaitTermination() ```to keep the streaming context running and accepting streaming input.
 
 ```java
 public class LogAnalyzerStreamingSQL {
