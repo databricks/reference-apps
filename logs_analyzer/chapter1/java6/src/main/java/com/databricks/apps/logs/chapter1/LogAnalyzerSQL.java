@@ -22,7 +22,7 @@ import java.util.List;
  *     --class "com.databricks.apps.logs.chapter1.LogsAnalyzerSQL"
  *     --master local[4]
  *     target/log-analyzer-1.0.jar
- *     ../../data/apache.access.log
+ *     ../../data/apache.accesslog
  */
 public class LogAnalyzerSQL {
   public static void main(String[] args) {
@@ -38,9 +38,9 @@ public class LogAnalyzerSQL {
         .map(Functions.PARSE_LOG_LINE);
 
     JavaSQLContext sqlContext = new JavaSQLContext(sc);
-    JavaSchemaRDD schemaRDD = sqlContext.applySchema(accessLogs,
-        ApacheAccessLog.class).cache();
-    schemaRDD.registerAsTable("logs");
+    JavaSchemaRDD schemaRDD = sqlContext.applySchema(accessLogs, ApacheAccessLog.class);
+    schemaRDD.registerTempTable("logs");
+    sqlContext.sqlContext().cacheTable("logs");
 
     // Calculate statistics based on the content size.
     Row contentSizeStats = sqlContext.sql(
@@ -54,7 +54,7 @@ public class LogAnalyzerSQL {
 
     // Compute Response Code to Count.
     List<Tuple2<Integer, Long>> responseCodeToCount = sqlContext
-        .sql("SELECT responseCode, COUNT(*) FROM logs GROUP BY responseCode LIMIT 1000")
+        .sql("SELECT responseCode, COUNT(*) FROM logs GROUP BY responseCode LIMIT 100")
         .mapToPair(new PairFunction<Row, Integer, Long>() {
           @Override
           public Tuple2<Integer, Long> call(Row row) throws Exception {

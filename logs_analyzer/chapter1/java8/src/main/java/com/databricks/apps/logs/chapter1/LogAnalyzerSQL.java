@@ -19,7 +19,7 @@ import java.util.List;
  *     --class "com.databricks.apps.logs.chapter1.LogsAnalyzerSQL"
  *     --master local[4]
  *     target/log-analyzer-1.0.jar
- *     ../../data/apache.access.log
+ *     ../../data/apache.accesslog
  */
 public class LogAnalyzerSQL {
 
@@ -38,8 +38,9 @@ public class LogAnalyzerSQL {
         .map(ApacheAccessLog::parseFromLogLine);
 
     // Spark SQL can imply a schema for a table if given a Java class with getters and setters.
-    JavaSchemaRDD schemaRDD = sqlContext.applySchema(accessLogs, ApacheAccessLog.class).cache();
-    schemaRDD.registerAsTable("logs");
+    JavaSchemaRDD schemaRDD = sqlContext.applySchema(accessLogs, ApacheAccessLog.class);
+    schemaRDD.registerTempTable("logs");
+    sqlContext.sqlContext().cacheTable("logs");
 
     // Calculate statistics based on the content size.
     Row contentSizeStats =
@@ -53,9 +54,9 @@ public class LogAnalyzerSQL {
 
     // Compute Response Code to Count.
     List<Tuple2<Integer, Long>> responseCodeToCount = sqlContext
-        .sql("SELECT responseCode, COUNT(*) FROM logs GROUP BY responseCode LIMIT 1000")
+        .sql("SELECT responseCode, COUNT(*) FROM logs GROUP BY responseCode LIMIT 100")
         .mapToPair(row -> new Tuple2<>(row.getInt(0), row.getLong(1)))
-        .take(1000);
+        .collect();
     System.out.println(String.format("Response code counts: %s", responseCodeToCount));
 
     // Any IPAddress that has accessed the server more than 10 times.

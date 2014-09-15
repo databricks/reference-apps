@@ -3,6 +3,15 @@
 You should go through the [Spark SQL Guide](https://spark.apache.org/docs/latest/sql-programming-guide.html)
 before beginning this section.
 
+This section requires an additioal dependency on Spark SQL:
+```xml
+<dependency> <!-- Spark SQL -->
+    <groupId>org.apache.spark</groupId>
+    <artifactId>spark-sql_2.10</artifactId>
+    <version>1.1.0</version>
+</dependency>
+```
+
 For those of you who are familiar with SQL, the same statistics we calculated
 in the previous example can be done using Spark SQL rather than calling
 Spark transformations and actions directly.  We walk through how to do that
@@ -44,8 +53,9 @@ box.  Or you can also refer to the
 for more details.)
 ```java
 JavaSchemaRDD schemaRDD = sqlContext.applySchema(accessLogs,
-    ApacheAccessLog.class).cache();
-schemaRDD.registerAsTable("logs");
+    ApacheAccessLog.class);
+schemaRDD.registerTempTable("logs");
+sqlContext.sqlContext().cacheTable("logs");
 ```
 
 Now, we are ready to start running some SQL queries on our table.  Here's

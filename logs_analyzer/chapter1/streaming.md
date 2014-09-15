@@ -3,6 +3,15 @@
 Go through the [Spark Streaming Programming Guide](https://spark.apache.org/docs/latest/streaming-programming-guide.html)
 before beginning this section.  In particular, it covers the concept of DStreams.
 
+This section requires another dependency on the Spark Streaming library:
+```xml
+<dependency> <!-- Spark Streaming -->
+    <groupId>org.apache.spark</groupId>
+    <artifactId>spark-streaming_2.10</artifactId>
+    <version>1.1.0</version>
+</dependency>
+```
+
 The earlier examples demonstrates how to compute statistics on an existing log file - but not how to do realtime monitoring of logs. Spark Streaming enables that functionality.
 
 To run the streaming examples, you will `tail` a log file into `netcat` to send to Spark.
@@ -17,7 +26,7 @@ In a terminal window, just run this command on a logfile which you will append t
 If you don't have a live log file that is being updated on the fly, you
 can add lines manually with the included data file or another your own log file:
 ```
-% cat ../../data/apache.access.log >> [[YOUR_LOG_FILE]]
+% cat ../../data/apache.accesslog >> [[YOUR_LOG_FILE]]
 ```
 
 When data is streamed into Spark, there are two common use cases covered:
