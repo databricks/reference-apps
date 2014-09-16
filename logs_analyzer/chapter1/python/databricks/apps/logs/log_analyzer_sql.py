@@ -2,7 +2,7 @@
 #
 # % spark-submit databricks/apps/logs/log_analyzer_sql.py
 #    --py-files databricks/apps/logs/apache_access_log.py
-#    ../../data/apache.access.log
+#    ../../data/apache.accesslog
 from pyspark import SparkContext, SparkConf
 from pyspark.sql import SQLContext
 

@@ -29,7 +29,7 @@ import java.util.List;
  *
  * If you don't have a live log file that is being written to,
  * you can add test lines using this command:
- *   % cat ../../data/apache.access.log >> [[YOUR_LOG_FILE]]
+ *   % cat ../../data/apache.accesslog >> [[YOUR_LOG_FILE]]
  *
  * Example command to run:
  * %  ${YOUR_SPARK_HOME}/bin/spark-submit
@@ -58,7 +58,7 @@ public class LogAnalyzerStreamingSQL {
 
 // A DStream of Apache Access Logs.
     JavaDStream<ApacheAccessLog> accessLogDStream =
-        logDataDStream.map(Functions.PARSE_LOG_LINE).cache();
+        logDataDStream.map(Functions.PARSE_LOG_LINE);
 
     // Splits the accessLogDStream into a dstream of time windowed rdd's of apache access logs.
     JavaDStream<ApacheAccessLog> windowDStream =
@@ -75,8 +75,9 @@ public class LogAnalyzerStreamingSQL {
 
             // *** Note that this is code copied verbatim from LogAnalyzerSQL.java.
             JavaSchemaRDD schemaRDD = sqlContext.applySchema(
-                accessLogs, ApacheAccessLog.class).cache();
-            schemaRDD.registerAsTable("logs");
+                accessLogs, ApacheAccessLog.class);
+            schemaRDD.registerTempTable("logs");
+            sqlContext.sqlContext().cacheTable("logs");
 
             // Calculate statistics based on the content size.
             Tuple4<Long, Long, Long, Long> contentSizeStats =
@@ -98,27 +99,27 @@ public class LogAnalyzerStreamingSQL {
 
             // Compute Response Code to Count.
             List<Tuple2<Integer, Long>> responseCodeToCount = sqlContext
-                .sql("SELECT responseCode, COUNT(*) FROM logs GROUP BY responseCode")
+                .sql("SELECT responseCode, COUNT(*) FROM logs GROUP BY responseCode LIMIT 100")
                 .mapToPair(new PairFunction<Row, Integer, Long>() {
                   @Override
                   public Tuple2<Integer, Long> call(Row row) throws Exception {
                     return new Tuple2<Integer, Long>(row.getInt(0), row.getLong(1));
                   }
                 })
-                .take(1000);
+                .collect();
             System.out.println(
                 String.format("Response code counts: %s", responseCodeToCount));
 
             // Any IPAddress that has accessed the server more than 10 times.
             List<String> ipAddresses = sqlContext
-                .sql("SELECT ipAddress, COUNT(*) AS total FROM logs GROUP BY ipAddress HAVING total > 10")
+                .sql("SELECT ipAddress, COUNT(*) AS total FROM logs GROUP BY ipAddress HAVING total > 10 LIMIT 100")
                 .map(new Function<Row, String>() {
                   @Override
                   public String call(Row row) throws Exception {
                     return row.getString(0);
                   }
                 })
-                .take(100);  // Take only 100 in case this is a super large data set.
+                .collect();  // Take only 100 in case this is a super large data set.
             System.out.println(
                 String.format("IPAddresses > 10 times: %s", ipAddresses));
 

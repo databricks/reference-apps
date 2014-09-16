@@ -17,8 +17,9 @@ public class LogAnalyzerRDD {
 
   public LogStatistics processRdd(JavaRDD<ApacheAccessLog> accessLogs) {
     // Spark SQL can imply a schema for a table if given a Java class with getters and setters.
-    JavaSchemaRDD schemaRDD = sqlContext.applySchema(accessLogs, ApacheAccessLog.class).cache();
-    schemaRDD.registerAsTable("logs");
+    JavaSchemaRDD schemaRDD = sqlContext.applySchema(accessLogs, ApacheAccessLog.class);
+    schemaRDD.registerTempTable("logs");
+    sqlContext.sqlContext().cacheTable("logs");
 
     LogStatistics stats = new LogStatistics();
 

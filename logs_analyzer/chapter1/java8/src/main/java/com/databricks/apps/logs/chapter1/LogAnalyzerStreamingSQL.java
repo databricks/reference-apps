@@ -24,7 +24,7 @@ import java.util.List;
  *
  * If you don't have a live log file that is being written to,
  * you can add test lines using this command:
- *   % cat ../../data/apache.access.log >> [[YOUR_LOG_FILE]]
+ *   % cat ../../data/apache.accesslog >> [[YOUR_LOG_FILE]]
  *
  * Example command to run:
  * %  ${YOUR_SPARK_HOME}/bin/spark-submit
@@ -54,7 +54,7 @@ public class LogAnalyzerStreamingSQL {
 
     // A DStream of RDD's that contain parsed Apache Access Logs.
     JavaDStream<ApacheAccessLog> accessLogDStream =
-        logDataDStream.map(ApacheAccessLog::parseFromLogLine).cache();
+        logDataDStream.map(ApacheAccessLog::parseFromLogLine);
 
     // Splits the accessLogDStream into a dstream of time windowed rdd's.
     JavaDStream<ApacheAccessLog> windowDStream =
@@ -67,8 +67,10 @@ public class LogAnalyzerStreamingSQL {
       }
 
       // *** Note that this is code copied verbatim from LogAnalyzerSQL.java.
-      JavaSchemaRDD schemaRDD = sqlContext.applySchema(accessLogs, ApacheAccessLog.class).cache();
-      schemaRDD.registerAsTable("logs");
+      // Spark SQL can imply a schema for a table if given a Java class with getters and setters.
+      JavaSchemaRDD schemaRDD = sqlContext.applySchema(accessLogs, ApacheAccessLog.class);
+      schemaRDD.registerTempTable("logs");
+      sqlContext.sqlContext().cacheTable("logs");
 
       // Calculate statistics based on the content size.
       Row contentSizeStats = sqlContext

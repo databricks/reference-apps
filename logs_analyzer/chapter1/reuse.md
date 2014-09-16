@@ -1,14 +1,14 @@
 # Reusing Code from Batching: transform()
 
 As you may have noticed, while the functions you called on a DStream
-is named the same as those you called on an RDD in the batch example,
-it may not be clear how to reuse the code from the batch examples.  In
+are named the same as those you called on an RDD in the batch example,
+they are not the same methods, and it may not be clear how to reuse the code from the batch examples.  In
 this section, we refactor the code from the batch examples and show how
 to reuse it here.
 
 DStreams have `transform` functions which allows you to call
 any arbitrary RDD to RDD functions to RDD's in the DStream.  The
-`tranform` functions are perfect for reusing any RDD to RDD functions
+`transform` functions are perfect for reusing any RDD to RDD functions
 that you may have written in batch code and want to port over to
 streaming.  Let's look at some code to illustrate this point.
 
@@ -24,7 +24,7 @@ public static JavaPairRDD<Integer, Long> responseCodeCount(
 }
 ```
 
-The responseCodeDStream can be created by calling `transformToPair` with the `responseCodeCount` function to the apacheAccessLogsDStream.
+The responseCodeCountDStream can be created by calling `transformToPair` with the `responseCodeCount` function to the accessLogDStream.
 Then, you can finish up by calling `updateStateByKey` to keep a running count of the response codes for all of time,
 and use `forEachRDD` to print the values out:
 

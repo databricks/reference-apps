@@ -6,10 +6,10 @@ Apache Spark.  We'll show how to load a Resilient Distributed Dataset
 some statistics for web server monitoring.  In the process, we'll introduce
 the Spark SQL and the Spark Streaming libraries.
 
-In this explanation, the code snippets are in [Java 8](java8).  However,
-there is also sample code in [Java 6](java6), [Scala](scala), and [Python](python)
-included in this directory.  Refer to the README's in those folders for
-instructions on how to build and run those examples.
+In this explanation, the code snippets are in [Java 8](https://github.com/databricks/reference-apps/tree/master/logs_analyzer/chapter1/java8).  However,
+there is also sample code in [Java 6](https://github.com/databricks/reference-apps/tree/master/logs_analyzer/chapter1/java6), [Scala](https://github.com/databricks/reference-apps/tree/master/logs_analyzer/chapter1/scala), and [Python](https://github.com/databricks/reference-apps/tree/master/logs_analyzer/chapter1/python)
+included in this directory.  In those folders are README's for
+instructions on how to build and run those examples, and the necessary build files with all the required dependencies.
 
 This chapter covers the following topics:
 

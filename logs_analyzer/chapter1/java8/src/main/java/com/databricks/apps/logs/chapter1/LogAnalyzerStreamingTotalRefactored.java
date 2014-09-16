@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * If you don't have a live log file that is being written to,
  * you can add test lines using this command:
- *   % cat data/apache.access.log >> [[YOUR_LOG_FILE]]
+ *   % cat data/apache.accesslog >> [[YOUR_LOG_FILE]]
  *
  * Example command to run:
  * %  ${YOUR_SPARK_HOME}/bin/spark-submit
@@ -74,7 +74,7 @@ public class LogAnalyzerStreamingTotalRefactored {
   public static Tuple4<Long, Long, Long, Long> contentSizeStats(
      JavaRDD<ApacheAccessLog> accessLogRDD) {
     JavaRDD<Long> contentSizes =
-       accessLogRDD.map(ApacheAccessLog::getContentSize).cache();
+       accessLogRDD.map(ApacheAccessLog::getContentSize);
     return new Tuple4<>(contentSizes.count(), contentSizes.reduce(SUM_REDUCER),
        contentSizes.min(Comparator.naturalOrder()),
        contentSizes.max(Comparator.naturalOrder()));
@@ -122,7 +122,7 @@ public class LogAnalyzerStreamingTotalRefactored {
        jssc.socketTextStream("localhost", 9999);
 
     JavaDStream<ApacheAccessLog> accessLogDStream =
-       logDataDStream.map(ApacheAccessLog::parseFromLogLine).cache();
+       logDataDStream.map(ApacheAccessLog::parseFromLogLine);
 
     // Calculate statistics based on the content size, and update the static variables to track this.
     accessLogDStream.foreachRDD(accessLogRDD -> {

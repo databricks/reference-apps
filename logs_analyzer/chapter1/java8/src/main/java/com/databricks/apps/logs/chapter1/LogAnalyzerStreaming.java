@@ -64,7 +64,7 @@ public class LogAnalyzerStreaming {
 
     // A DStream of Apache Access Logs.
     JavaDStream<ApacheAccessLog> accessLogDStream =
-        logDataDStream.map(ApacheAccessLog::parseFromLogLine).cache();
+        logDataDStream.map(ApacheAccessLog::parseFromLogLine);
 
     // Splits the accessLogDStream into a dstream of time windowed rdd's of apache access logs.
     JavaDStream<ApacheAccessLog> windowDStream =

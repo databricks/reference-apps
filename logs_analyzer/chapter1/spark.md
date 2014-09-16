@@ -4,12 +4,23 @@ Before beginning this section, go through [Spark Quick Start](https://spark.apac
 and familiarize with the [Spark Programming Guide](https://spark.apache.org/docs/latest/programming-guide.html)
 first.
 
+This section requires a dependency on the Spark Core library in the maven file - note update this dependency based on the version of Spark you have installed:
+```xml
+<dependency> <!-- Spark -->
+    <groupId>org.apache.spark</groupId>
+    <artifactId>spark-core_2.10</artifactId>
+    <version>1.1.0</version>
+</dependency>
+```
+
 Before we can begin, we need two things:
 
-* *An Apache access log file*: If you have one, it's more interesting to use real
-data.  If not, you can use the sample one provided at
- [data/apache.access.log](../data/apache.access.log).
-* *A parser and model for the log file* - see
+* **An Apache access log file**: If you have one, it's more interesting to use real
+data.
+  * This is trivial sample one provided at
+ [data/apache.access.log](../data/apache.accesslog).
+  * Or download a better example here: http://www.monitorware.com/en/logsamples/apache.php
+* **A parser and model for the log file**: See
  [ApacheAccessLog.java](java8/src/main/java/com/databricks/apps/logs/ApacheAccessLog.java).
 
 The example code uses an Apache access log file since that's a well known
@@ -22,7 +33,7 @@ The following statistics will be computed:
 * All IPAddresses that have accessed this server more than N times.
 * The top endpoints requested by count.
 
-Let's understand the code first before running the example.
+Let's first walk through the code first before running the example at [LogAnalyzer.java](java8/src/main/java/com/databricks/apps/logs/chapter1/LogAnalyzer.java).
 
 The main body of a simple Spark application is below.
 The first step is to bring up a Spark context.  Then the Spark context
@@ -87,8 +98,7 @@ System.out.println(String.format("Content Size Avg: %s, Min: %s, Max: %s",
 
 To compute the response code counts, we have to work with key-value pairs - by using ```mapToPair``` and ```reduceByKey```.
 Notice that we call ```take(100)``` instead of ```collect()``` to gather the final output of the response code counts.
-That's just to be safe since it could take a really long time to call
-```collect()``` on a very large dataset.
+Use extreme caution before calling ```collect()``` on an RDD since all that data will be sent to a single Spark driver and can cause the driver to run out of memory.  Even in this case where there are only a limited number of response codes and it seems safe - if there are malformed lines in the Apache access log or a bug in the parser, there could be many invalid response codes to cause an.
 
 ```java
 // Compute Response Code to Count.
@@ -142,4 +152,4 @@ System.out.println("Top Endpoints: " + topEndpoints);
 ```
 
 These code snippets are from [LogAnalyzer.java](java8/src/main/java/com/databricks/apps/logs/chapter1/LogAnalyzer.java).
-Now that we've walked through the code, try running that example.
+Now that we've walked through the code, try running that example.  See the README for language specific instructions for building and running.
