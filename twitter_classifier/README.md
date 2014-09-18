@@ -17,5 +17,5 @@ Here are 5 typical stages for creating a production ready classifer - oftentimes
 Spark can be used for all of the above and simple to use for all these purposes.  We've chosen to break up the language classifier into 3 parts with one simple Spark program to accomplish each part:
 
 1. [Collect a Dataset of Tweets](collect.md) - Spark Streaming is used to collect a dataset of tweets and write them out to files.
-* [Examine the Tweets and Train a Model](examine_and_train.md) - Spark SQL is used to examines the dataset of Tweets.  Then Spark MLLib is used to apply KMeans algorithm to train a model on the data.
+* [Examine the Tweets and Train a Model](examine_and_train.md) - Spark SQL is used to examine the dataset of Tweets.  Then Spark MLLib is used to apply KMeans algorithm to train a model on the data.
 * [Apply the Model in Real-time](predict.md) - Spark Streaming and Spark MLLib are used to filter a live stream of Tweets for those that match the specified cluster.
