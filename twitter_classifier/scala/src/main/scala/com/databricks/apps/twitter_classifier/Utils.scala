@@ -1,11 +1,16 @@
 package com.databricks.apps.twitter_classifier
 
 import org.apache.commons.cli.{Options, ParseException, PosixParser}
-import org.apache.spark.mllib.linalg.{Vector, Vectors}
+import org.apache.spark.mllib.linalg.Vector
+import org.apache.spark.mllib.feature.HashingTF
 import twitter4j.auth.OAuthAuthorization
 import twitter4j.conf.ConfigurationBuilder
 
 object Utils {
+
+  val numFeatures = 1000
+  val tf = new HashingTF(numFeatures)
+
   val CONSUMER_KEY = "consumerKey"
   val CONSUMER_SECRET = "consumerSecret"
   val ACCESS_TOKEN = "accessToken"
@@ -48,13 +53,7 @@ object Utils {
    * potentially be a feature).
    */
   def featurize(s: String): Vector = {
-    val n = 1000
-    val result = new Array[Double](n)
-    val bigrams = s.sliding(2).toArray
-    for (h <- bigrams.map(_.hashCode % n)) {
-      result(h) += 1.0 / bigrams.length
-    }
-    Vectors.sparse(n, result.zipWithIndex.filter(_._1 != 0).map(_.swap))
+    tf.transform(s.sliding(2).toSeq)
   }
 
   object IntParam {
