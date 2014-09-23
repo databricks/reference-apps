@@ -2,11 +2,14 @@
 
 This section covers how to train a language classifier using the texts in the Tweets.
 
-First, we need to featurize the Tweet text.  Here is that function below:
+First, we need to featurize the Tweet text.  MLLib has a HashingTF class that does that:
 
 ```scala
 object Utils {
   ...
+
+  val numFeatures = 1000
+  val tf = new HashingTF(numFeatures)
 
   /**
    * Create feature vectors by turning each tweet into bigrams of
@@ -17,13 +20,7 @@ object Utils {
    * pair of Unicode characters would potentially be a feature).
    */
   def featurize(s: String): Vector = {
-    val n = 1000
-    val result = new Array[Double](n)
-    val bigrams = s.sliding(2).toArray
-    for (h <- bigrams.map(_.hashCode % n)) {
-      result(h) += 1.0 / bigrams.length
-    }
-    Vectors.sparse(n, result.zipWithIndex.filter(_._1 != 0).map(_.swap))
+    tf.transform(s.sliding(2).toSeq)
   }
 
   ...
