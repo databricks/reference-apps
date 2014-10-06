@@ -1,4 +1,4 @@
-# Section 2: Importing and Exporting Data
+# Section 2: Importing Data
 
 In the last section we covered how to get started with Spark for log analysis,
 but in those examples, data was just pulled in from a local file and the statistics were printed to standard out.  In this chapter, we cover techniques for
@@ -17,7 +17,7 @@ Once you get a Spark cluster up:
 examples from the previous chapter to check your set up.
 * Poke around and familiarize with the web interfaces for Spark.  It's at http://localhost:8080 if you set up a local cluster.
 
-Now, proceed on to the next sections:
+There are two ways to import data into Spark:
 
-* [Importing Data](import.md)
-* [Exporting Data](export.md)
+1. [Batch Data Import](batch.md) - if you are loading a dataset all at once.
+* [Streaming Data Import](streaming.md) - if you wish to continuously stream data into Spark.

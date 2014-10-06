@@ -18,14 +18,18 @@ The Apache Spark library is introduced, as well as Spark SQL and Spark Streaming
 end of this chapter, a reader will know how to call transformations and actions and work
 with RDDs and DStreams.
 
-###[Section 2: Importing and Exporting Data](chapter2/README.md)
+###[Section 2: Importing Data](chapter2/README.md)
 
-This chapter includes examples to illustrate how to get data in
-and out of Spark, and start covering concepts of distributed computing.  The
-examples are all suitable for datasets that are too large to be processed on one
+This section includes examples to illustrate how to get data into Spark and starts covering concepts of distributed computing.
+The examples are all suitable for datasets that are too large to be processed on one
 machine.
 
-### [Section 3: Logs Analyzer Application](app/README.md)
+###[Section 3: Exporting Data](chapter3/README.md)
+
+This section includes examples to illustrate how to get data out of Spark.  Again, concepts of a distributed
+computing environment are reinforced, and the examples are suitable for large datasets.
+
+### [Section 4: Logs Analyzer Application](app/README.md)
 
 This section puts together some of the code in the other chapters to form
 a sample log analysis application.
