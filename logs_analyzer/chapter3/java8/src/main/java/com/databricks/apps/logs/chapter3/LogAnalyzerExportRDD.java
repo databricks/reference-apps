@@ -1,4 +1,4 @@
-package com.databricks.apps.logs.chapter2;
+package com.databricks.apps.logs.chapter3;
 
 import com.databricks.apps.logs.ApacheAccessLog;
 import org.apache.spark.SparkConf;
