@@ -14,7 +14,7 @@
            * [Importing from Files](logs_analyzer/chapter2/importing_from_files.md)
                * [S3](logs_analyzer/chapter2/s3.md)
                * [HDFS](logs_analyzer/chapter2/hdfs.md)
-           * [Reading from Databases](logs_analyzer/chapter2/reading_from_databases.md)
+           * [Importing from Databases](logs_analyzer/chapter2/importing_from_databases.md)
        * [Streaming Import](logs_analyzer/chapter2/streaming.md)
            * [Built In Methods for Streaming Import](logs_analyzer/chapter2/built_in.md)
            * [Kafka](logs_analyzer/chapter2/kafka.md)

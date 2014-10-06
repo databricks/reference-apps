@@ -7,6 +7,6 @@ and the program exits.  In a production system, you could set up a cron job to
 kick off a batch job each night to process the last day's worth of log files and then publish statistics for the last day.
 
 * [Importing From Files](importing_from_files.md) covers caveats when importing data from files.
-* [Reading from Databases](importing_from_databases.md) links to examples of reading data from databases.
+* [Importing from Databases](importing_from_databases.md) links to examples of reading data from databases.
 
 
