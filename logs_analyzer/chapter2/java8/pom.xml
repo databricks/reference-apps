@@ -16,19 +16,16 @@
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-core_2.10</artifactId>
             <version>1.1.0</version>
-            <scope>provided</scope>
         </dependency>
         <dependency> <!-- Spark SQL -->
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql_2.10</artifactId>
             <version>1.1.0</version>
-            <scope>provided</scope>
         </dependency>
         <dependency> <!-- Spark Streaming -->
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-streaming_2.10</artifactId>
             <version>1.1.0</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
     <build>
