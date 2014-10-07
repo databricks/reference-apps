@@ -1,3 +1,8 @@
+<!-- Note that since this project requires the common-cli jar
+ which may not be on the spark cluster by default,
+ an uber jar is being compiled.  For more details see:
+   http://databricks.gitbooks.io/databricks-spark-knowledge-base/troubleshooting/missing_dependencies_in_jar_files.html
+ -->
 <project>
     <groupId>com.databricks.apps.logs</groupId>
     <artifactId>log-analyzer</artifactId>
@@ -16,16 +21,19 @@
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-core_2.10</artifactId>
             <version>1.1.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency> <!-- Spark SQL -->
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql_2.10</artifactId>
             <version>1.1.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency> <!-- Spark Streaming -->
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-streaming_2.10</artifactId>
             <version>1.1.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency> <!-- Command Line Parsing -->
             <groupId>commons-cli</groupId>
@@ -70,7 +78,6 @@
                     <finalName>uber-${project.artifactId}-${project.version}</finalName>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
 </project>
