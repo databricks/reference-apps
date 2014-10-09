@@ -14,8 +14,8 @@ Here is an example command to run [ExamineAndTrain.scala](scala/src/main/scala/c
      --class "com.databricks.apps.twitter_classifier.ExamineAndTrain" \
      --master ${YOUR_SPARK_MASTER:-local[4]} \
      target/scala-2.10/spark-twitter-lang-classifier-assembly-1.0.jar \
-     ${YOUR_TWEET_INPUT:-/tmp/tweets/tweets*/part-*} \
-     ${OUTPUT_MODEL_DIR:-/tmp/tweets/model}
+     "${YOUR_TWEET_INPUT:-/tmp/tweets/tweets*/part-*}" \
+     ${OUTPUT_MODEL_DIR:-/tmp/tweets/model} \
      ${NUM_CLUSTERS:-10} \
      ${NUM_ITERATIONS:-20}
 ```
