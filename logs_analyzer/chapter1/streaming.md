@@ -42,5 +42,5 @@ statistics, while streaming in new data to refresh those statistics.  In that
 case, you need to maintain the state for those statistics.
    * The Spark Streaming library has some convenient functions for maintaining state
 to support this use case, `updateStateByKey`.
-* [Reusing code from Batching](reuse.md) covers how to should organize business logic code from the batch examples so that code can be reused in Spark Streaming.
+* [Reusing code from Batching](reuse.md) covers how to organize business logic code from the batch examples so that code can be reused in Spark Streaming.
    * The Spark Streaming library has `transform` functions which allow you to apply arbitrary RDD-to-RDD functions, and thus to reuse code from the batch mode of Spark.
