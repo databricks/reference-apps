@@ -44,7 +44,7 @@ JavaDStream<ApacheAccessLog> accessLogDStream =
     logDataDStream.map(ApacheAccessLog::parseFromLogLine).cache();
 ```
 
-Next, call ```window``` on the accessLogDStream to create a windowed DStream.  The window function nicely packages the input data that is being
+Next, call ```window``` on the accessLogDStream to create a windowed DStream.  The ``window`` function nicely packages the input data that is being
 streamed into RDDs containing a window length of data, and creates a new
 RDD every SLIDE_INTERVAL of time.
 ```java
