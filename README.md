@@ -15,4 +15,4 @@ systems, so the applications mention other technologies that are compatible with
 
 * [Twitter Streaming Language Classifier](http://databricks.gitbooks.io/databricks-spark-reference-applications/content/twitter_classifier/README.html) - This application demonstrates how to fetch and train a language classifier for Tweets using Spark MLLib.  Then Spark Streaming is used to call the trained classifier and filter out live tweets that match a specified cluster. To build this example go into the twitter_classifier/scala and follow the direction in the README.
 
-This reference app is covered by license terms covered [here](http://databricks.gitbooks.io/databricks-spark-reference-applications/LICENSE).
+This reference app is covered by license terms covered [here](http://databricks.gitbooks.io/databricks-spark-reference-applications/content/LICENSE).
