@@ -24,12 +24,12 @@ There is currently just one sample app with a simple client.
 
     ./apache-cassandra-{latest.version}/bin/cassandra -f
 
-3. Run the 2 setup cql scripts to create the schema and populate the weather stations table.
+3. Run the setup cql scripts to create the schema and populate the weather stations table.
 
 On the command line start a cqlsh shell:
 
-
-    ./apache-cassandra-{latest.version}/bin/cqlsh
+    cd /path/to/reference-apps/timeseries/scala/data
+    ~/apache-cassandra-{latest.version}/bin/cqlsh
 
 You should see:
 
@@ -38,10 +38,10 @@ You should see:
     Use HELP for help.
     cqlsh>
 
-Run the scripts:
+Run the script:
 
-    cqlsh> source '/path/to/reference-apps/cassandra_kafka/scala/data/create-timeseries.cql';
-    cqlsh> source '/path/to/reference-apps/cassandra_kafka/scala/data/load-timeseries.cql';
+    cqlsh> source 'create-timeseries.cql';
+    cqlsh> quit;
 
 [Find out more] (https://github.com/killrweather/killrweather/wiki/2.-Code-and-Data-Setup#data-setup)
 
@@ -51,7 +51,7 @@ First start com.databricks.apps.WeatherApp, then start com.databricks.apps.Weath
 
 #### To Run from Command Line
 
-    cd /path/to/reference-apps/cassandra_kafka/scala
+    cd /path/to/reference-apps/timeseries/scala
     sbt weather/run
 
 You should see:

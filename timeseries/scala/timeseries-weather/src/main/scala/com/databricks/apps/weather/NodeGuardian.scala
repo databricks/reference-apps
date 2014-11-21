@@ -82,18 +82,18 @@ class NodeGuardian(ssc: StreamingContext,
 
   def initialized: Actor.Receive = {
     case e: KafkaMessageEnvelope[_,_] =>
-      log.debug("Forwarding {} to {}", e, publisher)
+      log.debug("Forwarding request {} to {}", e, publisher)
       publisher forward e
-    case e: TemperatureRequest    =>
-      log.debug("Forwarding {} to {}", e, temperature)
+    case e: TemperatureRequest =>
+      log.debug("Forwarding request {} to to {}", e, temperature)
       temperature forward e
-    case e: PrecipitationRequest  =>
-      log.debug("Forwarding {} to {}", e, precipitation)
+    case e: PrecipitationRequest =>
+      log.debug("Forwarding request {} to to {}", e, precipitation)
       precipitation forward e
     case e: WeatherStationRequest =>
-      log.debug("Forwarding {} to {}", e, station)
+      log.debug("Forwarding request {} to to {}", e, station)
       station forward e
-    case PoisonPill               =>
+    case PoisonPill =>
       gracefulShutdown()
   }
 

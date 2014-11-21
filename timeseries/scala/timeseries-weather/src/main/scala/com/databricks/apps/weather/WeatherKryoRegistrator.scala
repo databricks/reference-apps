@@ -18,11 +18,26 @@ package com.databricks.apps.weather
 import com.esotericsoftware.kryo.Kryo
 import org.apache.spark.serializer.KryoRegistrator
 
-/** work in progress */
 class WeatherKryoRegistrator extends KryoRegistrator {
   import Weather._
+  import WeatherEvent._
 
   override def registerClasses(kryo: Kryo) {
     kryo.register(classOf[RawWeatherData])
+    kryo.register(classOf[Day])
+    kryo.register(classOf[DailyPrecipitation])
+    kryo.register(classOf[AnnualPrecipitation])
+    kryo.register(classOf[TopKPrecipitation])
+    kryo.register(classOf[DailyTemperature])
+    kryo.register(classOf[MonthlyTemperature])
+    kryo.register(classOf[GetWeatherStation])
+    kryo.register(classOf[GetCurrentWeather])
+    kryo.register(classOf[GetPrecipitation])
+    kryo.register(classOf[GetTopKPrecipitation])
+    kryo.register(classOf[GetDailyTemperature])
+    kryo.register(classOf[GetMonthlyHiLowTemperature])
+    kryo.register(classOf[GetMonthlyTemperature])
+    kryo.register(classOf[NoDataAvailable])
+    kryo.register(classOf[WeatherStation])
   }
 }

@@ -23,39 +23,12 @@ import org.apache.spark.streaming.{Milliseconds, StreamingContext}
 import org.apache.spark.{SparkConf, SparkContext}
 
 /** Runnable.
-  * I. 3-Step Setup:
-  * 1. Download the latest Cassandra from http://cassandra.apache.org/download/ and open the compressed file
-  *    Optional: open /apache-cassandra-{latest.version}/conf/cassandra.yaml and increase batch_size_warn_threshold_in_kb to 64
+  * First run the setup described in the README.
   *
-  * 2. Start Cassandra - you may need to prepend with sudo, or chown /var/lib/cassandra
-  *    On the command line:
+  * For an IDE first start [[WeatherApp]], then start [[WeatherClientApp]].
+  * By command line:
   *   {{{
-  *     ./apache-cassandra-{latest.version}/bin/cassandra -f
-  *   }}}
-  *
-  * 3. Run the 2 setup cql scripts to create the schema and populate the weather stations table:
-  *    On the command line start a cqlsh shell:
-  *   {{{
-  *     ./apache-cassandra-{latest.version}/bin/cqlsh
-  *   }}}
-  *
-  * You should see:
-  * Connected to Test Cluster at 127.0.0.1:9042.
-  *    [cqlsh {latest.version} | Cassandra {latest.version} | CQL spec {latest.version} | Native protocol {latest.version}]
-  *    Use HELP for help.
-  *    cqlsh>
-  *
-  * Run the scripts.
-  *   {{{
-  *     cqlsh> source '/path/to/reference-apps/cassandra_kafka/scala/data/create-timeseries.cql';
-  *     cqlsh> source '/path/to/reference-apps/cassandra_kafka/scala/data/load-timeseries.cql';
-  *   }}}
-  *
-  * II. Run the app and client app: runnable by command line or in an IDE.
-  * - For an IDE first start [[WeatherApp]], then start [[WeatherClientApp]].
-  * - By command line:
-  *   {{{
-  *     cd /path/to/reference-apps/cassandra_kafka/scala
+  *     cd /path/to/reference-apps/timeseries/scala
   *     sbt weather/run
   *   }}}
   *   You should see: Multiple main classes detected, select one to run:
