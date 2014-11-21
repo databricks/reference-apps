@@ -15,4 +15,6 @@ systems, so the applications mention other technologies that are compatible with
 
 * [Twitter Streaming Language Classifier](http://databricks.gitbooks.io/databricks-spark-reference-applications/content/twitter_classifier/README.html) - This application demonstrates how to fetch and train a language classifier for Tweets using Spark MLLib.  Then Spark Streaming is used to call the trained classifier and filter out live tweets that match a specified cluster. To build this example go into the twitter_classifier/scala and follow the direction in the README.
 
+* [Streaming Kafka, Cassandra and Akka TimeSeries Application] - The time series reference application (constantly improving) demonstrates several strategies to easily leverage and integrate Apache Spark, Spark Streaming, Apache Cassandra, and Apache Kafka for fast, fault tolerant, streaming computations in asynchronous Akka event-driven environments. This application focuses on the use case of time series data. To build and run this example go into the time_series/scala and follow the direction in the README.
+
 This reference app is covered by license terms covered [here](http://databricks.gitbooks.io/databricks-spark-reference-applications/content/LICENSE).
