@@ -89,3 +89,10 @@ CREATE TABLE year_cumulative_precip (
    precipitation counter,
    PRIMARY KEY ((wsid), year)
 ) WITH CLUSTERING ORDER BY (year DESC);
+
+/*
+Declares the keyspace to use:
+*/
+USE isd_weather_data;
+
+COPY weather_station (id, name, country_code, state_code, call_sign, lat, long, elevation) FROM 'weather_stations.csv';

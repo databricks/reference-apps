@@ -40,9 +40,9 @@ class WeatherApiQueries(settings: WeatherSettings, actor: ActorSelection)
 
   def receive: Actor.Receive = {
     case e: WeatherAggregate =>
-      log.info("Received {}", e)
+      log.info("Received {} from {}", e, sender)
     case e: WeatherModel =>
-      log.info("Received {}", e)
+      log.info("Received {} from {}", e, sender)
     case QueryTask => queries()
   }
 

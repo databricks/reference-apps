@@ -100,8 +100,6 @@ object Weather {
     def year: Int
   }
 
-  case class Hour(wsid: String, year: Int, month: Int, day: Int, hour: Int) extends WeatherAggregate
-
   case class Day(wsid: String, year: Int, month: Int, day: Int) extends WeatherAggregate
 
   object Day {
@@ -190,12 +188,4 @@ object WeatherEvent {
   case class GetDailyTemperature(day: Day) extends TemperatureRequest
   case class GetMonthlyHiLowTemperature(wsid: String, year: Int, month: Int) extends TemperatureRequest
   case class GetMonthlyTemperature(wsid: String, year: Int, month: Int) extends TemperatureRequest
-
-
-
-  /**
-   * Quick access lookup table for sky_condition. Useful for potential analytics.
-   * See http://en.wikipedia.org/wiki/Okta
-   */
-  case class GetSkyConditionLookup(code: Int) extends WeatherRequest
 }
