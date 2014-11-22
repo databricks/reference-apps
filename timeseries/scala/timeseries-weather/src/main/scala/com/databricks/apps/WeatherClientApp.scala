@@ -36,11 +36,8 @@ object WeatherClientApp extends App {
 
   val cluster = Cluster(system)
   cluster.joinSeedNodes(seedNodes = immutable.Seq(cluster.selfAddress))
-  log.info("Loading data from files")
 
   val guardian = system.actorSelection(cluster.selfAddress.copy(port = Some(2550)) + "/user/node-guardian")
-
-  log.info("Loading data from files")
 
   /** Drives demo activity by sending requests to the [[NodeGuardian]] actor. */
   val queryClient = system.actorOf(Props(new WeatherApiQueries(settings, guardian)), "api-client")
