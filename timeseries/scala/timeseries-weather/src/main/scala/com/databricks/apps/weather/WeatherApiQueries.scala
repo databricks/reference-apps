@@ -17,13 +17,13 @@ package com.databricks.apps.weather
 
 import scala.concurrent.duration._
 import akka.actor._
-import com.databricks.apps.core.Event.QueryTask
 import com.databricks.apps.core.AggregationActor
+import com.datastax.spark.connector.embedded.Event
 import org.joda.time.{DateTime, DateTimeZone}
 
 class WeatherApiQueries(settings: WeatherSettings, actor: ActorSelection)
   extends AggregationActor with ActorLogging {
-
+  import Event._
   import Weather._
   import WeatherEvent._
   import settings._
