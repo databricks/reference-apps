@@ -8,6 +8,8 @@ import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The LogAnalyzerAppMain is an sample logs analysis application.  For now,
@@ -33,7 +35,6 @@ import java.io.IOException;
  *     target/uber-log-analyzer-1.0.jar
  *     --logs_directory /tmp/logs
  *     --output_html_file /tmp/log_stats.html
- *     --index_html_template ./src/main/resources/index.html.template
  */
 public class LogAnalyzerAppMain {
   public static final String WINDOW_LENGTH = "window_length";
@@ -41,7 +42,6 @@ public class LogAnalyzerAppMain {
   public static final String LOGS_DIRECTORY = "logs_directory";
   public static final String OUTPUT_HTML_FILE = "output_html_file";
   public static final String CHECKPOINT_DIRECTORY = "checkpoint_directory";
-  public static final String INDEX_HTML_TEMPLATE = "index_html_template";
 
   private static final Options THE_OPTIONS = createOptions();
   private static Options createOptions() {
@@ -57,9 +57,6 @@ public class LogAnalyzerAppMain {
         new Option(OUTPUT_HTML_FILE, false, "Where to write output html file"));
     options.addOption(
         new Option(CHECKPOINT_DIRECTORY, false, "The checkpoint directory."));
-    options.addOption(new Option(INDEX_HTML_TEMPLATE, true,
-            "path to the index.html.template file - accessible from all workers"));
-
     return options;
   }
 
@@ -79,8 +76,15 @@ public class LogAnalyzerAppMain {
     // This methods monitors a directory for new files to read in for streaming.
     JavaDStream<String> logData = jssc.textFileStream(Flags.getInstance().getLogsDirectory());
 
-    JavaDStream<ApacheAccessLog> accessLogsDStream
-        = logData.map(ApacheAccessLog::parseFromLogLine).cache();
+    JavaDStream<ApacheAccessLog> accessLogsDStream = logData.flatMap(
+        line -> {
+          List<ApacheAccessLog> list = new ArrayList<>();
+          try {
+            list.add(ApacheAccessLog.parseFromLogLine(line));
+            return list;
+          } catch (RuntimeException e) {
+            return list;
+    }}).cache();
 
     LogAnalyzerTotal logAnalyzerTotal = new LogAnalyzerTotal();
     LogAnalyzerWindowed logAnalyzerWindowed = new LogAnalyzerWindowed();
