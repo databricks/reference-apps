@@ -6,6 +6,7 @@ import scala.Tuple2;
 import scala.Tuple4;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -17,24 +18,31 @@ public class LogAnalyzerWindowed implements Serializable {
         Flags.getInstance().getWindowLength(),
         Flags.getInstance().getSlideInterval());
     windowDStream.foreachRDD(accessLogs -> {
-      Tuple4<Long, Long, Long, Long> contentSizeStats =
-          Functions.contentSizeStats(accessLogs);
+      if (accessLogs.count() > 0) {
+        Tuple4<Long, Long, Long, Long> contentSizeStats =
+            Functions.contentSizeStats(accessLogs);
 
-      List<Tuple2<Integer, Long>> responseCodeToCount =
-          Functions.responseCodeCount(accessLogs)
-          .take(100);
+        List<Tuple2<Integer, Long>> responseCodeToCount =
+            Functions.responseCodeCount(accessLogs)
+                .take(100);
 
-      JavaPairRDD<String, Long> ipAddressCounts =
-          Functions.ipAddressCount(accessLogs);
-      List<String> ipAddresses = Functions.filterIPAddress(ipAddressCounts)
-          .take(100);
+        JavaPairRDD<String, Long> ipAddressCounts =
+            Functions.ipAddressCount(accessLogs);
+        List<String> ipAddresses = Functions.filterIPAddress(ipAddressCounts)
+            .take(100);
 
-      List<Tuple2<String, Long>> topEndpoints =
-          Functions.endpointCount(accessLogs)
-          .top(10, new Functions.ValueComparator<>(Comparator.<Long>naturalOrder()));
+        List<Tuple2<String, Long>> topEndpoints =
+            Functions.endpointCount(accessLogs)
+                .top(10, new Functions.ValueComparator<>(Comparator.<Long>naturalOrder()));
 
-      logStatistics = new LogStatistics(contentSizeStats, responseCodeToCount,
-          ipAddresses, topEndpoints);
+        logStatistics = new LogStatistics(contentSizeStats, responseCodeToCount,
+            ipAddresses, topEndpoints);
+      } else {
+        logStatistics = new LogStatistics(new Tuple4<>(0L, 0L, 0L, 0L),
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptyList());
+      }
 
       return null;
     });

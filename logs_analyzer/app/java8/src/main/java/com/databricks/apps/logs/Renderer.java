@@ -1,7 +1,7 @@
 package com.databricks.apps.logs;
 
 import com.google.common.base.Charsets;
-import com.google.common.io.Files;
+import org.apache.commons.io.IOUtils;
 import scala.Tuple2;
 import scala.Tuple4;
 
@@ -15,9 +15,8 @@ public class Renderer implements Serializable {
   public void render(LogStatistics allOfTime, LogStatistics lastWindow)
       throws Exception {
     if (fileTemplate == null) {
-      fileTemplate = Files.toString(
-          new File(Flags.getInstance().getIndexHtmlTemplate()),
-          Charsets.UTF_8);
+      InputStream inputStream = Renderer.class.getClassLoader().getResourceAsStream("index.html.template");
+      fileTemplate = IOUtils.toString(inputStream, Charsets.UTF_8);
     }
 
     // TODO: Replace this hacky String replace with a proper HTML templating library.

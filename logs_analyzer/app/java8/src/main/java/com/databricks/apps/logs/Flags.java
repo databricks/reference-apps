@@ -11,7 +11,6 @@ public class Flags {
   private String logsDirectory;
   private String outputHtmlFile;
   private String checkpointDirectory;
-  private String indexHtmlTemplate;
 
   private boolean initialized = false;
 
@@ -37,10 +36,6 @@ public class Flags {
     return checkpointDirectory;
   }
 
-  public String getIndexHtmlTemplate() {
-    return indexHtmlTemplate;
-  }
-
   public static Flags getInstance() {
     if (!THE_INSTANCE.initialized) {
       throw new RuntimeException("Flags have not been initalized");
@@ -62,9 +57,6 @@ public class Flags {
           LogAnalyzerAppMain.OUTPUT_HTML_FILE, "/tmp/log_stats.html");
       THE_INSTANCE.checkpointDirectory = cl.getOptionValue(
           LogAnalyzerAppMain.CHECKPOINT_DIRECTORY, "/tmp/log-analyzer-streaming");
-      THE_INSTANCE.indexHtmlTemplate = cl.getOptionValue(
-          LogAnalyzerAppMain.INDEX_HTML_TEMPLATE,
-          "./src/main/resources/index.html.template");
       THE_INSTANCE.initialized = true;
     } catch (ParseException e) {
       THE_INSTANCE.initialized = false;
