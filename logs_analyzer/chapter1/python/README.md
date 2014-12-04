@@ -8,7 +8,7 @@ in Python when these examples are written.
 To run an example, such as LogAnalyzer, use spark-submit:
 ```
 %  ${YOUR_SPARK_HOME}/bin/spark-submit
-    databricks/apps/logs/log_analyzer.py
     --py-files databricks/apps/logs/apache_access_log.py
+    databricks/apps/logs/log_analyzer.py
     ../../data/apache.access.log
 ```
