@@ -1,7 +1,7 @@
 # Chapter 1: Introduction to Apache Spark in Scala.
 
 This directory contains all the sample code for Chapter 1 in Scala.  For
-more explanation of this code, see (Chapter 1)[../README.md].
+more explanation of this code, see [Chapter 1] (../README.md).
 
 To compile this code, use sbt:
 ```
