@@ -21,7 +21,6 @@ import org.apache.spark.SparkContext
 import org.apache.spark.util.StatCounter
 import org.apache.spark.SparkContext._
 import com.datastax.spark.connector._
-import com.databricks.apps.core.AggregationActor
 
 /** The TemperatureActor reads the daily temperature rollup data from Cassandra,
   * and for a given weather station, computes temperature statistics by month for a given year.

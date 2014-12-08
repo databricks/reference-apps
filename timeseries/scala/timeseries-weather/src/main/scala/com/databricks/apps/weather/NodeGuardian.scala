@@ -15,20 +15,17 @@
  */
 package com.databricks.apps.weather
 
-import com.datastax.spark.connector.embedded.KafkaEvent.KafkaMessageEnvelope
-
 import scala.collection.immutable
 import akka.actor._
 import akka.cluster.Cluster
 import akka.pattern.gracefulStop
 import org.apache.spark.streaming.kafka.KafkaInputDStream
 import org.apache.spark.streaming.StreamingContext
-import com.datastax.spark.connector.embedded.{KafkaProducer, Assertions, EmbeddedKafka}
-import com.databricks.apps.core.{AggregationActor, Event}
+import com.datastax.spark.connector.embedded.{KafkaProducer, Assertions, EmbeddedKafka, KafkaEvent}
 
 /**
  * The `NodeGuardian` is the root of the application and manages a set of
- * [[com.databricks.apps.core.AggregationActor]] actors.
+ * [[AggregationActor]] actors.
  *
  * Creates the [[KafkaStreamingActor]] which
  *    - Transforms raw weather data .gz files
@@ -44,7 +41,7 @@ class NodeGuardian(ssc: StreamingContext,
   extends ClusterAware with AggregationActor with Assertions with ActorLogging {
 
   import WeatherEvent._
-  import Event._
+  import KafkaEvent._
   import settings._
 
   /* Creates the Kafka actors: */

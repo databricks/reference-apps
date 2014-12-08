@@ -15,9 +15,10 @@
  */
 package com.databricks.apps.weather
 
+import java.io.{File => JFile}
+
 import scala.concurrent.duration._
 import akka.actor._
-import com.databricks.apps.core.AggregationActor
 import com.datastax.spark.connector.embedded.Event
 import org.joda.time.{DateTime, DateTimeZone}
 
@@ -52,7 +53,7 @@ class WeatherApiQueries(settings: WeatherSettings, actor: ActorSelection)
 
     val sample: Day = (for {
       file <- IngestionData
-      data <- getLines(file).map(Day(_)).filterNot(previous)
+      data <- getLines(file).toList.map(Day(_)).filterNot(previous)
     } yield data).head
 
     log.info("Requesting the current weather for weather station {}", sample.wsid)
@@ -79,7 +80,19 @@ class WeatherApiQueries(settings: WeatherSettings, actor: ActorSelection)
     queried += sample
   }
 
-  // slinking away in shame for writing this..
+  def getLines(file: JFile): Stream[String] = {
+    import java.io.{BufferedInputStream, FileInputStream}
+    import java.util.zip.GZIPInputStream
+    file match {
+      case null =>
+        throw new IllegalArgumentException("FileStream: File must not be null.")
+      case f if f.getAbsolutePath endsWith ".gz" =>
+        scala.io.Source.fromInputStream(new GZIPInputStream(new BufferedInputStream(new FileInputStream(file)))).getLines.toStream
+      case f =>
+        scala.io.Source.fromFile(file).getLines.toStream
+    }
+  }
+
   protected def getLines(file: String): Seq[String] = {
     import java.io.{BufferedInputStream, FileInputStream}
     import java.util.zip.GZIPInputStream
