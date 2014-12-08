@@ -21,7 +21,6 @@ import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
 import com.datastax.spark.connector._
 import org.joda.time.DateTime
-import com.databricks.apps.core.AggregationActor
 
 /** Retrieves data for a given weather station. */
 class WeatherStationActor(sc: SparkContext, settings: WeatherSettings)

@@ -15,6 +15,7 @@
  */
 package com.databricks.apps.weather
 
+import akka.actor.ActorRef
 import org.apache.spark.util.StatCounter
 import org.joda.time.DateTime
 
@@ -172,6 +173,17 @@ object Weather {
 
 object WeatherEvent {
   import Weather._
+
+  /** Base marker trait. */
+  @SerialVersionUID(1L)
+  sealed trait AppEvent extends Serializable
+
+  sealed trait LifeCycleEvent extends AppEvent
+  case object OutputStreamInitialized extends LifeCycleEvent
+  case class NodeInitialized(root: ActorRef) extends LifeCycleEvent
+  case object DataFeedStarted extends LifeCycleEvent
+  case object Shutdown extends LifeCycleEvent
+  case object TaskCompleted extends LifeCycleEvent
 
   @SerialVersionUID(1L)
   sealed trait WeatherRequest extends Serializable

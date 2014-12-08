@@ -20,7 +20,6 @@ import akka.pattern.pipe
 import org.apache.spark.SparkContext._
 import org.apache.spark.streaming.StreamingContext
 import com.datastax.spark.connector.streaming._
-import com.databricks.apps.core.AggregationActor
 
 /** For a given weather station, calculates annual cumulative precip - or year to date. */
 class PrecipitationActor(ssc: StreamingContext, settings: WeatherSettings)

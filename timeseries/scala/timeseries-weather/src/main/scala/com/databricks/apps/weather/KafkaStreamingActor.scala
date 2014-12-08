@@ -26,7 +26,6 @@ import org.apache.spark.storage.StorageLevel
 import org.apache.spark.streaming.kafka.KafkaUtils
 import com.datastax.spark.connector.streaming._
 import com.datastax.spark.connector.embedded.{KafkaEvent, KafkaProducerActor}
-import com.databricks.apps.core.{ AggregationActor, Event }
 
 /** The KafkaStreamActor creates a streaming pipeline from Kafka to Cassandra via Spark.
   * It creates the Kafka stream which streams the raw data, transforms it, to
@@ -39,8 +38,8 @@ class KafkaStreamingActor(kafkaParams: Map[String, String],
                           listener: ActorRef) extends AggregationActor {
 
   import settings._
-  import Event._
   import Weather._
+  import WeatherEvent._
 
   val kafkaStream = KafkaUtils.createStream[String, String, StringDecoder, StringDecoder](
     ssc, kafkaParams, Map(KafkaTopicRaw -> 10), StorageLevel.DISK_ONLY_2)
@@ -110,7 +109,7 @@ class KafkaPublisherActor(val producerConfig: ProducerConfig,
     */
   for (file <- IngestionData) {
     log.info(s"Ingesting $file")
-    sc.textFile(file).flatMap(_.split("\\n")).toLocalIterator.foreach(toActor)
+    sc.textFile(file.getAbsolutePath).flatMap(_.split("\\n")).toLocalIterator.foreach(toActor)
   }
 
 }
