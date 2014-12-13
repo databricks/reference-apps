@@ -31,15 +31,20 @@ public class Functions {
     }
   }
 
+  public static class LongComparator
+      implements Comparator<Long>, Serializable {
+
+    @Override
+    public int compare(Long a, Long b) {
+        if (a > b) return 1;
+        if (a.equals(b)) return 0;
+        return -1;
+    }
+  }
+
+
   public static Comparator<Long> LONG_NATURAL_ORDER_COMPARATOR =
-      new Comparator<Long>() {
-        @Override
-        public int compare(Long a, Long b) {
-          if (a > b) return 1;
-          if (a.equals(b)) return 0;
-          return -1;
-        }
-      };
+      new LongComparator();
 
   public static Function<String, ApacheAccessLog> PARSE_LOG_LINE =
       new Function<String, ApacheAccessLog>() {
