@@ -22,7 +22,7 @@ import org.apache.spark.SparkContext._
 import com.datastax.spark.connector._
 import org.joda.time.DateTime
 
-/** Retrieves data for a given weather station. */
+/** For a given weather station id, retrieves the full station data. */
 class WeatherStationActor(sc: SparkContext, settings: WeatherSettings)
   extends AggregationActor with ActorLogging {
 
@@ -42,25 +42,19 @@ class WeatherStationActor(sc: SparkContext, settings: WeatherSettings)
     */
   def current(wsid: String, dt: Option[DateTime], requester: ActorRef): Unit = {
     val day = Day(wsid, dt getOrElse timestamp)
-    (for {
-      now <- sc.cassandraTable[RawWeatherData](keyspace, rawtable)
-              .where("wsid = ? AND year = ? AND month = ? AND day = ?",
-                wsid, day.year, day.month, day.day)
-              .collectAsync()
-    } yield now.headOption) pipeTo requester
+    sc.cassandraTable[RawWeatherData](keyspace, rawtable)
+      .where("wsid = ? AND year = ? AND month = ? AND day = ?",
+        wsid, day.year, day.month, day.day)
+      .collectAsync.map(_.headOption) pipeTo requester
   }
 
-  /** For a given weather station id, retrieves the full station data.
-    *
-    * The reason we can not allow a `LIMIT 1` in the `where` function is that
+  /** The reason we can not allow a `LIMIT 1` in the `where` function is that
     * the query is executed on each node, so the limit would applied in each
     * query invocation. You would probably receive about partitions_number * limit results.
     */
   def weatherStation(wsid: String, requester: ActorRef): Unit =
-    for {
-      stations <- sc.cassandraTable[Weather.WeatherStation](keyspace, weatherstations)
-                  .where("id = ?", wsid).collectAsync
-      station <- stations.headOption
-    } requester ! station
+    sc.cassandraTable[Weather.WeatherStation](keyspace, weatherstations)
+      .where("id = ?", wsid)
+      .collectAsync.map(_.headOption) pipeTo requester
 
 }

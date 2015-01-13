@@ -16,6 +16,7 @@
 package com.databricks.apps.weather
 
 import scala.collection.immutable
+import scala.concurrent.duration._
 import akka.actor._
 import akka.cluster.Cluster
 import akka.pattern.gracefulStop
