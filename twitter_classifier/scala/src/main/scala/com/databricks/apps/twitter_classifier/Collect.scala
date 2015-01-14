@@ -39,8 +39,7 @@ object Collect {
 
     val tweetStream = TwitterUtils.createStream(ssc, Utils.getAuth)
       .map(gson.toJson(_))
-      .filter(!_.contains("boundingBoxCoordinates")) // TODO(vida): Remove this workaround when SPARK-3390 is fixed.
-
+      
     tweetStream.foreachRDD((rdd, time) => {
       val count = rdd.count()
       if (count > 0) {
