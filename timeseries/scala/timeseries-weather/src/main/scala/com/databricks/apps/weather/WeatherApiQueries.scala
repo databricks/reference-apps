@@ -16,6 +16,7 @@
 package com.databricks.apps.weather
 
 import java.io.{File => JFile}
+import java.util
 
 import scala.concurrent.duration._
 import akka.actor._
@@ -33,7 +34,7 @@ class WeatherApiQueries(settings: WeatherSettings, actor: ActorSelection)
     self ! QueryTask
   }
 
-  var queried: Set[Day] = Set(Day("725030:14732", 2008, 12, 31)) // just the initial one
+  var queried: util.Set[Day] = Set(Day("725030:14732", 2008, 12, 31)) // just the initial one
 
   override def preStart(): Unit = log.info("Starting.")
 

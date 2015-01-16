@@ -12,7 +12,7 @@ Cassandra in particular is excellent for time series data, working with raw data
 and so forth. In some cases, using Spark with Cassandra (and the right data model) reduces the number of Spark
 transformations necessary on your data because Cassandra does that for you in its cluster.
 
-When using Apache Spark & Apache Cassandra together, it is recommended practice to co-locate Spark and Cassandra nodes for data-locality and decreased network calls, resulting in overall reduced latency.
+When using Apache Spark & Apache Cassandra together, it is best practice to co-locate Spark and Cassandra nodes for data-locality and decreased network calls, resulting in overall reduced latency.
 
 ## Setup
 1. [Download and install the latest Cassandra release](http://cassandra.apache.org/download/)
