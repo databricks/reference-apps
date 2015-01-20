@@ -39,19 +39,19 @@ object ReferenceAppsBuild extends Build {
 
 object Versions {
 
-  val Akka           = "2.2.3" // can not use akka latest
-  val Bijection      = "0.7.0"
-  val CassandraDriver = "2.1.2"
+  val Akka           = "2.3.4"//2.3.8
+  val AkkaStreams    = "0.11"
+  val CassandraDriver = "2.1.3"
   val Chill          = "1.1"
   val JDK            = "1.7"
   val JodaConvert    = "1.7"
   val JodaTime       = "2.4"
   val Kafka          = "0.8.0"//0.8.2 when out of beta
-  val Kryo           = "3.0.0"
+  val Logback        = "1.0.0"
   val Scala          = "2.10.4"
   val Slf4j          = "1.7.7"
-  val Spark          = "1.1.1"// support for 1.2.0/1.2.2 in the connector very soon
-  val SparkCassandra = "1.1.0"// upgrade for 1.2.0 release very soon
+  val Spark          = "1.2.0"
+  val SparkCassandra = "1.2.0-alpha1"
 }
 
 object Dependencies {
@@ -59,25 +59,24 @@ object Dependencies {
 
   object Compile {
 
+    val akkaStreams       = "com.typesafe.akka"   %% "akka-stream-experimental"           % AkkaStreams    // ApacheV2
     val akkaActor         = "com.typesafe.akka"   %% "akka-actor"                         % Akka           // ApacheV2
     val akkaCluster       = "com.typesafe.akka"   %% "akka-cluster"                       % Akka           // ApacheV2
     val akkaRemote        = "com.typesafe.akka"   %% "akka-remote"                        % Akka           // ApacheV2
     val akkaSlf4j         = "com.typesafe.akka"   %% "akka-slf4j"                         % Akka           // ApacheV2
-    val bijection         = "com.twitter"         %% "bijection-core"                     % Bijection
     val driver            = "com.datastax.cassandra" % "cassandra-driver-core"            % CassandraDriver  exclude("com.google.guava", "guava") excludeAll(ExclusionRule("org.slf4j"))
     val jodaTime          = "joda-time"           % "joda-time"                           % JodaTime        // ApacheV2
     val jodaConvert       = "org.joda"            % "joda-convert"                        % JodaConvert     // ApacheV2
     val kafka             = "org.apache.kafka"    %% "kafka"                              % Kafka  excludeAll(ExclusionRule("org.slf4j")) // ApacheV2
-    val kafkaStreaming    = "org.apache.spark"    %% "spark-streaming-kafka" % Spark exclude("com.google.guava", "guava") exclude("org.apache.spark", "spark-core") // ApacheV2
-    val logback = "ch.qos.logback" % "logback-classic" % "1.0.0" % "runtime"
+    val kafkaStreaming    = "org.apache.spark"    %% "spark-streaming-kafka"              % Spark  exclude("com.google.guava", "guava") exclude("org.apache.spark", "spark-core") // ApacheV2
+    val logback           = "ch.qos.logback"      % "logback-classic"                     % Logback
     val sparkCassandra    = "com.datastax.spark"  %% "spark-cassandra-connector"          % SparkCassandra  excludeAll(ExclusionRule("org.slf4j"))// ApacheV2
     val sparkCassandraEmb = "com.datastax.spark"  %% "spark-cassandra-connector-embedded" % SparkCassandra  excludeAll(ExclusionRule("org.slf4j"))// ApacheV2
   }
 
   import Compile._
 
-  // would normally set up chill-akka for ser.
-  val akka = Seq(akkaActor, akkaCluster, akkaRemote, akkaSlf4j)
+  val akka = Seq(akkaActor, akkaCluster, akkaRemote, akkaSlf4j, akkaStreams)
 
   val connector = Seq(driver, sparkCassandra, sparkCassandraEmb)
 

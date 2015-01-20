@@ -18,10 +18,10 @@ package com.databricks.apps.weather
 import java.io.{File => JFile}
 
 import scala.util.Try
-import com.datastax.driver.core.ConsistencyLevel
-import com.datastax.spark.connector.cql.{NoAuthConf, PasswordAuthConf, AuthConf}
 import com.typesafe.config.{Config, ConfigFactory}
 import org.apache.spark.Logging
+import com.databricks.apps.FileFeedEvent.FileSource
+import com.datastax.spark.connector.cql.{NoAuthConf, PasswordAuthConf, AuthConf}
 
 /**
  * (Type safe) application settings. First attempts to acquire from the runtime environment.
@@ -49,6 +49,8 @@ final class WeatherSettings(conf: Option[Config] = None) extends Serializable wi
     case Some(c) => c.withFallback(ConfigFactory.load)
     case _ => ConfigFactory.load
   }
+
+  val AkkaBasePort = rootConfig.getInt("akka.remote.netty.tcp.port")
 
   protected val spark = rootConfig.getConfig("spark")
 
@@ -86,64 +88,8 @@ final class WeatherSettings(conf: Option[Config] = None) extends Serializable wi
     }
   }
 
-  val CassandraRpcPort = withFallback[Int](Try(cassandra.getInt("connection.rpc.port")),
-    "spark.cassandra.connection.rpc.port") getOrElse 9160
-
   val CassandraNativePort = withFallback[Int](Try(cassandra.getInt("connection.native.port")),
     "spark.cassandra.connection.native.port") getOrElse 9042
-
-  /* Tuning */
-
-  val CassandraKeepAlive = withFallback[Int](Try(cassandra.getInt("connection.keep-alive")),
-    "spark.cassandra.connection.keep_alive_ms") getOrElse 1000
-
-  val CassandraRetryCount = withFallback[Int](Try(cassandra.getInt("connection.query.retry-count")),
-    "spark.cassandra.query.retry.count") getOrElse 10
-
-  val CassandraConnectionReconnectDelayMin = withFallback[Int](Try(cassandra.getInt("connection.reconnect-delay.min")),
-    "spark.cassandra.connection.reconnection_delay_ms.min") getOrElse 1000
-
-  val CassandraConnectionReconnectDelayMax = withFallback[Int](Try(cassandra.getInt("reconnect-delay.max")),
-    "spark.cassandra.connection.reconnection_delay_ms.max") getOrElse 60000
-
-  /* Tuning: Reads */
-  val CassandraReadPageRowSize = withFallback[Int](Try(cassandra.getInt("read.page.row.size")),
-    "spark.cassandra.input.page.row.size") getOrElse 1000
-
-  val CassandraReadConsistencyLevel: ConsistencyLevel = ConsistencyLevel.valueOf(
-    withFallback[String](Try(cassandra.getString("read.consistency.level")),
-      "spark.cassandra.input.consistency.level") getOrElse ConsistencyLevel.LOCAL_ONE.name)
-
-  val CassandraReadSplitSize = withFallback[Long](Try(cassandra.getLong("read.split.size")),
-    "spark.cassandra.input.split.size") getOrElse 100000
-
-  /* Tuning: Writes */
-
-  val CassandraWriteParallelismLevel = withFallback[Int](Try(cassandra.getInt("write.concurrent.writes")),
-    "spark.cassandra.output.concurrent.writes") getOrElse 5
-
-  val CassandraWriteBatchSizeBytes = withFallback[Int](Try(cassandra.getInt("write.batch.size.bytes")),
-    "spark.cassandra.output.batch.size.bytes") getOrElse 64 * 1024
-
-  private val CassandraWriteBatchSizeRows = withFallback[String](Try(cassandra.getString("write.batch.size.rows")),
-    "spark.cassandra.output.batch.size.rows") getOrElse "auto"
-
-  val CassandraWriteBatchRowSize: Option[Int] = {
-    val NumberPattern = "([0-9]+)".r
-    CassandraWriteBatchSizeRows match {
-      case "auto"           => None
-      case NumberPattern(x) => Some(x.toInt)
-      case other =>
-        throw new IllegalArgumentException(
-          s"Invalid value for 'cassandra.output.batch.size.rows': $other. Number or 'auto' expected")
-    }
-  }
-
-  val CassandraWriteConsistencyLevel: ConsistencyLevel = ConsistencyLevel.valueOf(
-    withFallback[String](Try(cassandra.getString("write.consistency.level")),
-      "spark.cassandra.output.consistency.level") getOrElse ConsistencyLevel.LOCAL_ONE.name)
-
-  val CassandraDefaultMeasuredInsertsCount: Int = 128
 
   /* App Specific Settings */
   protected val weather = rootConfig.getConfig("weather")
@@ -172,14 +118,16 @@ final class WeatherSettings(conf: Option[Config] = None) extends Serializable wi
   val IngestionData: Set[JFile] = {
     import java.io.{File => JFile}
 
-    val files = new JFile(DataLoadPath).listFiles.filter(_.exists).collect {
-      case file if file.exists => file
+    val files = new JFile(DataLoadPath).listFiles.collect {
+      case file => file
     }.toSet
 
     log.info(s"Found ${files.size} data files to load.")
     require(files.nonEmpty, s"Unable to find valid data files at $DataLoadPath")
     files
   }
+
+  val RawDataSources: Set[FileSource] = for (file <- IngestionData) yield FileSource(file)
 
   /** Attempts to acquire from environment, then java system properties. */
   private def withFallback[T](env: Try[T], key: String): Option[T] = env match {

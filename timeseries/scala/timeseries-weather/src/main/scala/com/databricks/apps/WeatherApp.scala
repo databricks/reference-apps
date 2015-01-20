@@ -16,16 +16,16 @@
 package com.databricks.apps
 
 import akka.actor.{Props, ActorSystem, PoisonPill}
-import com.databricks.apps.weather.{NodeGuardian, WeatherSettings}
-import com.datastax.spark.connector.embedded._
 import org.apache.spark.serializer.KryoSerializer
 import org.apache.spark.streaming.{Milliseconds, StreamingContext}
 import org.apache.spark.{SparkConf, SparkContext}
+import com.databricks.apps.weather.{NodeGuardian, WeatherSettings}
+import com.datastax.spark.connector.embedded._
 
-/** Runnable.
+/** Runnable computation app.
   * First run the setup described in the README.
   *
-  * For an IDE first start [[WeatherApp]], then start [[WeatherClientApp]].
+  * For an IDE first start [[WeatherApp]], then start [[WeatherClient]].
   * By command line:
   *   {{{
   *     cd /path/to/reference-apps/timeseries/scala
@@ -33,7 +33,7 @@ import org.apache.spark.{SparkConf, SparkContext}
   *   }}}
   *   You should see: Multiple main classes detected, select one to run:
   *   [1] com.databricks.apps.WeatherApp
-  *   [2] com.databricks.apps.WeatherClientApp
+  *   [2] com.databricks.apps.WeatherClient
   *
   * Select 1, then in a second window do the same and select 2.
   */
