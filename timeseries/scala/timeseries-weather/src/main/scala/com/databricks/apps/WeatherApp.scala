@@ -35,7 +35,9 @@ import com.datastax.spark.connector.embedded._
   *   [1] com.databricks.apps.WeatherApp
   *   [2] com.databricks.apps.WeatherClient
   *
-  * Select 1, then in a second window do the same and select 2.
+  * Select WeatherApp. You will eventually see:
+  *     [INFO] Node is transitioning from 'uninitialized' to 'initialized'
+  * In a second window do the same and select WeatherClient.
   */
 object WeatherApp extends App {
 
@@ -65,7 +67,7 @@ object WeatherApp extends App {
   val system = ActorSystem(AppName, rootConfig)
 
   /* The root supervisor and traffic controller of the app. All inbound messages go through this actor. */
-  val guardian = system.actorOf(Props(new NodeGuardian(ssc, kafka, settings)), "node-guardian")
+  val guardian = system.actorOf(Props(new NodeGuardian(ssc, kafka.kafkaParams, settings)), "node-guardian")
 
   /** Registers the shutdown sequence. */
   system.registerOnTermination {

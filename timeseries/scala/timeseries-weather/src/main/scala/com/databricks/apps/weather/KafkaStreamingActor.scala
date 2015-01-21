@@ -16,15 +16,11 @@
 package com.databricks.apps.weather
 
 import akka.actor.{Actor, ActorRef}
-import com.datastax.spark.connector.embedded.KafkaEvent.KafkaMessageEnvelope
-import kafka.producer.ProducerConfig
 import kafka.serializer.StringDecoder
-import org.apache.spark.SparkContext
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark.streaming.kafka.KafkaUtils
 import com.datastax.spark.connector.streaming._
-import com.datastax.spark.connector.embedded.{KafkaEvent, KafkaProducerActor}
 
 /** The KafkaStreamActor creates a streaming pipeline from Kafka to Cassandra via Spark.
   * It creates the Kafka stream which streams the raw data, transforms it, to
@@ -75,10 +71,3 @@ class KafkaStreamingActor(kafkaParams: Map[String, String],
     case e => // ignore
   }
 }
-
-/** [[KafkaMessageEnvelope]] messages sent to this actor are handled by the [[KafkaProducerActor]]
-  * which it extends.
-  */
-class KafkaPublisherActor(val producerConfig: ProducerConfig,
-                          sc: SparkContext,
-                          settings: WeatherSettings) extends KafkaProducerActor[String, String]

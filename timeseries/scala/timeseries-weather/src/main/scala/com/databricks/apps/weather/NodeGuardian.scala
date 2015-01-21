@@ -22,7 +22,7 @@ import akka.cluster.Cluster
 import akka.pattern.gracefulStop
 import org.apache.spark.streaming.kafka.KafkaInputDStream
 import org.apache.spark.streaming.StreamingContext
-import com.datastax.spark.connector.embedded.{KafkaProducer, Assertions, EmbeddedKafka, KafkaEvent}
+import com.datastax.spark.connector.embedded.Assertions
 
 /**
  * The `NodeGuardian` is the root of the application and manages a set of
@@ -37,19 +37,15 @@ import com.datastax.spark.connector.embedded.{KafkaProducer, Assertions, Embedde
  *    and saves the new data to the cassandra raw data table as it arrives.
  */
 class NodeGuardian(ssc: StreamingContext,
-                   kafka: EmbeddedKafka,
+                   kafkaParams: Map[String,String],
                    settings: WeatherSettings)
   extends ClusterAware with AggregationActor with Assertions with ActorLogging {
 
   import WeatherEvent._
-  import KafkaEvent._
   import settings._
 
   /* Creates the Kafka actors: */
-  context.actorOf(Props(new KafkaStreamingActor(kafka.kafkaParams, ssc, settings, self)), "kafka-stream")
-
-  val publisher = context.actorOf(Props(new KafkaPublisherActor(
-    KafkaProducer.defaultConfig(kafka.kafkaConfig), ssc.sparkContext, settings)), "kafka-publisher")
+  context.actorOf(Props(new KafkaStreamingActor(kafkaParams, ssc, settings, self)), "kafka-stream")
 
   /* The Spark/Cassandra computation actors: For the tutorial we just use 2005 for now. */
   val temperature = context.actorOf(Props(new TemperatureActor(ssc.sparkContext, settings)), "temperature")
@@ -79,17 +75,14 @@ class NodeGuardian(ssc: StreamingContext,
   }
 
   def initialized: Actor.Receive = {
-    case e: KafkaMessageEnvelope[_,_] =>
-      log.debug("Forwarding request {} to {}", e, publisher)
-      publisher forward e
     case e: TemperatureRequest =>
-      log.debug("Forwarding request {} to to {}", e, temperature)
+      log.debug("Forwarding request {} to {}", e, temperature)
       temperature forward e
     case e: PrecipitationRequest =>
-      log.debug("Forwarding request {} to to {}", e, precipitation)
+      log.debug("Forwarding request {} to {}", e, precipitation)
       precipitation forward e
     case e: WeatherStationRequest =>
-      log.debug("Forwarding request {} to to {}", e, station)
+      log.debug("Forwarding request {} to {}", e, station)
       station forward e
     case PoisonPill =>
       gracefulShutdown()

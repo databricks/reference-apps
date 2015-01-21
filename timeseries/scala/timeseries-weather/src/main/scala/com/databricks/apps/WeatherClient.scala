@@ -15,13 +15,12 @@
  */
 package com.databricks.apps
 
-import com.databricks.apps.FileFeedEvent.FileStreamEnvelope
-
 import scala.collection.immutable
 import akka.actor._
 import akka.cluster.Cluster
-import com.databricks.apps.weather.{WeatherApiQueries, NodeGuardian, WeatherSettings}
 import com.typesafe.config.ConfigFactory
+import com.databricks.apps.FileFeedEvent.FileStreamEnvelope
+import com.databricks.apps.weather.{WeatherApiQueries, NodeGuardian, WeatherSettings}
 
 /**
  * Exercises the weather app by triggering computations every 2 seconds via
@@ -36,17 +35,15 @@ object WeatherClient extends App {
   val system = ActorSystem(AppName,
     ConfigFactory.parseString(s"akka.remote.netty.tcp.port = 2551").withFallback(rootConfig))
 
-  protected val log = akka.event.Logging(system, system.name)
-
   val cluster = Cluster(system)
   cluster.joinSeedNodes(seedNodes = immutable.Seq(cluster.selfAddress))
-
-  val guardian = system.actorSelection(cluster.selfAddress.copy(port = Some(AkkaBasePort)) + "/user/node-guardian")
 
   /** This represents a separately-deployed process that would typically be feeding data to Kafka.
     * To simplify this as a runnable sample, we create this here so one does not have to
     * start up 3 processes in sbt: the main app, a data feed and the query client. */
-  system.actorOf(Props(new DataFeedActor(guardian, settings)), "data-feed") ! FileStreamEnvelope(RawDataSources)
+  system.actorOf(Props(new DataFeedActor(settings)), "data-feed") ! FileStreamEnvelope(RawDataSources)
+
+  val guardian = system.actorSelection(cluster.selfAddress.copy(port = Some(AkkaBasePort)) + "/user/node-guardian")
 
   /** Drives demo activity by sending requests to the [[NodeGuardian]] actor. */
   val queryClient = system.actorOf(Props(new WeatherApiQueries(settings, guardian)), "api-client")
