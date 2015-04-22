@@ -32,4 +32,6 @@
        * [Run Examine And Train](twitter_classifier/run_part2.md)
    * [Apply the Model in Real-time](twitter_classifier/predict.md)
 * [Weather TimeSeries Data Application with Cassandra](timeseries/README.md)
+   * [Overview](timeseries/overview.md)
+   * [Running the Example](timeseries/run.md)
 
