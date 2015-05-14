@@ -1,6 +1,6 @@
 # Part 1: Collect a Dataset of Tweets
 
-Spark Streaming is used to collect tweets as the dataset.  The tweets are written out in json format, one tweet per line.  A file of tweets is written every time interval until at least the desired number of tweets is collected.
+Spark Streaming is used to collect tweets as the dataset.  The tweets are written out in JSON format, one tweet per line.  A file of tweets is written every time interval until at least the desired number of tweets is collected.
 
 See [Collect.scala](scala/src/main/scala/com/databricks/apps/twitter_classifier/Collect.scala) for the full code.  We'll walk through some
 of the interesting bits now.
@@ -12,7 +12,7 @@ Collect.scala takes in the following argument list:
 *  *intervalInSeconds* - write out a new set of tweets every interval.
 *  *partitionsEachInterval* - this is used to control the number of output files written for each interval
 
-Collect.scala will also require [Twitter API Credentials](https://apps.twitter.com/).  If you have never signed up for a Twitter Api Credentials, follow these steps [here](https://databricks-training.s3.amazonaws.com/realtime-processing-with-spark-streaming.html#twitter-credential-setup).  The Twitter credentials are passed in through command line flags.
+Collect.scala will also require [Twitter API Credentials](https://apps.twitter.com/).  If you have never signed up for Twitter Api Credentials, follow these steps [here](https://databricks-training.s3.amazonaws.com/realtime-processing-with-spark-streaming.html#twitter-credential-setup).  The Twitter credentials are passed in through command line flags.
 
 Below is a snippet of the actual code in Collect.scala.  The code calls TwitterUtils in the Spark Streaming Twitter library to get a DStream of tweets.  Then, map is called to convert the tweets to JSON format.  Finally, call for each RDD on the DStream.  This example repartitions the RDD to write out so that you can control the number of output files.
 

@@ -5,7 +5,7 @@ To run this program, the following argument list is required:
 1. YOUR_TWEET_INPUT - This is the file pattern for input tweets.
 * OUTPUT_MODEL_DIR - This is the directory to persist the model.
 * NUM_CLUSTERS - The number of clusters the algorithm should create.
-* NUM_ITERATIONS - The number of iterations the algorithm should be run.
+* NUM_ITERATIONS - The number of iterations the algorithm should run for.
 
 Here is an example command to run [ExamineAndTrain.scala](scala/src/main/scala/com/databricks/apps/twitter_classifier/ExamineAndTrain.scala):
 

@@ -4,7 +4,7 @@ Spark SQL can be used to examine data based on the tweets.  Below are some relev
 code snippets from [ExamineAndTrain.scala](scala/src/main/scala/com/databricks/apps/twitter_classifier/ExamineAndTrain.scala).
 
 First, here is code to pretty print 5 sample tweets so that they are
-more humun readable.
+more human-readable.
 
 ```scala
 val tweets = sc.textFile(tweetInput)
@@ -36,7 +36,7 @@ sqlContext.sql(
     .collect().foreach(println)
 ```
 
-Finally, show the count of tweets by user language.  This can help determine the number of clusters is ideal for this dataset of tweets.
+Finally, show the count of tweets by user language.  This can help determine the number of clusters that is ideal for this dataset of tweets.
 ```scala
 sqlContext.sql(
     "SELECT user.lang, COUNT(*) as cnt FROM tweetTable " +
