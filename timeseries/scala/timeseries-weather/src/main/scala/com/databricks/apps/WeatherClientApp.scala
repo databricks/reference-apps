@@ -15,8 +15,6 @@
  */
 package com.databricks.apps
 
-import com.sun.deploy.config.ConfigFactory
-
 import scala.collection.immutable
 import akka.actor._
 import akka.cluster.Cluster
