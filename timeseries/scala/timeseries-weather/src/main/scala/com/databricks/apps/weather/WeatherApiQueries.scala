@@ -22,6 +22,7 @@ import scala.concurrent.duration._
 import akka.actor._
 import com.datastax.spark.connector.embedded.Event
 import org.joda.time.{DateTime, DateTimeZone}
+import scala.collection.JavaConversions._
 
 class WeatherApiQueries(settings: WeatherSettings, actor: ActorSelection)
   extends AggregationActor with ActorLogging {
@@ -78,7 +79,7 @@ class WeatherApiQueries(settings: WeatherSettings, actor: ActorSelection)
     log.info("Requesting weather station {}", sample.wsid)
     actor ! GetWeatherStation(sample.wsid)
 
-    queried += sample
+    queried + sample
   }
 
   def getLines(file: JFile): Stream[String] = {
