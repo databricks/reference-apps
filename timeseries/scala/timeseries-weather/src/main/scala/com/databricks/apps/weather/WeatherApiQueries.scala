@@ -79,7 +79,7 @@ class WeatherApiQueries(settings: WeatherSettings, actor: ActorSelection)
     log.info("Requesting weather station {}", sample.wsid)
     actor ! GetWeatherStation(sample.wsid)
 
-    queried + sample
+    queried = queried + sample
   }
 
   def getLines(file: JFile): Stream[String] = {
