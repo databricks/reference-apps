@@ -1,12 +1,14 @@
 package com.databricks.apps.logs.chapter1;
 
 import com.databricks.apps.logs.ApacheAccessLog;
+
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.sql.api.java.JavaSQLContext;
-import org.apache.spark.sql.api.java.JavaSchemaRDD;
-import org.apache.spark.sql.api.java.Row;
+import org.apache.spark.sql.DataFrame;
+import org.apache.spark.sql.SQLContext;
+import org.apache.spark.sql.Row;
+
 import scala.Tuple2;
 
 import java.util.List;
@@ -27,7 +29,7 @@ public class LogAnalyzerSQL {
     // Initialize the Spark context.
     SparkConf conf = new SparkConf().setAppName("Log Analyzer SQL");
     JavaSparkContext sc = new JavaSparkContext(conf);
-    JavaSQLContext sqlContext = new JavaSQLContext(sc);
+    SQLContext sqlContext = new SQLContext(sc);
 
     if (args.length == 0) {
       System.out.println("Must specify an access logs file.");
@@ -38,13 +40,15 @@ public class LogAnalyzerSQL {
         .map(ApacheAccessLog::parseFromLogLine);
 
     // Spark SQL can imply a schema for a table if given a Java class with getters and setters.
-    JavaSchemaRDD schemaRDD = sqlContext.applySchema(accessLogs, ApacheAccessLog.class);
-    schemaRDD.registerTempTable("logs");
-    sqlContext.sqlContext().cacheTable("logs");
+    DataFrame sqlDataFrame =
+        sqlContext.createDataFrame(accessLogs, ApacheAccessLog.class);
+    sqlDataFrame.registerTempTable("logs");
+    sqlContext.cacheTable("logs");
 
     // Calculate statistics based on the content size.
-    Row contentSizeStats =
-        sqlContext.sql("SELECT SUM(contentSize), COUNT(*), MIN(contentSize), MAX(contentSize) FROM logs")
+    Row contentSizeStats = sqlContext.sql(
+        "SELECT SUM(contentSize), COUNT(*), MIN(contentSize), MAX(contentSize) FROM logs")
+            .javaRDD()
             .collect()
             .get(0);
     System.out.println(String.format("Content Size Avg: %s, Min: %s, Max: %s",
@@ -55,6 +59,7 @@ public class LogAnalyzerSQL {
     // Compute Response Code to Count.
     List<Tuple2<Integer, Long>> responseCodeToCount = sqlContext
         .sql("SELECT responseCode, COUNT(*) FROM logs GROUP BY responseCode LIMIT 100")
+        .javaRDD()
         .mapToPair(row -> new Tuple2<>(row.getInt(0), row.getLong(1)))
         .collect();
     System.out.println(String.format("Response code counts: %s", responseCodeToCount));
@@ -62,6 +67,7 @@ public class LogAnalyzerSQL {
     // Any IPAddress that has accessed the server more than 10 times.
     List<String> ipAddresses = sqlContext
         .sql("SELECT ipAddress, COUNT(*) AS total FROM logs GROUP BY ipAddress HAVING total > 10 LIMIT 100")
+        .javaRDD()
         .map(row -> row.getString(0))
         .collect();
     System.out.println(String.format("IPAddresses > 10 times: %s", ipAddresses));
@@ -69,6 +75,7 @@ public class LogAnalyzerSQL {
     // Top Endpoints.
     List<Tuple2<String, Long>> topEndpoints = sqlContext
         .sql("SELECT endpoint, COUNT(*) AS total FROM logs GROUP BY endpoint ORDER BY total DESC LIMIT 10")
+        .javaRDD()
         .map(row -> new Tuple2<>(row.getString(0), row.getLong(1)))
         .collect();
     System.out.println(String.format("Top Endpoints: %s", topEndpoints));

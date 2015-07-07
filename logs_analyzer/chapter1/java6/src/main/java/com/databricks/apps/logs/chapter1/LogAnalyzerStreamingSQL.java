@@ -2,18 +2,20 @@ package com.databricks.apps.logs.chapter1;
 
 import com.databricks.apps.logs.ApacheAccessLog;
 import com.databricks.apps.logs.Functions;
+
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFunction;
-import org.apache.spark.sql.api.java.JavaSQLContext;
-import org.apache.spark.sql.api.java.JavaSchemaRDD;
-import org.apache.spark.sql.api.java.Row;
+import org.apache.spark.sql.DataFrame;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SQLContext;
 import org.apache.spark.streaming.Duration;
 import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaReceiverInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
+
 import scala.Tuple2;
 import scala.Tuple4;
 
@@ -51,7 +53,7 @@ public class LogAnalyzerStreamingSQL {
     JavaSparkContext sc = new JavaSparkContext(conf);
     JavaStreamingContext jssc = new JavaStreamingContext(sc,
         SLIDE_INTERVAL);  // This sets the update window to be every 10 seconds.
-    final JavaSQLContext sqlContext = new JavaSQLContext(sc);
+    final SQLContext sqlContext = new SQLContext(sc);
 
     JavaReceiverInputDStream<String> logDataDStream =
         jssc.socketTextStream("localhost", 9999);
@@ -74,14 +76,15 @@ public class LogAnalyzerStreamingSQL {
             }
 
             // *** Note that this is code copied verbatim from LogAnalyzerSQL.java.
-            JavaSchemaRDD schemaRDD = sqlContext.applySchema(
+            DataFrame sqlDataFrame = sqlContext.createDataFrame(
                 accessLogs, ApacheAccessLog.class);
-            schemaRDD.registerTempTable("logs");
-            sqlContext.sqlContext().cacheTable("logs");
+            sqlDataFrame.registerTempTable("logs");
+            sqlContext.cacheTable("logs");
 
             // Calculate statistics based on the content size.
             Tuple4<Long, Long, Long, Long> contentSizeStats =
                 sqlContext.sql("SELECT SUM(contentSize), COUNT(*), MIN(contentSize), MAX(contentSize) FROM logs")
+                    .javaRDD()
                     .map(new Function<Row, Tuple4<Long, Long, Long, Long>>() {
                       @Override
                       public Tuple4<Long, Long, Long, Long> call(Row row)
@@ -100,6 +103,7 @@ public class LogAnalyzerStreamingSQL {
             // Compute Response Code to Count.
             List<Tuple2<Integer, Long>> responseCodeToCount = sqlContext
                 .sql("SELECT responseCode, COUNT(*) FROM logs GROUP BY responseCode LIMIT 100")
+                .javaRDD()
                 .mapToPair(new PairFunction<Row, Integer, Long>() {
                   @Override
                   public Tuple2<Integer, Long> call(Row row) throws Exception {
@@ -113,6 +117,7 @@ public class LogAnalyzerStreamingSQL {
             // Any IPAddress that has accessed the server more than 10 times.
             List<String> ipAddresses = sqlContext
                 .sql("SELECT ipAddress, COUNT(*) AS total FROM logs GROUP BY ipAddress HAVING total > 10 LIMIT 100")
+                .javaRDD()
                 .map(new Function<Row, String>() {
                   @Override
                   public String call(Row row) throws Exception {
@@ -126,6 +131,7 @@ public class LogAnalyzerStreamingSQL {
             // Top Endpoints.
             List<Tuple2<String, Long>> topEndpoints = sqlContext
                 .sql("SELECT endpoint, COUNT(*) AS total FROM logs GROUP BY endpoint ORDER BY total DESC LIMIT 10")
+                .javaRDD()
                 .map(new Function<Row, Tuple2<String, Long>>() {
                   @Override
                   public Tuple2<String, Long> call(Row row) throws Exception {

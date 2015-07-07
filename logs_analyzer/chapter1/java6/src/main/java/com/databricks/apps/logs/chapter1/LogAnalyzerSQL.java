@@ -2,14 +2,16 @@ package com.databricks.apps.logs.chapter1;
 
 import com.databricks.apps.logs.ApacheAccessLog;
 import com.databricks.apps.logs.Functions;
+
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFunction;
-import org.apache.spark.sql.api.java.JavaSQLContext;
-import org.apache.spark.sql.api.java.JavaSchemaRDD;
-import org.apache.spark.sql.api.java.Row;
+import org.apache.spark.sql.DataFrame;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SQLContext;
+
 import scala.Tuple2;
 
 import java.util.List;
@@ -37,14 +39,15 @@ public class LogAnalyzerSQL {
     JavaRDD<ApacheAccessLog> accessLogs = sc.textFile(logFile)
         .map(Functions.PARSE_LOG_LINE);
 
-    JavaSQLContext sqlContext = new JavaSQLContext(sc);
-    JavaSchemaRDD schemaRDD = sqlContext.applySchema(accessLogs, ApacheAccessLog.class);
-    schemaRDD.registerTempTable("logs");
-    sqlContext.sqlContext().cacheTable("logs");
+    SQLContext sqlContext = new SQLContext(sc);
+    DataFrame sqlDataFrame = sqlContext.createDataFrame(accessLogs, ApacheAccessLog.class);
+    sqlDataFrame.registerTempTable("logs");
+    sqlContext.cacheTable("logs");
 
     // Calculate statistics based on the content size.
     Row contentSizeStats = sqlContext.sql(
         "SELECT SUM(contentSize), COUNT(*), MIN(contentSize), MAX(contentSize) FROM logs")
+            .javaRDD()
             .collect()
             .get(0);
     System.out.println(String.format("Content Size Avg: %s, Min: %s, Max: %s",
@@ -55,6 +58,7 @@ public class LogAnalyzerSQL {
     // Compute Response Code to Count.
     List<Tuple2<Integer, Long>> responseCodeToCount = sqlContext
         .sql("SELECT responseCode, COUNT(*) FROM logs GROUP BY responseCode LIMIT 100")
+        .javaRDD()
         .mapToPair(new PairFunction<Row, Integer, Long>() {
           @Override
           public Tuple2<Integer, Long> call(Row row) throws Exception {
@@ -68,6 +72,7 @@ public class LogAnalyzerSQL {
     // Any IPAddress that has accessed the server more than 10 times.
     List<String> ipAddresses = sqlContext
         .sql("SELECT ipAddress, COUNT(*) AS total FROM logs GROUP BY ipAddress HAVING total > 10 LIMIT 100")
+        .javaRDD()
         .map(new Function<Row, String>() {
           @Override
           public String call(Row row) throws Exception {
@@ -81,6 +86,7 @@ public class LogAnalyzerSQL {
     // Top Endpoints.
     List<Tuple2<String, Long>> topEndpoints = sqlContext
         .sql("SELECT endpoint, COUNT(*) AS total FROM logs GROUP BY endpoint ORDER BY total DESC LIMIT 10")
+        .javaRDD()
         .map(new Function<Row, Tuple2<String, Long>>() {
                @Override
                public Tuple2<String, Long> call(Row row) throws Exception {
