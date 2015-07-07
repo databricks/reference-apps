@@ -3,9 +3,10 @@ package com.databricks.apps.logs.chapter2;
 import com.databricks.apps.logs.ApacheAccessLog;
 import com.databricks.apps.logs.LogAnalyzerRDD;
 import com.databricks.apps.logs.LogStatistics;
+
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.sql.api.java.JavaSQLContext;
+import org.apache.spark.sql.SQLContext;
 import org.apache.spark.streaming.Duration;
 import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
@@ -22,8 +23,8 @@ import org.apache.spark.streaming.api.java.JavaStreamingContext;
  * %  ${YOUR_SPARK_HOME}/bin/spark-submit
  *     --class "com.databricks.apps.logs.chapter2.LogAnalyzerStreamingImportDirectory"
  *     --master spark://YOUR_SPARK_MASTER
- *     YOUR_LOCAL_LOGS_DIRECTORY
  *     target/log-analyzer-1.0.jar
+ *     YOUR_LOCAL_LOGS_DIRECTORY
  */
 public class LogAnalyzerStreamingImportDirectory {
   private static final Duration WINDOW_LENGTH = new Duration(30 * 1000);
@@ -33,7 +34,7 @@ public class LogAnalyzerStreamingImportDirectory {
     SparkConf conf = new SparkConf().setAppName("Log Analyzer Import Streaming HDFS");
     JavaSparkContext sc = new JavaSparkContext(conf);
     JavaStreamingContext jssc = new JavaStreamingContext(sc, SLIDE_INTERVAL);
-    JavaSQLContext sqlContext = new JavaSQLContext(sc);
+    SQLContext sqlContext = new SQLContext(sc);
 
     // Specify a directory to monitor for log files.
     if (args.length == 0) {

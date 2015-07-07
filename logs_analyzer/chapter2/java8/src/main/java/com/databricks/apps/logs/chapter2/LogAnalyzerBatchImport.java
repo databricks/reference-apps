@@ -3,16 +3,17 @@ package com.databricks.apps.logs.chapter2;
 import com.databricks.apps.logs.ApacheAccessLog;
 import com.databricks.apps.logs.LogAnalyzerRDD;
 import com.databricks.apps.logs.LogStatistics;
+
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.sql.api.java.JavaSQLContext;
+import org.apache.spark.sql.SQLContext;
 
 public class LogAnalyzerBatchImport {
   public static void main(String[] args) {
     SparkConf conf = new SparkConf().setAppName("Log Analyzer SQL");
     JavaSparkContext sc = new JavaSparkContext(conf);
-    JavaSQLContext sqlContext = new JavaSQLContext(sc);
+    SQLContext sqlContext = new SQLContext(sc);
 
     if (args.length == 0) {
       System.out.println("Must specify an access logs file.");
