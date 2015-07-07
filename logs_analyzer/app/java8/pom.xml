@@ -20,19 +20,19 @@
         <dependency> <!-- Spark -->
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-core_2.10</artifactId>
-            <version>1.2.0</version>
+            <version>1.4.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency> <!-- Spark SQL -->
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql_2.10</artifactId>
-            <version>1.2.0</version>
+            <version>1.4.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency> <!-- Spark Streaming -->
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-streaming_2.10</artifactId>
-            <version>1.2.0</version>
+            <version>1.4.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency> <!-- Command Line Parsing -->
@@ -44,6 +44,11 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.4</version>
+        </dependency>
+        <dependency> <!-- Guava -->
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>14.0.1</version>
         </dependency>
     </dependencies>
     <build>
