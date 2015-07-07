@@ -17,7 +17,7 @@ public class LogAnalyzerExportRDD {
     JavaSparkContext sc = new JavaSparkContext(conf);
 
     if (args.length < 2) {
-      System.out.println("Must specify an access logs file and an output file.");
+      System.out.println("Must specify an access logs file and an output directory.");
       System.exit(-1);
     }
     String inputFile = args[0];
