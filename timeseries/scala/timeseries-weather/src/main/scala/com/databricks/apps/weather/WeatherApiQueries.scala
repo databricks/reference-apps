@@ -22,6 +22,7 @@ import scala.concurrent.duration._
 import akka.actor._
 import com.datastax.spark.connector.embedded.Event
 import org.joda.time.{DateTime, DateTimeZone}
+import scala.collection.JavaConversions._
 
 class WeatherApiQueries(settings: WeatherSettings, actor: ActorSelection)
   extends AggregationActor with ActorLogging {
