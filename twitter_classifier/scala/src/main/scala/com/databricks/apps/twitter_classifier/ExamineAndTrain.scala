@@ -32,7 +32,7 @@ object ExamineAndTrain {
       println(gson.toJson(jsonParser.parse(tweet)))
     }
 
-    val tweetTable = sqlContext.jsonFile(tweetInput).cache()
+    val tweetTable = sqlContext.read.json(tweetInput).cache()
     tweetTable.registerTempTable("tweetTable")
 
     println("------Tweet table Schema---")
@@ -48,7 +48,7 @@ object ExamineAndTrain {
     sqlContext.sql("SELECT user.lang, COUNT(*) as cnt FROM tweetTable GROUP BY user.lang ORDER BY cnt DESC LIMIT 25").collect.foreach(println)
 
     println("--- Training the model and persist it")
-    val texts = sqlContext.sql("SELECT text from tweetTable").map(_.head.toString)
+    val texts = sqlContext.sql("SELECT text from tweetTable").map(_.toString)
     // Cache the vectors RDD since it will be used for all the KMeans iterations.
     val vectors = texts.map(Utils.featurize).cache()
     vectors.count()  // Calls an action on the RDD to populate the vectors cache.
