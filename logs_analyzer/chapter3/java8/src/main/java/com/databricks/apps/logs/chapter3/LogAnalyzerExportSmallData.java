@@ -3,10 +3,12 @@ package com.databricks.apps.logs.chapter3;
 import com.databricks.apps.logs.ApacheAccessLog;
 import com.databricks.apps.logs.LogAnalyzerRDD;
 import com.databricks.apps.logs.LogStatistics;
+
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.sql.api.java.JavaSQLContext;
+import org.apache.spark.sql.SQLContext;
+
 import scala.Tuple2;
 import scala.Tuple4;
 
@@ -18,7 +20,7 @@ public class LogAnalyzerExportSmallData {
     // Create the spark context.
     SparkConf conf = new SparkConf().setAppName("Log Analyzer SQL");
     JavaSparkContext sc = new JavaSparkContext(conf);
-    JavaSQLContext sqlContext = new JavaSQLContext(sc);
+    SQLContext sqlContext = new SQLContext(sc);
 
     if (args.length < 2) {
       System.out.println("Must specify an access logs file and an output file.");

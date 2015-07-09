@@ -48,15 +48,15 @@ public class LogAnalyzerAppMain {
     Options options = new Options();
 
     options.addOption(
-        new Option(WINDOW_LENGTH, false, "The window length in seconds"));
+        new Option(WINDOW_LENGTH, true, "The window length in seconds"));
     options.addOption(
-        new Option(SLIDE_INTERVAL, false, "The slide interval in seconds"));
+        new Option(SLIDE_INTERVAL, true, "The slide interval in seconds"));
     options.addOption(
         new Option(LOGS_DIRECTORY, true, "The directory where logs are written"));
     options.addOption(
-        new Option(OUTPUT_HTML_FILE, false, "Where to write output html file"));
+        new Option(OUTPUT_HTML_FILE, true, "Where to write output html file"));
     options.addOption(
-        new Option(CHECKPOINT_DIRECTORY, false, "The checkpoint directory."));
+        new Option(CHECKPOINT_DIRECTORY, true, "The checkpoint directory."));
     return options;
   }
 

@@ -22,10 +22,11 @@ object LogAnalyzerSQL {
     val logFile = args(0)
 
     val sqlContext = new SQLContext(sc)
-    import sqlContext.createSchemaRDD
+    import sqlContext.implicits._
 
-    val accessLogs = sc.textFile(logFile).map(ApacheAccessLog.parseLogLine).cache()
-    accessLogs.registerAsTable("com.databricks.app.logs")
+    val accessLogs = sc.textFile(logFile).map(ApacheAccessLog.parseLogLine).toDF()
+    accessLogs.registerTempTable("com.databricks.app.logs")
+    sqlContext.cacheTable("com.databricks.app.logs");
 
     // Calculate statistics based on the content size.
     val contentSizeStats = sqlContext

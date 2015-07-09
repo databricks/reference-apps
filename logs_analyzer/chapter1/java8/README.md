@@ -10,7 +10,7 @@ To compile this code, use maven:
 To run an example, such as LogAnalyzer, you can use spark-submit program
 ```
 %  ${YOUR_SPARK_HOME}/bin/spark-submit
-   --class "com.databricks.apps.logs.LogAnalyzer"
+   --class "com.databricks.apps.logs.chapter1.LogAnalyzer"
    --master local[4]
    target/log-analyzer-1.0.jar
    ../../data/apache.access.log

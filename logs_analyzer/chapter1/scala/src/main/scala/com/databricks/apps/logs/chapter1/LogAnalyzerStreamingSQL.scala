@@ -32,7 +32,7 @@ object LogAnalyzerStreamingSQL {
     val sc = new SparkContext(sparkConf)
 
     val sqlContext = new SQLContext(sc)
-    import sqlContext.createSchemaRDD
+    import sqlContext.implicits._
 
     val streamingContext = new StreamingContext(sc, SLIDE_INTERVAL)
 
@@ -46,7 +46,7 @@ object LogAnalyzerStreamingSQL {
       if (accessLogs.count() == 0) {
         println("No access com.databricks.app.logs received in this time interval")
       } else {
-        accessLogs.registerAsTable("com/databricks/app/logs")
+        accessLogs.toDF().registerTempTable("com/databricks/app/logs")
 
         // Calculate statistics based on the content size.
         val contentSizeStats = sqlContext
