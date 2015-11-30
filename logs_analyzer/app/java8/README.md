@@ -8,9 +8,9 @@ To compile this code, use maven:
 To run the program, you can use spark-submit program:
 ```
 %  ${YOUR_SPARK_HOME}/bin/spark-submit \
-   --class "com.databricks.apps.logs.LogsAnalyzerReferenceAppMain" \
+   --class "com.databricks.apps.logs.LogAnalyzerAppMain" \
    --master spark://YOUR_SPARK_MASTER \
-   target/log-analyzer-1.0.jar
+   target/uber-log-analyzer-1.0.jar
 ```
 
 Configure values for flags - see LogAnalyzerAppMain.
