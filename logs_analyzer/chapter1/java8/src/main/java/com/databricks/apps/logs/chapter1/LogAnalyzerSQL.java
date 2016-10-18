@@ -70,7 +70,8 @@ public class LogAnalyzerSQL {
     // Top Endpoints.
     List<Tuple2<String, Long>> topEndpoints = sparkSession
         .sql("SELECT endpoint, COUNT(*) AS total FROM logs GROUP BY endpoint ORDER BY total DESC LIMIT 10")
-        .map(row -> new Tuple2<>(row.getString(0), row.getLong(1)), Encoders.tuple(Encoders.STRING(), Encoders.LONG()))
+        .map(row -> new Tuple2<>(row.getString(0), row.getLong(1)),
+                Encoders.tuple(Encoders.STRING(), Encoders.LONG()))
         .collectAsList();
     System.out.println(String.format("Top Endpoints: %s", topEndpoints));
 
