@@ -35,7 +35,7 @@ import scala.Tuple2;
  *     target/log-analyzer-1.0.jar
  */
 public class LogAnalyzerStreamingTotal {
-  private final static Function2<Long, Long, Long> SUM_REDUCER = (a, b) -> a + b;
+  private static final Function2<Long, Long, Long> SUM_REDUCER = (a, b) -> a + b;
 
   private static class ValueComparator<K, V>
      implements Comparator<Tuple2<K, V>>, Serializable {
