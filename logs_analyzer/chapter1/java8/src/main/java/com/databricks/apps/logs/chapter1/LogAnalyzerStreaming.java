@@ -34,7 +34,7 @@ public class LogAnalyzerStreaming {
   private static final Function2<Long, Long, Long> SUM_REDUCER = (a, b) -> a + b;
 
   private static class ValueComparator<K, V> implements Comparator<Tuple2<K, V>>, Serializable {
-    private Comparator<V> comparator;
+    private final Comparator<V> comparator;
 
     ValueComparator(Comparator<V> comparator) {
       this.comparator = comparator;
