@@ -168,7 +168,7 @@ public class LogAnalyzerStreamingTotalRefactored {
        .updateStateByKey(COMPUTE_RUNNING_SUM);
     endpointCountsDStream.foreachRDD(rdd -> {
       List<Tuple2<String, Long>> topEndpoints =
-         rdd.takeOrdered(10, new ValueComparator<>(Comparator.<Long>naturalOrder()));
+         rdd.top(10, new ValueComparator<>(Comparator.<Long>naturalOrder()));
       System.out.println("Top Endpoints: " + topEndpoints);
     });
 
