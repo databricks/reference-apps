@@ -1,10 +1,13 @@
 package com.databricks.apps.logs.chapter1;
 
 import com.databricks.apps.logs.ApacheAccessLog;
-
-import com.google.common.base.Optional;
+import java.io.Serializable;
+import java.util.Comparator;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.Optional;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.streaming.Duration;
 import org.apache.spark.streaming.api.java.JavaDStream;
@@ -12,11 +15,6 @@ import org.apache.spark.streaming.api.java.JavaPairDStream;
 import org.apache.spark.streaming.api.java.JavaReceiverInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import scala.Tuple2;
-
-import java.io.Serializable;
-import java.util.Comparator;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * This LogAnalyzerStreaming program reads the localhost 9999 socket
@@ -37,13 +35,13 @@ import java.util.concurrent.atomic.AtomicLong;
  *     target/log-analyzer-1.0.jar
  */
 public class LogAnalyzerStreamingTotal {
-  private static Function2<Long, Long, Long> SUM_REDUCER = (a, b) -> a + b;
+  private final static Function2<Long, Long, Long> SUM_REDUCER = (a, b) -> a + b;
 
   private static class ValueComparator<K, V>
      implements Comparator<Tuple2<K, V>>, Serializable {
-    private Comparator<V> comparator;
+    private final Comparator<V> comparator;
 
-    public ValueComparator(Comparator<V> comparator) {
+    ValueComparator(Comparator<V> comparator) {
       this.comparator = comparator;
     }
 
@@ -53,7 +51,7 @@ public class LogAnalyzerStreamingTotal {
     }
   }
 
-  private static Function2<List<Long>, Optional<Long>, Optional<Long>>
+  private static final Function2<List<Long>, Optional<Long>, Optional<Long>>
      COMPUTE_RUNNING_SUM = (nums, current) -> {
        long sum = current.or(0L);
        for (long i : nums) {
@@ -68,7 +66,7 @@ public class LogAnalyzerStreamingTotal {
   private static final AtomicLong runningMin = new AtomicLong(Long.MAX_VALUE);
   private static final AtomicLong runningMax = new AtomicLong(Long.MIN_VALUE);
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws InterruptedException {
     SparkConf conf = new SparkConf().setAppName("Log Analyzer Streaming Total");
     JavaSparkContext sc = new JavaSparkContext(conf);
 
@@ -97,7 +95,6 @@ public class LogAnalyzerStreamingTotal {
         System.out.print(", Min: " + runningMin.get());
         System.out.println(", Max: " + runningMax.get());
       }
-      return null;
     });
 
     // Compute Response Code to Count.
@@ -108,7 +105,6 @@ public class LogAnalyzerStreamingTotal {
         .updateStateByKey(COMPUTE_RUNNING_SUM);
     responseCodeCountDStream.foreachRDD(rdd -> {
       System.out.println("Response code counts: " + rdd.take(100));
-      return null;
     });
 
     // A DStream of ipAddresses accessed > 10 times.
@@ -121,7 +117,6 @@ public class LogAnalyzerStreamingTotal {
     ipAddressesDStream.foreachRDD(rdd -> {
       List<String> ipAddresses = rdd.take(100);
       System.out.println("All IPAddresses > 10 times: " + ipAddresses);
-      return null;
     });
 
     // A DStream of endpoint to count.
@@ -133,7 +128,6 @@ public class LogAnalyzerStreamingTotal {
       List<Tuple2<String, Long>> topEndpoints =
           rdd.takeOrdered(10, new ValueComparator<>(Comparator.<Long>naturalOrder()));
       System.out.println("Top Endpoints: " + topEndpoints);
-      return null;
     });
 
     // Start the streaming server.
