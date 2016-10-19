@@ -26,7 +26,7 @@ import scala.Tuple2;
  *
  * Example command to run:
  * %  ${YOUR_SPARK_HOME}/bin/spark-submit
- *     --class "com.databricks.apps.logs.chapter1.LogsAnalyzerStreaming"
+ *     --class "com.databricks.apps.logs.chapter1.LogAnalyzerStreaming"
  *     --master local[4]
  *     target/log-analyzer-1.0.jar
  */
