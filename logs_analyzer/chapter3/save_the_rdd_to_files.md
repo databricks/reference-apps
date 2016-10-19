@@ -39,4 +39,4 @@ Run [LogAnalyzerExportRDD.java](java8/src/main/java/com/databricks/apps/logs/cha
 Refer to the API documentation for other built in methods for saving to file.
 There are different built in methods for saving RDD's to files in various formats, so skim the whole RDD package to see if there is something to suit your needs.
 
-[Sqoop](http://http://sqoop.apache.org/) is a very useful tool that can import Hadoop files into various databases, and is thus very useful to use for getting the data written into files from Spark into your production database.
+[Sqoop](http://sqoop.apache.org/) is a very useful tool that can import Hadoop files into various databases, and is thus very useful to use for getting the data written into files from Spark into your production database.
