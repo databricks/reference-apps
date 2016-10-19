@@ -29,7 +29,7 @@ import scala.Tuple2;
  * %  ${YOUR_SPARK_HOME}/bin/spark-submit
  *     --class "com.databricks.apps.logs.chapter1.LogAnalyzerStreamingSQL"
  *     --master local[4]
- *     target/log-analyzer-1.0.jar
+ *     target/log-analyzer-2.0.jar
  */
 public class LogAnalyzerStreamingSQL {
   // Stats will be computed for the last window length of time.
