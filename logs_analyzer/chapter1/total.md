@@ -6,11 +6,11 @@ To maintain state for key-pair values, the data may be too big to fit in memory 
 ```updateStateByKey``` function of the Spark Streaming library.
 
 First, in order to use ```updateStateByKey```, checkpointing must be enabled on the streaming context.  To do that, just call ```checkpoint```
-on the streaming context with a directory to write the checkpoint data.  Here is
+on the streaming context with a directory to write the checkpoint data. Here is
 part of the main function of a streaming application that will save state for all of time:
 ```java
 public class LogAnalyzerStreamingTotal {
-  public static void main(String[] args) {
+  public static void main(String[] args) throws InterruptedException {
     SparkConf conf = new SparkConf().setAppName("Log Analyzer Streaming Total");
     JavaSparkContext sc = new JavaSparkContext(conf);
 
@@ -53,7 +53,6 @@ contentSizeDStream.foreachRDD(rdd -> {
     System.out.print(", Min: " + runningMin.get());
     System.out.println(", Max: " + runningMax.get());
   }
-  return null;
 });
 ```
 
@@ -88,7 +87,6 @@ JavaPairDStream<Integer, Long> responseCodeCountDStream = accessLogDStream
     .updateStateByKey(COMPUTE_RUNNING_SUM);
 responseCodeCountDStream.foreachRDD(rdd -> {
   System.out.println("Response code counts: " + rdd.take(100));
-  return null;
 });
 
 // A DStream of ipAddresses accessed > 10 times.
@@ -101,7 +99,6 @@ JavaDStream<String> ipAddressesDStream = accessLogDStream
 ipAddressesDStream.foreachRDD(rdd -> {
   List<String> ipAddresses = rdd.take(100);
   System.out.println("All IPAddresses > 10 times: " + ipAddresses);
-  return null;
 });
 
 // A DStream of endpoint to count.
@@ -111,9 +108,8 @@ JavaPairDStream<String, Long> endpointCountsDStream = accessLogDStream
     .updateStateByKey(COMPUTE_RUNNING_SUM);
 endpointCountsDStream.foreachRDD(rdd -> {
   List<Tuple2<String, Long>> topEndpoints =
-      rdd.takeOrdered(10, new ValueComparator<>(Comparator.<Long>naturalOrder()));
+      rdd.top(10, new ValueComparator<>(Comparator.<Long>naturalOrder()));
   System.out.println("Top Endpoints: " + topEndpoints);
-  return null;
 });
 ```
 
