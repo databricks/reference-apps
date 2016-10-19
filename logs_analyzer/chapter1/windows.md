@@ -9,19 +9,22 @@ example, we use a window length of 30 seconds and a slide interval of
 The windows feature of Spark Streaming makes it very easy to compute
 stats for a window of time, using the `window` function.
 
-The first step is to initalize the SparkConf and context objects - in particular a streaming context.  Note how only one SparkContext is created from the conf and the streaming and sql contexts are created from those.  Next, the main body should be written.  Finally, the example calls ```start()``` on the streaming context, and ```awaitTermination() ```to keep the streaming context running and accepting streaming input.
+The first step is to initiate the SparkSession and context objects - in particular
+a streaming context. Note how only SparkSession is created the streaming context
+is created from it.  Next, the main body should be written.  Finally, the example
+calls ```start()``` on the streaming context, and ```awaitTermination() ```to keep
+the streaming context running and accepting streaming input.
 
 ```java
 public class LogAnalyzerStreamingSQL {
-  public static void main(String[] args) {
-    SparkConf conf = new SparkConf().setAppName("Log Analyzer Streaming SQL");
-
-    // Note: Only one Spark Context is created from the conf, the rest
-    //       are created from the original Spark context.
-    JavaSparkContext sc = new JavaSparkContext(conf);
+  public static void main(String[] args) throws InterruptedException {
+    SparkSession sparkSession = SparkSession
+            .builder()
+            .appName("Log Analyzer Streaming SQL")
+            .getOrCreate();
+    JavaSparkContext sc = new JavaSparkContext(sparkSession.sparkContext());
     JavaStreamingContext jssc = new JavaStreamingContext(sc,
         SLIDE_INTERVAL);  // This sets the update window to be every 10 seconds.
-    JavaSQLContext sqlContext = new JavaSQLContext(sc);
 
     // TODO: Insert code here to process logs.
 
@@ -41,7 +44,7 @@ JavaReceiverInputDStream<String> logDataDStream =
 Next, call the ```map``` transformation to convert the logDataDStream into a ApacheAccessLog DStream.
 ```java
 JavaDStream<ApacheAccessLog> accessLogDStream =
-    logDataDStream.map(ApacheAccessLog::parseFromLogLine).cache();
+    logDataDStream.map(ApacheAccessLog::parseFromLogLine);
 ```
 
 Next, call ```window``` on the accessLogDStream to create a windowed DStream.  The ``window`` function nicely packages the input data that is being
@@ -53,7 +56,7 @@ JavaDStream<ApacheAccessLog> windowDStream =
 ```
 
 Then call ```foreachRDD``` on the windowDStream.  The function
-passed into ```forEachRDD``` is called on each new RDD in the windowDStream as the RDD
+passed into ```foreachRDD``` is called on each new RDD in the windowDStream as the RDD
 is created, so every *slide_interval*.  The RDD passed into the function contains
 all the input for the last *window_length* of time.  Now that there is
 an RDD of ApacheAccessLogs, simply reuse code from either two batch examples (regular or SQL).  In this example, the code was just copied and pasted, but you could refactor this code into one place nicely for reuse in your production code base - you can reuse all your batch processing code for streaming!
@@ -61,7 +64,7 @@ an RDD of ApacheAccessLogs, simply reuse code from either two batch examples (re
 windowDStream.foreachRDD(accessLogs -> {
   if (accessLogs.count() == 0) {
     System.out.println("No access logs in this time interval");
-    return null;
+    return;
   }
 
   // Insert code verbatim from LogAnalyzer.java or LogAnalyzerSQL.java here.

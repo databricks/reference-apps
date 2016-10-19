@@ -7,8 +7,8 @@ This section requires another dependency on the Spark Streaming library:
 ```xml
 <dependency> <!-- Spark Streaming -->
     <groupId>org.apache.spark</groupId>
-    <artifactId>spark-streaming_2.10</artifactId>
-    <version>1.1.0</version>
+    <artifactId>spark-streaming_2.11</artifactId>
+    <version>2.0.1</version>
 </dependency>
 ```
 
