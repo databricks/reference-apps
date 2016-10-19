@@ -8,8 +8,8 @@ This section requires a dependency on the Spark Core library in the maven file -
 ```xml
 <dependency> <!-- Spark -->
     <groupId>org.apache.spark</groupId>
-    <artifactId>spark-core_2.10</artifactId>
-    <version>1.1.0</version>
+    <artifactId>spark-core_2.11</artifactId>
+    <version>2.0.1</version>
 </dependency>
 ```
 

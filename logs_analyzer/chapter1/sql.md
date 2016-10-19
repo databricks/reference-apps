@@ -7,8 +7,8 @@ This section requires an additioal dependency on Spark SQL:
 ```xml
 <dependency> <!-- Spark SQL -->
     <groupId>org.apache.spark</groupId>
-    <artifactId>spark-sql_2.10</artifactId>
-    <version>1.1.0</version>
+    <artifactId>spark-sql_2.11</artifactId>
+    <version>2.0.1</version>
 </dependency>
 ```
 
@@ -17,16 +17,18 @@ in the previous example can be done using Spark SQL rather than calling
 Spark transformations and actions directly.  We walk through how to do that
 here.
 
-First, we need to create a SQL Spark context. Note how we create one Spark
-Context, and then use that to instantiate different flavors of Spark contexts.
+First, we need to create a SparkSession instance. Note how we obtain different
+flavors of Spark context from a SparkSession instance.
 You should not initialize multiple Spark contexts from the SparkConf in one process.
 ```java
 public class LogAnalyzerSQL {
   public static void main(String[] args) {
-    // Create the spark context.
-    SparkConf conf = new SparkConf().setAppName("Log Analyzer SQL");
-    JavaSparkContext sc = new JavaSparkContext(conf);
-    JavaSQLContext sqlContext = new JavaSQLContext(sc);
+    // Initialize SparkSession instance.
+    SparkSession sparkSession = SparkSession
+            .builder()
+            .appName("Log Analyzer SQL")
+            .getOrCreate();
+    JavaSparkContext sc = new JavaSparkContext(sparkSession.sparkContext());
 
     if (args.length == 0) {
       System.out.println("Must specify an access logs file.");
@@ -43,56 +45,60 @@ public class LogAnalyzerSQL {
 }
 ```
 
-Next, we need a way to register our logs data into a table.  In Java, Spark SQL
-can infer the table schema on a standard Java POJO - with getters and setters
-as we've done with [ApacheAccessLog.java](java8/src/main/java/com/databricks/apps/logs/ApacheAccessLog.java).
-(Note: if you are using a different language besides Java, there is a different
-way for Spark to infer the table schema.  The examples in this directory work out of the
-box.  Or you can also refer to the
-[Spark SQL Guide on Data Sources](https://spark.apache.org/docs/latest/sql-programming-guide.html#data-sources)
-for more details.)
+Next, we need a way to register our logs data into a view in order to run SQL
+queries on it. Spark SQL provides DataFrame concept. DataFrame can be created
+from RDD and then registered as a temporary view in SparkSession.
+In this example we create our DataFrame from the RDD using Spark SQL mechanism
+of inferring SQL schema from Java bean class. For other ways to create DataFrames,
+you can refer to
+[Datasets and DataFrames](http://spark.apache.org/docs/latest/sql-programming-guide.html#datasets-and-dataframes)
 ```java
-JavaSchemaRDD schemaRDD = sqlContext.applySchema(accessLogs,
-    ApacheAccessLog.class);
-schemaRDD.registerTempTable("logs");
-sqlContext.sqlContext().cacheTable("logs");
+// Create Spark DataFrame from the RDD.
+Dataset<Row> accessLogsDf =
+        sparkSession.createDataFrame(accessLogs, ApacheAccessLog.class);
+// Register the DataFrame as a temporary view.
+accessLogsDf.createOrReplaceTempView("logs");
 ```
 
-Now, we are ready to start running some SQL queries on our table.  Here's
+Now, we are ready to start running some SQL queries on our view.  Here's
 the code to compute the identical statistics in the previous section - it
-should look very familiar for those of you who know SQL:
+should look very familiar for those of you who know SQL. For transformations
+on DataFrames, Spark SQL uses Encoders. The API provides Encoders for all
+widely used datatypes, as well as utilities to create Encoders for composite
+data types like tuples.
 ```java
 // Calculate statistics based on the content size.
-Tuple4<Long, Long, Long, Long> contentSizeStats =
-    sqlContext.sql("SELECT SUM(contentSize), COUNT(*), MIN(contentSize), MAX(contentSize) FROM logs")
-        .map(row -> new Tuple4<>(row.getLong(0), row.getLong(1), row.getLong(2), row.getLong(3)))
+Row contentSizeStats = sparkSession
+        .sql("SELECT SUM(contentSize), COUNT(*), MIN(contentSize), MAX(contentSize) FROM logs")
         .first();
 System.out.println(String.format("Content Size Avg: %s, Min: %s, Max: %s",
-    contentSizeStats._1() / contentSizeStats._2(),
-    contentSizeStats._3(),
-    contentSizeStats._4()));
+    contentSizeStats.getLong(0) / contentSizeStats.getLong(1),
+    contentSizeStats.getLong(2),
+    contentSizeStats.getLong(3)));
 
 // Compute Response Code to Count.
 // Note the use of "LIMIT 1000" since the number of responseCodes
 // can potentially be too large to fit in memory.
-List<Tuple2<Integer, Long>> responseCodeToCount = sqlContext
-    .sql("SELECT responseCode, COUNT(*) FROM logs GROUP BY responseCode LIMIT 1000")
-    .mapToPair(row -> new Tuple2<>(row.getInt(0), row.getLong(1)));
-System.out.println(String.format("Response code counts: %s", responseCodeToCount))
-    .collect();
+List<Tuple2<Integer, Long>> responseCodeToCount = sparkSession
+    .sql("SELECT responseCode, COUNT(*) FROM logs GROUP BY responseCode LIMIT 100")
+    .map(row -> new Tuple2<>(row.getInt(0), row.getLong(1)),
+            Encoders.tuple(Encoders.INT(), Encoders.LONG()))
+    .collectAsList();
+System.out.println(String.format("Response code counts: %s", responseCodeToCount));
 
 // Any IPAddress that has accessed the server more than 10 times.
-List<String> ipAddresses = sqlContext
+List<String> ipAddresses = sparkSession
     .sql("SELECT ipAddress, COUNT(*) AS total FROM logs GROUP BY ipAddress HAVING total > 10 LIMIT 100")
-    .map(row -> row.getString(0))
-    .collect();
+    .map(row -> row.getString(0), Encoders.STRING())
+    .collectAsList();
 System.out.println(String.format("IPAddresses > 10 times: %s", ipAddresses));
 
 // Top Endpoints.
-List<Tuple2<String, Long>> topEndpoints = sqlContext
+List<Tuple2<String, Long>> topEndpoints = sparkSession
     .sql("SELECT endpoint, COUNT(*) AS total FROM logs GROUP BY endpoint ORDER BY total DESC LIMIT 10")
-    .map(row -> new Tuple2<>(row.getString(0), row.getLong(1)))
-    .collect();
+    .map(row -> new Tuple2<>(row.getString(0), row.getLong(1)),
+            Encoders.tuple(Encoders.STRING(), Encoders.LONG()))
+    .collectAsList();
 System.out.println(String.format("Top Endpoints: %s", topEndpoints));
 ```
 

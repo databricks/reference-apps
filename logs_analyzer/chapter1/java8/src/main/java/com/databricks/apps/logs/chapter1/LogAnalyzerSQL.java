@@ -23,7 +23,7 @@ import scala.Tuple2;
 public class LogAnalyzerSQL {
 
   public static void main(String[] args) {
-    // Initialize the Spark context.
+    // Initialize SparkSession instance.
     SparkSession sparkSession = SparkSession
             .builder()
             .appName("Log Analyzer SQL")
@@ -41,6 +41,7 @@ public class LogAnalyzerSQL {
     // Create Spark DataFrame from the RDD.
     Dataset<Row> accessLogsDf =
             sparkSession.createDataFrame(accessLogs, ApacheAccessLog.class);
+    // Register the DataFrame as a temporary view.
     accessLogsDf.createOrReplaceTempView("logs");
 
     // Calculate statistics based on the content size.
@@ -53,6 +54,8 @@ public class LogAnalyzerSQL {
         contentSizeStats.getLong(3)));
 
     // Compute Response Code to Count.
+    // Note the use of "LIMIT 1000" since the number of responseCodes
+    // can potentially be too large to fit in memory.
     List<Tuple2<Integer, Long>> responseCodeToCount = sparkSession
         .sql("SELECT responseCode, COUNT(*) FROM logs GROUP BY responseCode LIMIT 100")
         .map(row -> new Tuple2<>(row.getInt(0), row.getLong(1)),
