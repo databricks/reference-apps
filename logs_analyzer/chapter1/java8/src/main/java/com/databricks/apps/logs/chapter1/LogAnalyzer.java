@@ -28,7 +28,7 @@ public class LogAnalyzer {
 
   private static class ValueComparator<K, V>
      implements Comparator<Tuple2<K, V>>, Serializable {
-    private Comparator<V> comparator;
+    private final Comparator<V> comparator;
 
     public ValueComparator(Comparator<V> comparator) {
       this.comparator = comparator;
