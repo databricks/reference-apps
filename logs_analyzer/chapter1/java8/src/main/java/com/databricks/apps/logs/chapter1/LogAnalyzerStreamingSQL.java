@@ -23,7 +23,7 @@ import scala.Tuple2;
  *
  * If you don't have a live log file that is being written to,
  * you can add test lines using this command:
- *   % cat ../../data/apache.accesslog >> [[YOUR_LOG_FILE]]
+ *   % cat ../../data/apache.access.log >> [[YOUR_LOG_FILE]]
  *
  * Example command to run:
  * %  ${YOUR_SPARK_HOME}/bin/spark-submit

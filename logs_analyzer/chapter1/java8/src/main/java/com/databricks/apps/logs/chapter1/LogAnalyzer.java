@@ -19,7 +19,7 @@ import scala.Tuple2;
  *     --class "com.databricks.apps.logs.chapter1.LogsAnalyzer"
  *     --master local[4]
  *     target/log-analyzer-1.0.jar
- *     ../../data/apache.accesslog
+ *     ../../data/apache.access.log
  */
 public class LogAnalyzer {
   private static Function2<Long, Long, Long> SUM_REDUCER = (a, b) -> a + b;

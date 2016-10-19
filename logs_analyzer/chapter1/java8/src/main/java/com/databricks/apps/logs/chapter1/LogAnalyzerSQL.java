@@ -18,7 +18,7 @@ import scala.Tuple2;
  *     --class "com.databricks.apps.logs.chapter1.LogsAnalyzerSQL"
  *     --master local[4]
  *     target/log-analyzer-1.0.jar
- *     ../../data/apache.accesslog
+ *     ../../data/apache.access.log
  */
 public class LogAnalyzerSQL {
 
