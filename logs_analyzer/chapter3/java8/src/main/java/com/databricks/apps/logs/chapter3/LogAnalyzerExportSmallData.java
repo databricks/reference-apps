@@ -3,34 +3,34 @@ package com.databricks.apps.logs.chapter3;
 import com.databricks.apps.logs.ApacheAccessLog;
 import com.databricks.apps.logs.LogAnalyzerRDD;
 import com.databricks.apps.logs.LogStatistics;
-
-import org.apache.spark.SparkConf;
+import java.io.*;
+import java.util.List;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.sql.SQLContext;
-
+import org.apache.spark.sql.SparkSession;
 import scala.Tuple2;
 import scala.Tuple4;
 
-import java.io.*;
-import java.util.List;
-
 public class LogAnalyzerExportSmallData {
+
   public static void main(String[] args) throws IOException {
-    // Create the spark context.
-    SparkConf conf = new SparkConf().setAppName("Log Analyzer SQL");
-    JavaSparkContext sc = new JavaSparkContext(conf);
-    SQLContext sqlContext = new SQLContext(sc);
+      // Initialize SparkSession instance.
+    SparkSession sparkSession = SparkSession
+            .builder()
+            .appName("Log Analyzer SQL")
+            .getOrCreate();
 
     if (args.length < 2) {
       System.out.println("Must specify an access logs file and an output file.");
       System.exit(-1);
     }
     String logFile = args[0];
-    JavaRDD<ApacheAccessLog> accessLogs = sc.textFile(logFile)
+    JavaRDD<ApacheAccessLog> accessLogs = sparkSession
+        .read()
+        .textFile(logFile)
+        .javaRDD()
         .map(ApacheAccessLog::parseFromLogLine);
 
-    LogAnalyzerRDD logAnalyzerRDD = new LogAnalyzerRDD(sqlContext);
+    LogAnalyzerRDD logAnalyzerRDD = new LogAnalyzerRDD(sparkSession);
     LogStatistics logStatistics = logAnalyzerRDD.processRdd(accessLogs);
 
     String outputFile = args[1];
@@ -56,6 +56,6 @@ public class LogAnalyzerExportSmallData {
 
     out.close();
 
-    sc.stop();
+    sparkSession.stop();
   }
 }
