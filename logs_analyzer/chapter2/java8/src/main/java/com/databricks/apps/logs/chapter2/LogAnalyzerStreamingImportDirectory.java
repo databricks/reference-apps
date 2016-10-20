@@ -23,7 +23,7 @@ import org.apache.spark.streaming.api.java.JavaStreamingContext;
  * %  ${YOUR_SPARK_HOME}/bin/spark-submit
  *     --class "com.databricks.apps.logs.chapter2.LogAnalyzerStreamingImportDirectory"
  *     --master spark://YOUR_SPARK_MASTER
- *     target/log-analyzer-1.0.jar
+ *     target/log-analyzer-2.0.jar
  *     YOUR_LOCAL_LOGS_DIRECTORY
  */
 public class LogAnalyzerStreamingImportDirectory {
