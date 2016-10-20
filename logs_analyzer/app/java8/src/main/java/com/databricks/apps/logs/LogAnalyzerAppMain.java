@@ -32,7 +32,7 @@ import java.util.List;
  * %  ${YOUR_SPARK_HOME}/bin/spark-submit
  *     --class "com.databricks.apps.logs.LogAnalyzerAppMain"
  *     --master local[4]
- *     target/uber-log-analyzer-1.0.jar
+ *     target/uber-log-analyzer-2.0.jar
  *     --logs_directory /tmp/logs
  *     --output_html_file /tmp/log_stats.html
  */
