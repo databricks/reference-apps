@@ -56,8 +56,7 @@ public class LogAnalyzerTotal implements Serializable {
         .transformToPair(Functions::endpointCount)
         .updateStateByKey(Functions.COMPUTE_RUNNING_SUM);
     endpointCountsDStream.foreachRDD(rdd -> {
-      //FIXME: It should calculate Top 10, but now it calculates Bottom 10.
-      currentTopEndpoints = rdd.takeOrdered(10,
+      currentTopEndpoints = rdd.top(10,
           new Functions.ValueComparator<>(Comparator.<Long>naturalOrder()));
     });
   }
