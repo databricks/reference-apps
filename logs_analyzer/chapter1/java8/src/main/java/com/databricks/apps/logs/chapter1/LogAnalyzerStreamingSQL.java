@@ -81,7 +81,7 @@ public class LogAnalyzerStreamingSQL {
 
       // Compute Response Code to Count.
       List<Tuple2<Integer, Long>> responseCodeToCount = sparkSession
-          .sql("SELECT responseCode, COUNT(*) FROM logs GROUP BY responseCode LIMIT 1000")
+          .sql("SELECT responseCode, COUNT(*) FROM logs GROUP BY responseCode LIMIT 100")
           .map(row -> new Tuple2<>(row.getInt(0), row.getLong(1)),
                 Encoders.tuple(Encoders.INT(), Encoders.LONG()))
           .collectAsList();

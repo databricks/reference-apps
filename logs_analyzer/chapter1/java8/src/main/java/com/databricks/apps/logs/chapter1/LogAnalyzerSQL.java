@@ -54,7 +54,7 @@ public class LogAnalyzerSQL {
         contentSizeStats.getLong(3)));
 
     // Compute Response Code to Count.
-    // Note the use of "LIMIT 1000" since the number of responseCodes
+    // Note the use of "LIMIT 100" since the number of responseCodes
     // can potentially be too large to fit in memory.
     List<Tuple2<Integer, Long>> responseCodeToCount = sparkSession
         .sql("SELECT responseCode, COUNT(*) FROM logs GROUP BY responseCode LIMIT 100")
