@@ -31,7 +31,6 @@ public class LogAnalyzerTotal implements Serializable {
             runningMin.set(Math.min(runningMin.get(), stats._3()));
             runningMax.set(Math.max(runningMax.get(), stats._4()));
           }
-          return null;
         }
     );
 
@@ -41,7 +40,6 @@ public class LogAnalyzerTotal implements Serializable {
         .updateStateByKey(Functions.COMPUTE_RUNNING_SUM);
     responseCodeCountDStream.foreachRDD(rdd -> {
       currentResponseCodeCounts = rdd.take(100);
-      return null;
     });
 
     // A DStream of ipAddressCounts.
@@ -51,7 +49,6 @@ public class LogAnalyzerTotal implements Serializable {
         .transform(Functions::filterIPAddress);
     ipAddressesDStream.foreachRDD(rdd -> {
       currentIPAddresses = rdd.take(100);
-      return null;
     });
 
     // A DStream of endpoint to count.
@@ -59,9 +56,9 @@ public class LogAnalyzerTotal implements Serializable {
         .transformToPair(Functions::endpointCount)
         .updateStateByKey(Functions.COMPUTE_RUNNING_SUM);
     endpointCountsDStream.foreachRDD(rdd -> {
+      //FIXME: It should calculate Top 10, but now it calculates Bottom 10.
       currentTopEndpoints = rdd.takeOrdered(10,
           new Functions.ValueComparator<>(Comparator.<Long>naturalOrder()));
-      return null;
     });
   }
 
