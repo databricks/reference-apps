@@ -78,7 +78,7 @@ public class LogAnalyzerAppMain {
         line -> {
             try {
                 return Iterators.singletonIterator(ApacheAccessLog.parseFromLogLine(line));
-            } catch (RuntimeException e) {
+            } catch (IOException e) {
                 return Iterators.emptyIterator();
             }
         }
