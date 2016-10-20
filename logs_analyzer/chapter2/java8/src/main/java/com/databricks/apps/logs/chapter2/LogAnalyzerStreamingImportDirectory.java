@@ -3,10 +3,8 @@ package com.databricks.apps.logs.chapter2;
 import com.databricks.apps.logs.ApacheAccessLog;
 import com.databricks.apps.logs.LogAnalyzerRDD;
 import com.databricks.apps.logs.LogStatistics;
-
-import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.sql.SQLContext;
+import org.apache.spark.sql.SparkSession;
 import org.apache.spark.streaming.Duration;
 import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
@@ -30,11 +28,13 @@ public class LogAnalyzerStreamingImportDirectory {
   private static final Duration WINDOW_LENGTH = new Duration(30 * 1000);
   private static final Duration SLIDE_INTERVAL = new Duration(10 * 1000);
 
-  public static void main(String[] args) {
-    SparkConf conf = new SparkConf().setAppName("Log Analyzer Import Streaming HDFS");
-    JavaSparkContext sc = new JavaSparkContext(conf);
+  public static void main(String[] args) throws InterruptedException {
+    SparkSession sparkSession = SparkSession
+            .builder()
+            .appName("Log Analyzer Import Streaming HDFS")
+            .getOrCreate();
+    JavaSparkContext sc = new JavaSparkContext(sparkSession.sparkContext());
     JavaStreamingContext jssc = new JavaStreamingContext(sc, SLIDE_INTERVAL);
-    SQLContext sqlContext = new SQLContext(sc);
 
     // Specify a directory to monitor for log files.
     if (args.length == 0) {
@@ -52,17 +52,15 @@ public class LogAnalyzerStreamingImportDirectory {
     JavaDStream<ApacheAccessLog> windowDStream = accessLogsDStream.window(
         WINDOW_LENGTH, SLIDE_INTERVAL);
 
-    final LogAnalyzerRDD logAnalyzerRDD = new LogAnalyzerRDD(sqlContext);
+    final LogAnalyzerRDD logAnalyzerRDD = new LogAnalyzerRDD(sparkSession);
     windowDStream.foreachRDD(accessLogs -> {
       if (accessLogs.count() == 0) {
         System.out.println("No access logs in this time interval");
-        return null;
+        return;
       }
 
       LogStatistics logStatistics = logAnalyzerRDD.processRdd(accessLogs);
       logStatistics.printToStandardOut();
-
-      return null;
     });
 
     // Start the streaming server.
