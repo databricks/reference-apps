@@ -38,6 +38,9 @@ public class LogAnalyzerStreamingSQL {
   private static final Duration SLIDE_INTERVAL = new Duration(10 * 1000);
 
   public static void main(String[] args) throws InterruptedException {
+    // Initialize SparkSession instance.
+    // Note: Only SparkSession instance is created,
+    //other flavors of Spark context are obtained from it.
     SparkSession sparkSession = SparkSession
             .builder()
             .appName("Log Analyzer Streaming SQL")

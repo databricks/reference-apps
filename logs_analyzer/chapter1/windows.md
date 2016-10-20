@@ -10,14 +10,18 @@ The windows feature of Spark Streaming makes it very easy to compute
 stats for a window of time, using the `window` function.
 
 The first step is to initiate the SparkSession and context objects - in particular
-a streaming context. Note how only SparkSession is created the streaming context
-is created from it.  Next, the main body should be written.  Finally, the example
+a streaming context. Note how only SparkSession is created and the streaming context
+is obtained from it.  Next, the main body should be written.  Finally, the example
 calls ```start()``` on the streaming context, and ```awaitTermination() ```to keep
 the streaming context running and accepting streaming input.
 
 ```java
 public class LogAnalyzerStreamingSQL {
+
   public static void main(String[] args) throws InterruptedException {
+    // Initialize SparkSession instance.
+    // Note: Only SparkSession instance is created,
+    //other flavors of Spark context are obtained from it.
     SparkSession sparkSession = SparkSession
             .builder()
             .appName("Log Analyzer Streaming SQL")
