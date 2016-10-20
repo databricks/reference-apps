@@ -18,8 +18,8 @@ public class LogAnalyzerRDD {
 
   public LogStatistics processRdd(JavaRDD<ApacheAccessLog> accessLogs) {
     // Create Spark DataFrame from the RDD.
-    Dataset<Row> accessLogsDf =
-            sparkSession.createDataFrame(accessLogs, ApacheAccessLog.class);
+    // Spark SQL can imply a schema for a table if given a Java class with getters and setters.
+    Dataset<Row> accessLogsDf = sparkSession.createDataFrame(accessLogs, ApacheAccessLog.class);
     // Register the DataFrame as a temporary view.
     accessLogsDf.createOrReplaceTempView("logs");
 
