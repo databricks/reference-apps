@@ -2,8 +2,6 @@ package com.databricks.apps.logs.chapter1;
 
 import com.databricks.apps.logs.ApacheAccessLog;
 import java.util.List;
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.Row;
@@ -28,21 +26,24 @@ public class LogAnalyzerSQL {
             .builder()
             .appName("Log Analyzer SQL")
             .getOrCreate();
-    JavaSparkContext sc = new JavaSparkContext(sparkSession.sparkContext());
 
     if (args.length == 0) {
       System.out.println("Must specify an access logs file.");
       System.exit(-1);
     }
     String logFile = args[0];
-    JavaRDD<ApacheAccessLog> accessLogs = sc.textFile(logFile)
-        .map(ApacheAccessLog::parseFromLogLine);
 
-    // Create Spark DataFrame from the RDD.
-    Dataset<Row> accessLogsDf =
-            sparkSession.createDataFrame(accessLogs, ApacheAccessLog.class);
-    // Register the DataFrame as a temporary view.
-    accessLogsDf.createOrReplaceTempView("logs");
+    // Read Dataset of lines from the file.
+    // Note how we convert Dataset of String lines to Dataset of ApacheAccessLog objects
+    // using an Encoder.
+    Dataset<ApacheAccessLog> accessLogs = sparkSession
+            .read()
+            .textFile(logFile)
+            .map(ApacheAccessLog::parseFromLogLine,
+                    Encoders.bean(ApacheAccessLog.class));
+
+    // Register the Dataset as a temporary view.
+    accessLogs.createOrReplaceTempView("logs");
 
     // Calculate statistics based on the content size.
     Row contentSizeStats = sparkSession
@@ -78,6 +79,6 @@ public class LogAnalyzerSQL {
         .collectAsList();
     System.out.println(String.format("Top Endpoints: %s", topEndpoints));
 
-    sc.stop();
+    sparkSession.stop();
   }
 }

@@ -17,9 +17,12 @@ in the previous example can be done using Spark SQL rather than calling
 Spark transformations and actions directly.  We walk through how to do that
 here.
 
-First, we need to create a SparkSession instance. Note how we obtain different
-flavors of Spark context from a SparkSession instance.
-You should not initialize multiple Spark contexts from the SparkConf in one process.
+First, we need to create a SparkSession instance - an entry point for a Spark SQL application.
+Using SparkSession, we read a text file and obtain a Dataset of Strings,
+where every string represents a line from the input file. Finally, we convert the
+Dataset of Strings to Dataset of ApacheAccessLog entries.
+To become familiar with Dataset concept, refer to
+[Datasets and DataFrames](http://spark.apache.org/docs/latest/sql-programming-guide.html#datasets-and-dataframes)
 ```java
 public class LogAnalyzerSQL {
   public static void main(String[] args) {
@@ -35,8 +38,15 @@ public class LogAnalyzerSQL {
       System.exit(-1);
     }
     String logFile = args[0];
-    JavaRDD<ApacheAccessLog> accessLogs = sc.textFile(logFile)
-        .map(ApacheAccessLog::parseFromLogLine);
+
+    // Read Dataset of lines from the file.
+    // Note how we convert Dataset of String lines to Dataset of ApacheAccessLog objects
+    // using an Encoder.
+    Dataset<ApacheAccessLog> accessLogs = sparkSession
+            .read()
+            .textFile(logFile)
+            .map(ApacheAccessLog::parseFromLogLine,
+                    Encoders.bean(ApacheAccessLog.class));
 
     // TODO: Insert code for computing log stats.
 
@@ -45,25 +55,17 @@ public class LogAnalyzerSQL {
 }
 ```
 
-Next, we need a way to register our logs data into a view in order to run SQL
-queries on it. Spark SQL provides DataFrame concept. DataFrame can be created
-from RDD and then registered as a temporary view in SparkSession.
-In this example we create our DataFrame from the RDD using Spark SQL mechanism
-of inferring SQL schema from Java bean class. For other ways to create DataFrames,
-you can refer to
-[Datasets and DataFrames](http://spark.apache.org/docs/latest/sql-programming-guide.html#datasets-and-dataframes)
+Next, we register our logs data into a view in order to run SQL
+queries on it.
 ```java
-// Create Spark DataFrame from the RDD.
-Dataset<Row> accessLogsDf =
-        sparkSession.createDataFrame(accessLogs, ApacheAccessLog.class);
-// Register the DataFrame as a temporary view.
-accessLogsDf.createOrReplaceTempView("logs");
+// Register the Dataset as a temporary view.
+accessLogs.createOrReplaceTempView("logs");
 ```
 
 Now, we are ready to start running some SQL queries on our view.  Here's
 the code to compute the identical statistics in the previous section - it
 should look very familiar for those of you who know SQL. For transformations
-on DataFrames, Spark SQL uses Encoders. The API provides Encoders for all
+on Datasets, Spark SQL uses Encoders. The API provides Encoders for all
 widely used datatypes, as well as utilities to create Encoders for composite
 data types like tuples.
 ```java

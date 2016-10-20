@@ -4,7 +4,6 @@ import com.databricks.apps.logs.ApacheAccessLog;
 import com.databricks.apps.logs.LogAnalyzerRDD;
 import com.databricks.apps.logs.LogStatistics;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.SparkSession;
 
 /**
@@ -24,20 +23,22 @@ public class LogAnalyzerBatchImport {
             .builder()
             .appName("Log Analyzer SQL")
             .getOrCreate();
-    JavaSparkContext sc = new JavaSparkContext(sparkSession.sparkContext());
 
     if (args.length == 0) {
       System.out.println("Must specify an access logs file.");
       System.exit(-1);
     }
     String logFile = args[0];
-    JavaRDD<ApacheAccessLog> accessLogs = sc.textFile(logFile)
+    JavaRDD<ApacheAccessLog> accessLogs = sparkSession
+        .read()
+        .textFile(logFile)
+        .javaRDD()
         .map(ApacheAccessLog::parseFromLogLine);
 
     LogAnalyzerRDD logAnalyzerRDD = new LogAnalyzerRDD(sparkSession);
     LogStatistics logStatistics = logAnalyzerRDD.processRdd(accessLogs);
     logStatistics.printToStandardOut();
 
-    sc.stop();
+    sparkSession.stop();
   }
 }
