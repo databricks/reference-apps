@@ -33,6 +33,9 @@ import org.apache.spark.streaming.api.java.JavaStreamingContext;
  *     target/uber-log-analyzer-2.0.jar
  *     --logs_directory /tmp/logs
  *     --output_html_file /tmp/log_stats.html
+ *     --window_length 30
+ *     --slide_interval 5
+ *     --checkpoint_directory /tmp/log-analyzer-streaming
  */
 public class LogAnalyzerAppMain {
   public static final String WINDOW_LENGTH = "window_length";
