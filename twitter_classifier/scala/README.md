@@ -2,6 +2,9 @@
 The default setting is to use Spark 2.0.1. 
 You should able to run this coding with other versions of Spark 2.+ by changing the Spark version in the build file (assuming no API changes).
 
+## Registering This App with Twitter
+You must [register this app with your Twitter account](https://apps.twitter.com/) so that it can interact with Twitter.
+
 ## Running from SBT
 This is only useful for checking out help messages and testing command line parsing.
 
