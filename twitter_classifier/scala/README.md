@@ -1,9 +1,11 @@
 # Spark-Twitter-Lang-Classifier
 This program was built for Spark 2.0.1.
 
-## Registering This App with Twitter
-You must [register this app with your Twitter account](https://apps.twitter.com/) so that it can interact with Twitter.
-The values provided by this process must be set in environment variables:
+## Registering An App with Twitter
+The 3 programs in this project all share the same Twitter application ID.
+They do not create tweets, so they only need Twitter read privileges.
+[Obtain Twitter application credentials](https://apps.twitter.com/) associated your Twitter account.
+The values provided by this process must be set in bash environment variables, like this:
 
     export SPARK_TWITTER_CONSUMER_KEY=blahblah
     export SPARK_TWITTER_CONSUMER_SECRET=blahblah

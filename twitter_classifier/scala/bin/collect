@@ -16,7 +16,8 @@ Before running this script, set the following environment variables to actual va
   export SPARK_TWITTER_ACCESS_TOKEN=blahblah
   export SPARK_TWITTER_ACCESS_TOKEN_SECRET=blahblah
 
-Values for the above environment variables can be obtained from https://apps.twitter.com
+Values for the above environment variables can be obtained from https://apps.twitter.com.
+This Twitter app only needs read privileges; it does not create tweets.
 "
   exit -1
 }
