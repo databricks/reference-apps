@@ -28,7 +28,7 @@ The generated file will be called something like
 
 ## Running Locally
 
-    # Usage: Collect <outputDirectory> <numTweetsToCollect> <intervalInSeconds> <partitionsEachInterval>
+    # Usage: Collect <tweetDirectory> <numTweetsToCollect> <intervalInSeconds> <partitionsEachInterval>
     spark-shell --master local \
     --class com.databricks.apps.twitterClassifier.Collect\
     --jars target/scala-2.11/spark-twitter-lang-classifier-assembly-2.0.0.jar \
@@ -36,9 +36,9 @@ The generated file will be called something like
     --consumerSecret blahblah \
     --accessToken blahblah \
     --accessTokenSecret blahblah \
-    ~/sparkTwitter/data 1000 0.1 5
+    ~/sparkTwitter/data 1000 1 5
 
-    # Usage: ExamineAndTrain <tweetInput> <outputModelDir> <numClusters> <numIterations>
+    # Usage: ExamineAndTrain <tweetDirectory> <outputModelDir> <numClusters> <numIterations>
     spark-shell --master local \
     --class com.databricks.apps.twitterClassifier.ExamineAndTrain \
     --jars target/scala-2.11/spark-twitter-lang-classifier-assembly-2.0.0.jar \

@@ -2,23 +2,34 @@ package com.databricks.apps.twitterClassifier
 
 import com.google.gson.{Gson, GsonBuilder, JsonParser}
 import org.apache.spark.mllib.clustering.{KMeans, KMeansModel}
-import org.apache.spark.mllib.linalg.Vector
-import org.apache.spark.sql.{DataFrame, Dataset, Encoders, SparkSession}
+import org.apache.spark.sql.{Dataset, SparkSession}
 
 /** Examine collected tweets and train a model based on them */
 object ExamineAndTrain extends App {
-  // Process program arguments and set properties
-  if (args.length < 3) {
-    System.err.println(s"Usage: ${ getClass.getSimpleName.replace("$", "") } <tweetInput> <outputModelDir> <numClusters> <numIterations>")
+  val options = ExamineAndTrainOptions.parse(args)
+  import options._
+
+  if (!tweetDirectory.exists) {
+    System.err.println(s"$tweetDirectory does not exist. Did you run Collect yet?")
+    System.exit(-1)
+  }
+  if (!modelDirectory.exists) {
+    System.err.println(s"${ modelDirectory.getCanonicalPath } does not exist. Did you run Collect yet?")
     System.exit(-2)
   }
-
-  val Array(tweetInput, outputModelDir, Utils.IntParam(numClusters), Utils.IntParam(numIterations)) = args
+  if (numClusters<1) {
+    System.err.println(s"At least 1 clusters must be specified")
+    System.exit(-3)
+  }
+  if (numIterations<1) {
+    System.err.println(s"At least 1 iteration must be specified")
+    System.exit(-4)
+  }
 
   val spark = SparkSession
     .builder()
     .appName(getClass.getSimpleName.replace("$", ""))
-    .config("spark.some.config.option", "some-value")
+    //.config("spark.some.config.option", "some-value")
     .getOrCreate()
 
   // For implicit conversions like converting RDDs to DataFrames
@@ -28,7 +39,7 @@ object ExamineAndTrain extends App {
   val sqlContext = spark.sqlContext
 
   // Pretty print some of the tweets.
-  val tweets = sc.textFile(tweetInput)
+  val tweets = sc.textFile(tweetDirectory.getCanonicalPath)
   println("------------Sample JSON Tweets-------")
   val gson: Gson = new GsonBuilder().setPrettyPrinting().create
   val jsonParser = new JsonParser
@@ -38,9 +49,9 @@ object ExamineAndTrain extends App {
 
   val tweetTable = sqlContext
     .read
-    .json(tweetInput)
+    .json(tweetDirectory.getCanonicalPath)
     .cache()
-  tweetTable.registerTempTable("tweetTable")
+  tweetTable.createOrReplaceTempView("tweetTable")
 
   println("------Tweet table Schema---")
   tweetTable.printSchema()
@@ -72,7 +83,7 @@ object ExamineAndTrain extends App {
 
   vectors.count()  // Calls an action on the RDD to populate the vectors cache.
   val model: KMeansModel = KMeans.train(vectors, numClusters, numIterations)
-  sc.makeRDD(model.clusterCenters, numClusters).saveAsObjectFile(outputModelDir)
+  sc.makeRDD(model.clusterCenters, numClusters).saveAsObjectFile(modelDirectory.getCanonicalPath)
 
   println("----100 example tweets from each cluster")
   0 until numClusters foreach { i =>
