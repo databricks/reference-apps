@@ -32,7 +32,7 @@ object ExamineAndTrainOptions extends CommonOptions {
     import options._
 
     if (!tweetDirectory.exists) {
-      System.err.println(s"$tweetDirectory does not exist. Did you run Collect yet?")
+      System.err.println(s"${ tweetDirectory.getCanonicalPath } does not exist. Did you run Collect yet?")
       System.exit(-1)
     }
     if (!modelDirectory.exists) {

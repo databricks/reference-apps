@@ -29,7 +29,6 @@ object Collect extends App {
     .getOrCreate()
 
   val sc = spark.sparkContext
-  val sqlContext = spark.sqlContext
   val ssc = new StreamingContext(sc, Seconds(intervalInSecs))
 
   val tweetStream: DStream[String] = TwitterUtils.createStream(ssc, Utils.maybeTwitterAuth)
