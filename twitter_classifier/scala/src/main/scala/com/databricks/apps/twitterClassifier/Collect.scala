@@ -25,7 +25,6 @@ object Collect extends App {
   val spark = SparkSession
     .builder
     .appName(getClass.getSimpleName.replace("$", ""))
-    //.config("spark.some.config.option", "some-value")
     .master("local")
     .getOrCreate()
 
@@ -33,16 +32,15 @@ object Collect extends App {
   val sqlContext = spark.sqlContext
   val ssc = new StreamingContext(sc, Seconds(intervalInSecs))
 
-  val gson = new Gson
   val tweetStream: DStream[String] = TwitterUtils.createStream(ssc, Utils.maybeTwitterAuth)
-    .map(gson.toJson(_))
+    .map(new Gson().toJson(_))
 
   var numTweetsCollected = 0L
   tweetStream.foreachRDD { (rdd, time) =>
     val count = rdd.count
     if (count > 0) {
       val outputRDD = rdd.repartition(partitionsEachInterval)
-      outputRDD.saveAsTextFile(s"$tweetDirectory/tweets_${ time.milliseconds}")
+      outputRDD.saveAsTextFile(s"$tweetDirectory/tweets_${ time.milliseconds }")
       numTweetsCollected += count
       if (numTweetsCollected > numTweetsToCollect) System.exit(0)
     }

@@ -25,10 +25,10 @@ object CollectOptions extends CommonOptions {
     new CollectOptions(
       twitterOptions = super.apply(args),
       overWrite = program.overWrite,
-      new File(program.args.head),
-      program.args(1).toInt,
-      program.args(2).toInt,
-      program.args(3).toInt
+      tweetDirectory = new File(program.args.head),
+      numTweetsToCollect = program.args(1).toInt,
+      intervalInSecs = program.args(2).toInt,
+      partitionsEachInterval = program.args(3).toInt
     ){}
   }
 }

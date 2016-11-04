@@ -9,27 +9,9 @@ object ExamineAndTrain extends App {
   val options = ExamineAndTrainOptions.parse(args)
   import options._
 
-  if (!tweetDirectory.exists) {
-    System.err.println(s"$tweetDirectory does not exist. Did you run Collect yet?")
-    System.exit(-1)
-  }
-  if (!modelDirectory.exists) {
-    System.err.println(s"${ modelDirectory.getCanonicalPath } does not exist. Did you run Collect yet?")
-    System.exit(-2)
-  }
-  if (numClusters<1) {
-    System.err.println(s"At least 1 clusters must be specified")
-    System.exit(-3)
-  }
-  if (numIterations<1) {
-    System.err.println(s"At least 1 iteration must be specified")
-    System.exit(-4)
-  }
-
   val spark = SparkSession
     .builder()
     .appName(getClass.getSimpleName.replace("$", ""))
-    //.config("spark.some.config.option", "some-value")
     .getOrCreate()
 
   // For implicit conversions like converting RDDs to DataFrames

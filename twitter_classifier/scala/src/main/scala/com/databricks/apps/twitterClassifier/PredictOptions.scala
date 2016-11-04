@@ -22,8 +22,8 @@ object PredictOptions extends CommonOptions {
     new PredictOptions(
       twitterOptions = super.apply(args),
       overWrite = program.overWrite,
-      new File(program.args.head),
-      program.args(1).toInt
+      modelDirectory = new File(program.args.head),
+      clusterNumber = program.args(1).toInt
     ){}
   }
 }

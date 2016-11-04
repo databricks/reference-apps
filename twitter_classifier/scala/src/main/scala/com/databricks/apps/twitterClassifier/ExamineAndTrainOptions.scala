@@ -21,13 +21,33 @@ object ExamineAndTrainOptions extends CommonOptions {
     val program: Program = _program.parse(args)
     if (program.args.length!=program.epilogue.split(" ").length) program.help
 
-    new ExamineAndTrainOptions(
+    val options = new ExamineAndTrainOptions(
       twitterOptions = super.apply(args),
       overWrite = program.overWrite,
-      new File(program.args.head),
-      new File(program.args(1)),
-      program.args(2).toInt,
-      program.args(3).toInt
+      tweetDirectory = new File(program.args.head),
+      modelDirectory = new File(program.args(1)),
+      numClusters = program.args(2).toInt,
+      numIterations = program.args(3).toInt
     ){}
+    import options._
+
+    if (!tweetDirectory.exists) {
+      System.err.println(s"$tweetDirectory does not exist. Did you run Collect yet?")
+      System.exit(-1)
+    }
+    if (!modelDirectory.exists) {
+      System.err.println(s"${ modelDirectory.getCanonicalPath } does not exist. Did you run Collect yet?")
+      System.exit(-2)
+    }
+    if (numClusters<1) {
+      System.err.println(s"At least 1 clusters must be specified")
+      System.exit(-3)
+    }
+    if (numIterations<1) {
+      System.err.println(s"At least 1 iteration must be specified")
+      System.exit(-4)
+    }
+
+    options
   }
 }
