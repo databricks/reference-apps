@@ -1,18 +1,24 @@
 # Spark-Twitter-Lang-Classifier
-The default setting is to use Spark 2.0.1. 
-You should able to run this coding with other versions of Spark 2.+ by changing the Spark version in the build file (assuming no API changes).
+This program was built for Spark 2.0.1.
 
 ## Registering This App with Twitter
 You must [register this app with your Twitter account](https://apps.twitter.com/) so that it can interact with Twitter.
+The values provided by this process must be set in environment variables:
+
+    export SPARK_TWITTER_CONSUMER_KEY=blahblah
+    export SPARK_TWITTER_CONSUMER_SECRET=blahblah
+    export SPARK_TWITTER_ACCESS_TOKEN=blahblah
+    export SPARK_TWITTER_ACCESS_TOKEN_SECRET=blahblah
 
 ## Running from SBT
 This is only useful for checking out help messages and testing command line parsing.
 
     $ sbt "runMain com.databricks.apps.twitterClassifier.Collect \
-     --consumerKey blahblah \
-     --consumerSecret blahblah \
-     --accessToken blahblah \
-     --accessTokenSecret blahblah \
+     --consumerKey $SPARK_TWITTER_CONSUMER_KEY \
+     --consumerSecret $SPARK_TWITTER_CONSUMER_SECRET \
+     --accessToken $SPARK_TWITTER_ACCESS_TOKEN \
+     --accessTokenSecret $SPARK_TWITTER_ACCESS_TOKEN_SECRET \
+     --overWrite \
      ~/sparkTwitter/data 1000 0.1 5"
     
 ## Assembling the Twitter Classifier Assembly
@@ -28,24 +34,16 @@ The generated file will be called something like
 
 ## Running Locally
 
-    # Usage: Collect <tweetDirectory> <numTweetsToCollect> <intervalInSeconds> <partitionsEachInterval>
-    spark-shell --master local \
-    --class com.databricks.apps.twitterClassifier.Collect\
-    --jars target/scala-2.11/spark-twitter-lang-classifier-assembly-2.0.0.jar \
-    --consumerKey blahblah \
-    --consumerSecret blahblah \
-    --accessToken blahblah \
-    --accessTokenSecret blahblah \
-    ~/sparkTwitter/data 1000 1 5
+See the `bin/collect` script. Still need to write similar scripts for `ExamineAndTrain` and `Predict`.
 
     # Usage: ExamineAndTrain <tweetDirectory> <outputModelDir> <numClusters> <numIterations>
-    spark-shell --master local \
+    spark-shell --master local[*] \
     --class com.databricks.apps.twitterClassifier.ExamineAndTrain \
     --jars target/scala-2.11/spark-twitter-lang-classifier-assembly-2.0.0.jar \
     ~/sparkTwitter/data ~/sparkTwitter/model 5 10
 
     # Usage: Predict <modelDirectory> <clusterNumber>
-    spark-shell --master local \
+    spark-shell --master local[*] \
     --class com.databricks.apps.twitterClassifier.Predict \
     --jars target/scala-2.11/spark-twitter-lang-classifier-assembly-2.0.0.jar \
     ~/sparkTwitter/model 5
