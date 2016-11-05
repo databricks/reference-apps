@@ -35,10 +35,8 @@ The generated file will be called something like
 `target/scala-2.11/spark-twitter-lang-classifier-assembly-2.0.0.jar`
 
 ## Running Locally
-
-See the `collect` and `train` scripts in the `bin/` directory. Still need to write a similar script for `Predict`.
-
-The scripts create `~/sparkTwitter/`. 
- * `Collect` stores tweets in the `data/` subdirectory. 
- * `Train` stores a model based on the tweets in the `model/` subdirectory. Any previous model is overwritten.
- * `Predict` not sure what this does.`
+ * `bin/sbt` fetches and runs SBT so you can compile and assemble the programs.
+ * `bin/options` contains settings for the following scripts.
+   * `bin/collect` stores tweets in the `~/sparkTwitter/data/` subdirectory.
+   * `bin/train` stores a model based on the tweets in the `~/sparkTwitter/model/` subdirectory. Any previous model is overwritten.
+   * `bin/predict` not sure what this does.`
