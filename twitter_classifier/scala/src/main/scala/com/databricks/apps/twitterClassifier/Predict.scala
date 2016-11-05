@@ -15,8 +15,11 @@ object Predict extends App {
   val conf: SparkConf = new SparkConf().setAppName(getClass.getSimpleName.replace("$", ""))
   val ssc = new StreamingContext(conf, Seconds(5))
 
+  // Suppress "WARN BlockManager: Block input-0-1478266015800 replicated to only 0 peer(s) instead of 1 peers" messages
+  ssc.sparkContext.setLogLevel("ERROR")
+
   println("Initializing the the KMeans model...")
-  val model: KMeansModel = new KMeansModel(ssc.sparkContext.objectFile[Vector](modelDirectory.toString).collect)
+  val model: KMeansModel = new KMeansModel(ssc.sparkContext.objectFile[Vector](modelDirectory.getCanonicalPath).collect)
 
   println("Materializing Twitter stream...")
   TwitterUtils.createStream(ssc, Utils.maybeTwitterAuth)

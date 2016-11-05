@@ -6,20 +6,20 @@ import com.github.acrisci.commander.Program
 abstract sealed case class CollectOptions(
   twitterOptions: TwitterOptions,
   overWrite: Boolean = false,
-  tweetDirectory: File = new File("~/twitterClassifier/tweets/"),
+  tweetDirectory: File = new File("~/sparkTwitter/tweets/"),
   numTweetsToCollect: Int = 100,
   intervalInSecs: Int = 1,
   partitionsEachInterval: Int = 1
 )
 
-object CollectOptions extends CommonOptions {
+object CollectOptions extends TwitterOptionParser {
   override val _program = super._program
-    .option(flags="-x, --overWrite", description="Overwrite data files on each run [false]")
-    .epilogue("<tweetDirectory> <numTweetsToCollect> <intervalInSeconds> <partitionsEachInterval>")
+    .option(flags="-w, --overWrite", description="Overwrite all data files from a previous run [false]")
+    .usage("Collect [options] <tweetDirectory> <numTweetsToCollect> <intervalInSeconds> <partitionsEachInterval>")
 
   def parse(args: Array[String]): CollectOptions = {
     val program: Program = _program.parse(args)
-    if (program.args.length!=program.epilogue.split(" ").length) program.help
+    if (program.args.length!=program.usage.split(" ").length-2) program.help
 
     val x: Boolean = program.overWrite
     new CollectOptions(

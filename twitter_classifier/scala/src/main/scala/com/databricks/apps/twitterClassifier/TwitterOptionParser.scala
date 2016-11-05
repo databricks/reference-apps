@@ -9,7 +9,7 @@ case class TwitterOptions(
   accessTokenSecret: String
 )
 
-trait CommonOptions {
+trait TwitterOptionParser {
   def _program = new Program()
     .version("2.0.0")
     .option(flags="-c, --consumerKey [type]",       description="Twitter OAuth Consumer Key",        required=true)

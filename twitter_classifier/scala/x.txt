@@ -1,0 +1,27 @@
+Initializing Streaming Spark Context...
+16/11/05 15:44:05 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Initializing the the KMeans model...
+Materializing Twitter stream...
+Initialization complete.
+MapPartitionsRDD[5] at filter at Predict.scala:27MapPartitionsRDD[8] at filter at Predict.scala:27MapPartitionsRDD[11] at filter at Predict.scala:27MapPartitionsRDD[14] at filter at Predict.scala:27MapPartitionsRDD[17] at filter at Predict.scala:27MapPartitionsRDD[20] at filter at Predict.scala:27MapPartitionsRDD[23] at filter at Predict.scala:27MapPartitionsRDD[26] at filter at Predict.scala:27MapPartitionsRDD[29] at filter at Predict.scala:27MapPartitionsRDD[32] at filter at Predict.scala:27MapPartitionsRDD[35] at filter at Predict.scala:27MapPartitionsRDD[38] at filter at Predict.scala:27MapPartitionsRDD[41] at filter at Predict.scala:27MapPartitionsRDD[44] at filter at Predict.scala:2716/11/05 15:45:15 ERROR ReceiverTracker: Deregistered receiver for stream 0: Restarting receiver with delay 2000ms: Error receiving tweets - java.util.concurrent.RejectedExecutionException: Task twitter4j.StatusStreamBase$1@3a4236ac rejected from java.util.concurrent.ThreadPoolExecutor@2234b2de[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 4875]
+	at java.util.concurrent.ThreadPoolExecutor$AbortPolicy.rejectedExecution(ThreadPoolExecutor.java:2047)
+	at java.util.concurrent.ThreadPoolExecutor.reject(ThreadPoolExecutor.java:823)
+	at java.util.concurrent.ThreadPoolExecutor.execute(ThreadPoolExecutor.java:1369)
+	at twitter4j.DispatcherImpl.invokeLater(DispatcherImpl.java:58)
+	at twitter4j.StatusStreamBase.handleNextElement(StatusStreamBase.java:80)
+	at twitter4j.StatusStreamImpl.next(StatusStreamImpl.java:56)
+	at twitter4j.TwitterStreamImpl$TwitterStreamConsumer.run(TwitterStreamImpl.java:568)
+
+Exception in thread "receiver-supervisor-future-0" java.lang.Error: java.lang.InterruptedException: sleep interrupted
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1148)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
+	at java.lang.Thread.run(Thread.java:745)
+Caused by: java.lang.InterruptedException: sleep interrupted
+	at java.lang.Thread.sleep(Native Method)
+	at org.apache.spark.streaming.receiver.ReceiverSupervisor$$anonfun$restartReceiver$1.apply$mcV$sp(ReceiverSupervisor.scala:196)
+	at org.apache.spark.streaming.receiver.ReceiverSupervisor$$anonfun$restartReceiver$1.apply(ReceiverSupervisor.scala:189)
+	at org.apache.spark.streaming.receiver.ReceiverSupervisor$$anonfun$restartReceiver$1.apply(ReceiverSupervisor.scala:189)
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24)
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
+	... 2 more

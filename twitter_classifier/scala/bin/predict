@@ -7,8 +7,8 @@ source bin/options
 
 function help {
   echo "
-Runs Collect from a local Spark instance.
-Stores $NUM_TWEETS tweets into $TWEET_DIR every $INTERVAL seconds in $PARTITIONS partitions.
+Runs Predict from a local Spark instance.
+Uses the model created by ExamineAndTrain in $MODEL_DIR using $NUM_CLUSTERS clusters.
 
 Before running this script, set the following environment variables to actual values:
   export SPARK_TWITTER_CONSUMER_KEY=blahblah
@@ -29,11 +29,11 @@ if [ -h == "$1" ] || \
    [ -z "$SPARK_TWITTER_ACCESS_TOKEN_SECRET" ]; then help; fi
 
 spark-shell --master local[*] \
-  --class com.databricks.apps.twitterClassifier.Collect \
+  --class com.databricks.apps.twitterClassifier.Predict \
   --jars target/scala-2.11/spark-twitter-lang-classifier-assembly-2.0.0.jar \
   --consumerKey $SPARK_TWITTER_CONSUMER_KEY \
   --consumerSecret $SPARK_TWITTER_CONSUMER_SECRET \
   --accessToken $SPARK_TWITTER_ACCESS_TOKEN \
   --accessTokenSecret $SPARK_TWITTER_ACCESS_TOKEN_SECRET \
   --overWrite \
-  $TWEET_DIR $NUM_TWEETS $INTERVAL $PARTITIONS
+  $MODEL_DIR $NUM_CLUSTERS
