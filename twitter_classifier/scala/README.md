@@ -2,7 +2,7 @@
 This program was built for Spark 2.0.1.
 
 ## Registering An App with Twitter
-The 3 programs in this project all share the same Twitter application ID.
+The programs in this project which interact with Twitter all share the same Twitter application ID.
 They do not create tweets, so they only need Twitter read privileges.
 [Obtain Twitter application credentials](https://apps.twitter.com/) associated your Twitter account.
 The values provided by this process must be set in bash environment variables, like this:
