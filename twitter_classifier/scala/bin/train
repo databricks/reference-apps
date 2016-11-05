@@ -2,14 +2,14 @@
 
 BASE_DIR=~/sparkTwitter
 TWEET_DIR=$BASE_DIR/data
-NUM_TWEETS=1000
-INTERVAL=1
-PARTITIONS=1
+MODEL_DIR=$BASE_DIR/model
+NUM_CLUSTERS=1
+NUM_ITERATIONS=10
 
 function help {
   echo "
-Runs Collect from a local Spark instance.
-Stores $NUM_TWEETS tweets into $TWEET_DIR every $INTERVAL seconds in $PARTITIONS partitions.
+Runs ExamineAndTrain from a local Spark instance.
+Stores the model into $MODEL_DIR using $NUM_CLUSTERS clusters and $NUM_ITERATIONS iterations.
 
 Before running this script, set the following environment variables to actual values:
   export SPARK_TWITTER_CONSUMER_KEY=blahblah
@@ -29,13 +29,13 @@ if [ -h == "$1" ] || \
    [ -z "$SPARK_TWITTER_ACCESS_TOKEN" ] || \
    [ -z "$SPARK_TWITTER_ACCESS_TOKEN_SECRET" ]; then help; fi
 
-# command-line arguments: <tweetDirectory> <numTweetsToCollect> <intervalInSeconds> <partitionsEachInterval>
+# command-line arguments: <tweetDirectory> <modelDirectory> <numClusters> <numIterations>
 spark-shell --master local[*] \
-  --class com.databricks.apps.twitterClassifier.Collect \
+  --class com.databricks.apps.twitterClassifier.ExamineAndTrain \
   --jars target/scala-2.11/spark-twitter-lang-classifier-assembly-2.0.0.jar \
   --consumerKey $SPARK_TWITTER_CONSUMER_KEY \
   --consumerSecret $SPARK_TWITTER_CONSUMER_SECRET \
   --accessToken $SPARK_TWITTER_ACCESS_TOKEN \
   --accessTokenSecret $SPARK_TWITTER_ACCESS_TOKEN_SECRET \
   --overWrite \
-  $TWEET_DIR $NUM_TWEETS $INTERVAL $PARTITIONS
+  $TWEET_DIR $MODEL_DIR $NUM_CLUSTERS $NUM_ITERATIONS

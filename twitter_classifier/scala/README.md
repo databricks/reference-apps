@@ -36,16 +36,14 @@ The generated file will be called something like
 
 ## Running Locally
 
-See the `bin/collect` script. Still need to write similar scripts for `ExamineAndTrain` and `Predict`.
-
-    # Usage: ExamineAndTrain <tweetDirectory> <outputModelDir> <numClusters> <numIterations>
-    spark-shell --master local[*] \
-    --class com.databricks.apps.twitterClassifier.ExamineAndTrain \
-    --jars target/scala-2.11/spark-twitter-lang-classifier-assembly-2.0.0.jar \
-    ~/sparkTwitter/data ~/sparkTwitter/model 5 10
+See the `collect` and `train` scripts in the `bin/` directory. Still need to write a similar script for `Predict`.
 
     # Usage: Predict <modelDirectory> <clusterNumber>
     spark-shell --master local[*] \
     --class com.databricks.apps.twitterClassifier.Predict \
     --jars target/scala-2.11/spark-twitter-lang-classifier-assembly-2.0.0.jar \
     ~/sparkTwitter/model 5
+
+The scripts create `~/sparkTwitter/`. 
+ * `Collect` stores tweets in the `data/` subdirectory. 
+ * `Train` stores a model based on the tweets in the `model/` subdirectory. Any previous model is overwritten.

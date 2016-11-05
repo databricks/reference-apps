@@ -41,8 +41,7 @@ object Collect extends App {
   tweetStream.foreachRDD { (rdd, time) =>
     val count = rdd.count
     if (count > 0) {
-      val outputRDD = rdd.repartition(partitionsEachInterval)
-      outputRDD.saveAsTextFile(s"$tweetDirectory/tweets_${ time.milliseconds }")
+      rdd.saveAsTextFile(tweetDirectory.getAbsolutePath)
       numTweetsCollected += count
       if (numTweetsCollected > numTweetsToCollect) System.exit(0)
     }

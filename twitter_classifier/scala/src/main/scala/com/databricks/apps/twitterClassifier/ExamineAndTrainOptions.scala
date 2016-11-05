@@ -35,9 +35,10 @@ object ExamineAndTrainOptions extends CommonOptions {
       System.err.println(s"${ tweetDirectory.getCanonicalPath } does not exist. Did you run Collect yet?")
       System.exit(-1)
     }
-    if (!modelDirectory.exists) {
-      System.err.println(s"${ modelDirectory.getCanonicalPath } does not exist. Did you run Collect yet?")
-      System.exit(-2)
+    if (modelDirectory.exists) {
+      import org.apache.commons.io.FileUtils
+      println("Replacing pre-existing model")
+      FileUtils.deleteDirectory(modelDirectory)
     }
     if (numClusters<1) {
       System.err.println(s"At least 1 clusters must be specified")

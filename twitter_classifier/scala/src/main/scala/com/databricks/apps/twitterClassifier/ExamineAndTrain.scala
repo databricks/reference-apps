@@ -2,6 +2,7 @@ package com.databricks.apps.twitterClassifier
 
 import com.google.gson.{Gson, GsonBuilder, JsonParser}
 import org.apache.spark.mllib.clustering.{KMeans, KMeansModel}
+import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{Dataset, SparkSession}
 
 /** Examine collected tweets and train a model based on them */
@@ -21,7 +22,7 @@ object ExamineAndTrain extends App {
   val sqlContext = spark.sqlContext
 
   // Pretty print some of the tweets.
-  val tweets = sc.textFile(tweetDirectory.getCanonicalPath)
+  val tweets: RDD[String] = sc.textFile(tweetDirectory.getCanonicalPath)
   println("------------Sample JSON Tweets-------")
   val gson: Gson = new GsonBuilder().setPrettyPrinting().create
   val jsonParser = new JsonParser
@@ -65,7 +66,8 @@ object ExamineAndTrain extends App {
 
   vectors.count()  // Calls an action on the RDD to populate the vectors cache.
   val model: KMeansModel = KMeans.train(vectors, numClusters, numIterations)
-  sc.makeRDD(model.clusterCenters, numClusters).saveAsObjectFile(modelDirectory.getCanonicalPath)
+  sc.makeRDD(model.clusterCenters, numClusters)
+    .saveAsObjectFile(modelDirectory.getCanonicalPath)
 
   println("----100 example tweets from each cluster")
   0 until numClusters foreach { i =>
