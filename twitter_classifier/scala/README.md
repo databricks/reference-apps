@@ -38,5 +38,5 @@ The generated file will be called something like
  * `bin/sbt` fetches and runs SBT so you can compile and assemble the programs.
  * `bin/options` contains settings for the following scripts.
    * `bin/collect` stores tweets in the `~/sparkTwitter/data/` subdirectory.
-   * `bin/train` stores a model based on the tweets in the `~/sparkTwitter/model/` subdirectory. Any previous model is overwritten.
-   * `bin/predict` not sure what this does.`
+   * `bin/train` reads the tweets in the `~/sparkTwitter/data/` subdirectory, then stores a model into the `~/sparkTwitter/model/` subdirectory.
+   * `bin/predict` uses the model somehow; not sure what this does.`
