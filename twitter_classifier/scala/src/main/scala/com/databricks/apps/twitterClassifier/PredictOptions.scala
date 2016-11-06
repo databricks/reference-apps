@@ -6,14 +6,17 @@ import com.github.acrisci.commander.Program
 abstract sealed case class PredictOptions(
   twitterOptions: TwitterOptions,
   overWrite: Boolean = false,
-  modelDirectory: File = new File("~/sparkTwitter/model/"),
+  verbose: Boolean = false,
+  modelDirectory: File = new java.io.File(System.getProperty("user.home"), "/sparkTwitter/model/"),
+  intervalInSecs: Int = 5,
   clusterNumber: Int = 10
-)
+) extends Serializable
 
 object PredictOptions extends TwitterOptionParser {
   override val _program: Program = super._program
-    .option(flags="-x, --overWrite", description="Overwrite all data files from a previous run [false]", default=false)
-    .usage("Predict [options] <modelDirectory> <clusterNumber>")
+    .option(flags="-v, --verbose",   description="Generate output to show progress")
+    .option(flags="-x, --overWrite", description="Overwrite all data files from a previous run")
+    .usage("Predict [options] <modelDirectory> <intervalInSeconds> <clusterNumber>")
 
   def parse(args: Array[String]): PredictOptions = {
     val program: Program = _program.parse(args)
@@ -22,8 +25,10 @@ object PredictOptions extends TwitterOptionParser {
     new PredictOptions(
       twitterOptions = super.apply(args),
       overWrite = program.overWrite,
-      modelDirectory = new File(program.args.head),
-      clusterNumber = program.args(1).toInt
+      verbose = program.verbose,
+      modelDirectory = new File(program.args.head.replaceAll("^~", System.getProperty("user.home"))),
+      intervalInSecs = program.args(1).toInt,
+      clusterNumber = program.args(2).toInt
     ){}
   }
 }

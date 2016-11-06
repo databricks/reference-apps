@@ -8,72 +8,91 @@ import org.apache.spark.sql.{Dataset, SparkSession}
 /** Examine collected tweets and train a model based on them */
 object ExamineAndTrain extends App {
   val options = ExamineAndTrainOptions.parse(args)
-  import options._
 
-  val spark = SparkSession
+  implicit val spark = SparkSession
     .builder()
     .appName(getClass.getSimpleName.replace("$", ""))
     .getOrCreate()
 
-  // For implicit conversions like converting RDDs to DataFrames
-  import spark.implicits._
+  new ExamineAndTrain(options)
+    .examineAndTrain()
+}
 
-  val sc = spark.sparkContext
-  val sqlContext = spark.sqlContext
+class ExamineAndTrain(options: ExamineAndTrainOptions)
+                     (implicit spark: SparkSession) {
+  import options._
 
-  // Pretty print some of the tweets.
-  val tweets: RDD[String] = sc.textFile(tweetDirectory.getCanonicalPath)
-  println("------------Sample JSON Tweets-------")
-  val gson: Gson = new GsonBuilder().setPrettyPrinting().create
-  val jsonParser = new JsonParser
-  tweets.take(5) foreach { tweet =>
-    println(gson.toJson(jsonParser.parse(tweet)))
-  }
+  def examineAndTrain(): Unit = {
+    // For implicit conversions like converting RDDs to DataFrames
+    import spark.implicits._
 
-  val tweetTable = sqlContext
-    .read
-    .json(tweetDirectory.getCanonicalPath)
-    .cache()
-  tweetTable.createOrReplaceTempView("tweetTable")
+    val sc = spark.sparkContext
+    val sqlContext = spark.sqlContext
 
-  println("------Tweet table Schema---")
-  tweetTable.printSchema()
+    if (verbose) { // Pretty-print some of the tweets
+      val tweets: RDD[String] = sc.textFile(tweetDirectory.getCanonicalPath)
+      println("------------Sample JSON Tweets-------")
+      val gson: Gson = new GsonBuilder().setPrettyPrinting().create
+      val jsonParser = new JsonParser
+      tweets.take(5) foreach { tweet =>
+        println(gson.toJson(jsonParser.parse(tweet)))
+      }
+    }
 
-  println("----Sample Tweet Text-----")
-  sqlContext
-    .sql("SELECT text FROM tweetTable LIMIT 10")
-    .collect
-    .foreach(println)
+    val tweetTable = sqlContext
+      .read
+      .json(tweetDirectory.getCanonicalPath)
+      .cache()
+    tweetTable.createOrReplaceTempView("tweetTable")
 
-  println("------Sample Lang, Name, text---")
-  sqlContext.sql("SELECT user.lang, user.name, text FROM tweetTable LIMIT 1000").collect.foreach(println)
+    if (verbose) {
+      println("------Tweet table Schema---")
+      tweetTable.printSchema()
+      println("----Sample Tweet Text-----")
+    }
 
-  println("------Total count by languages Lang, count(*)---")
-  sqlContext
-    .sql("SELECT user.lang, COUNT(*) as cnt FROM tweetTable GROUP BY user.lang ORDER BY cnt DESC LIMIT 25")
-    .collect
-    .foreach(println)
+    sqlContext
+      .sql("SELECT text FROM tweetTable LIMIT 10")
+      .collect
+      .foreach(println)
 
-  println("--- Training the model and persist it")
-  val texts: Dataset[String] = sqlContext
-    .sql("SELECT text from tweetTable")
-    .map(_.toString)
+    if (verbose) {
+      println("------Sample Lang, Name, text---")
+      sqlContext
+        .sql("SELECT user.lang, user.name, text FROM tweetTable LIMIT 1000")
+        .collect
+        .foreach(println)
 
-  // Cache the vectors RDD since it will be used for all the KMeans iterations.
-  val vectors = texts.rdd
-    .map(Utils.featurize)
-    .cache()
+      println("------Total count by languages Lang, count(*)---")
+      sqlContext
+        .sql("SELECT user.lang, COUNT(*) as cnt FROM tweetTable GROUP BY user.lang ORDER BY cnt DESC LIMIT 25")
+        .collect
+        .foreach(println)
 
-  vectors.count()  // Calls an action on the RDD to populate the vectors cache.
-  val model: KMeansModel = KMeans.train(vectors, numClusters, numIterations)
-  sc.makeRDD(model.clusterCenters, numClusters)
-    .saveAsObjectFile(modelDirectory.getCanonicalPath)
+      println("--- Training the model and persist it")
+    }
+    val texts: Dataset[String] = sqlContext
+      .sql("SELECT text from tweetTable")
+      .map(_.toString)
 
-  println("----100 example tweets from each cluster")
-  0 until numClusters foreach { i =>
-    println(s"\nCLUSTER $i:")
-    texts.take(100) foreach { t =>
-      if (model.predict(Utils.featurize(t)) == i) println(t)
+    // Cache the vectors RDD since it will be used for all the KMeans iterations.
+    val vectors = texts.rdd
+      .map(Utils.featurize)
+      .cache()
+
+    vectors.count()  // Calls an action on the RDD to populate the vectors cache.
+    val model: KMeansModel = KMeans.train(vectors, numClusters, numIterations)
+    sc.makeRDD(model.clusterCenters, numClusters)
+      .saveAsObjectFile(modelDirectory.getCanonicalPath)
+
+    if (verbose) {
+      println("----100 example tweets from each cluster")
+      0 until numClusters foreach { i =>
+        println(s"\nCLUSTER $i:")
+        texts.take(100) foreach { t =>
+          if (model.predict(Utils.featurize(t)) == i) println(t)
+        }
+      }
     }
   }
 }

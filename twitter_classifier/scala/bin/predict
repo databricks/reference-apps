@@ -36,4 +36,4 @@ spark-shell --master local[*] \
   --accessToken $SPARK_TWITTER_ACCESS_TOKEN \
   --accessTokenSecret $SPARK_TWITTER_ACCESS_TOKEN_SECRET \
   --overWrite \
-  $MODEL_DIR $NUM_CLUSTERS
+  $MODEL_DIR $INTERVAL $NUM_CLUSTERS

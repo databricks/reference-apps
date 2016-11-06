@@ -5,8 +5,9 @@ import com.github.acrisci.commander.Program
 
 abstract sealed case class ExamineAndTrainOptions(
   overWrite: Boolean = false,
-  tweetDirectory: File = new File("~/sparkTwitter/tweets/"),
-  modelDirectory: File = new File("~/sparkTwitter/modelDirectory/"),
+  verbose: Boolean = false,
+  tweetDirectory: File = new File(System.getProperty("user.home"), "/sparkTwitter/tweets/"),
+  modelDirectory: File = new File(System.getProperty("user.home"), "/sparkTwitter/modelDirectory/"),
   numClusters: Int = 10,
   numIterations: Int = 100
 )
@@ -14,7 +15,8 @@ abstract sealed case class ExamineAndTrainOptions(
 object ExamineAndTrainOptions {
   val _program = new Program()
     .version("2.0.0")
-    .option(flags="-w, --overWrite", description="Overwrite model from a previous run [false]", default=false)
+    .option(flags="-v, --verbose", description="Generate output to show progress")
+    .option(flags="-w, --overWrite", description="Overwrite model from a previous run")
     .usage("ExamineAndTrain [Options] <tweetDirectory> <modelDirectory> <numClusters> <numIterations>")
 
   def parse(args: Array[String]): ExamineAndTrainOptions = {
@@ -23,8 +25,9 @@ object ExamineAndTrainOptions {
 
     val options = new ExamineAndTrainOptions(
       overWrite = program.overWrite,
-      tweetDirectory = new File(program.args.head),
-      modelDirectory = new File(program.args(1)),
+      verbose = program.verbose,
+      tweetDirectory = new File(program.args.head.replaceAll("^~", System.getProperty("user.home"))),
+      modelDirectory = new File(program.args(1).replaceAll("^~", System.getProperty("user.home"))),
       numClusters = program.args(2).toInt,
       numIterations = program.args(3).toInt
     ){}

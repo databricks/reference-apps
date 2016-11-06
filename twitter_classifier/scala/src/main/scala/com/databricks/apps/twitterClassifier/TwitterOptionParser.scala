@@ -7,7 +7,7 @@ case class TwitterOptions(
   consumerSecret: String,
   accessToken: String,
   accessTokenSecret: String
-)
+) extends Serializable
 
 trait TwitterOptionParser {
   def _program = new Program()

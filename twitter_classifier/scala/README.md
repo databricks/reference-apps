@@ -39,4 +39,4 @@ The generated file will be called something like
  * `bin/options` contains settings for the following scripts.
    * `bin/collect` stores tweets in the `~/sparkTwitter/data/` subdirectory.
    * `bin/train` reads the tweets in the `~/sparkTwitter/data/` subdirectory, then stores a model into the `~/sparkTwitter/model/` subdirectory.
-   * `bin/predict` uses the model somehow; not sure what this does.`
+   * `bin/predict` uses the model to filter the stream and display similar tweets; not sure exactly what this does.

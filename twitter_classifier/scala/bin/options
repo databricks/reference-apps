@@ -2,7 +2,7 @@
 
 export BASE_DIR=~/sparkTwitter
 
-export INTERVAL=1
+export INTERVAL=5
 export MODEL_DIR=$BASE_DIR/model
 export NUM_CLUSTERS=1
 export NUM_ITERATIONS=10
