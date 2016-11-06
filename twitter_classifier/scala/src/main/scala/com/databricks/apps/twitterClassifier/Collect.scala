@@ -23,16 +23,17 @@ object Collect extends App {
 }
 
 class Collect(options: CollectOptions) extends StreamingSessionLike {
-  val tweetStream: DStream[String] = TwitterUtils.createStream(ssc, Utils.maybeTwitterAuth)
+  val intervalInSecs = options.intervalInSecs
+  val tweetStream: DStream[String] = TwitterUtils.createStream(ssc, maybeTwitterAuth)
     .map(new Gson().toJson(_))
 
   var numTweetsCollected = 0L
   tweetStream.foreachRDD { (rdd, time) =>
     val count = rdd.count
     if (count > 0) {
-      rdd.saveAsTextFile(tweetDirectory.getAbsolutePath)
+      rdd.saveAsTextFile(options.tweetDirectory.getAbsolutePath)
       numTweetsCollected += count
-      if (numTweetsCollected > numTweetsToCollect) System.exit(0)
+      if (numTweetsCollected > options.numTweetsToCollect) System.exit(0)
     }
   }
 

@@ -68,7 +68,7 @@ class ExamineAndTrain(options: ExamineAndTrainOptions) extends SparkSessionLike 
 
     // Cache the vectors RDD since it will be used for all the KMeans iterations.
     val vectors = texts.rdd
-      .map(Utils.featurize)
+      .map(featurize)
       .cache()
 
     vectors.count()  // Calls an action on the RDD to populate the vectors cache.
@@ -81,7 +81,7 @@ class ExamineAndTrain(options: ExamineAndTrainOptions) extends SparkSessionLike 
       0 until numClusters foreach { i =>
         println(s"\nCLUSTER $i:")
         texts.take(100) foreach { t =>
-          if (model.predict(Utils.featurize(t)) == i) println(t)
+          if (model.predict(featurize(t)) == i) println(t)
         }
       }
     }

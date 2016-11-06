@@ -1,26 +1,46 @@
-package com.databricks.apps.twitterClassifier
+package com.databricks.apps
 
-import org.apache.spark.SparkContext
-import org.apache.spark.sql.SparkSession
-import org.apache.spark.streaming.{Seconds, StreamingContext}
+package twitterClassifier {
+  import org.apache.spark.SparkContext
+  import org.apache.spark.sql.SparkSession
+  import org.apache.spark.streaming.{Seconds, StreamingContext}
 
-trait SparkSessionLike {
-  println("Initializing Streaming Spark Context...")
-  val spark = SparkSession
-    .builder
-    .appName(getClass.getSimpleName.replace("$", ""))
-    .master("local[*]")
-    .getOrCreate()
+  trait SparkSessionLike {
+    println("Initializing Streaming Spark Context...")
+    val spark = SparkSession
+      .builder
+      .appName(getClass.getSimpleName.replace("$", ""))
+      .master("local[*]")
+      .getOrCreate()
 
-  val sqlContext = spark.sqlContext
+    val sqlContext = spark.sqlContext
 
-  val sc: SparkContext = spark.sparkContext
-  // Suppress "WARN BlockManager: Block input-0-1478266015800 replicated to only 0 peer(s) instead of 1 peers" messages
-  sc.setLogLevel("ERROR")
+    val sc: SparkContext = spark.sparkContext
+    // Suppress "WARN BlockManager: Block input-0-1478266015800 replicated to only 0 peer(s) instead of 1 peers" messages
+    sc.setLogLevel("ERROR")
+  }
+
+  trait StreamingSessionLike extends SparkSessionLike {
+    def intervalInSecs: Int
+
+    val ssc = new StreamingContext(sc, Seconds(intervalInSecs))
+  }
 }
 
-trait StreamingSessionLike extends SparkSessionLike {
-  def intervalInSecs: Int
+package object `twitterClassifier` {
+  import org.apache.spark.mllib.linalg.Vector
+  import org.apache.spark.mllib.feature.HashingTF
+  import twitter4j.auth.OAuthAuthorization
+  import twitter4j.conf.ConfigurationBuilder
 
-  val ssc = new StreamingContext(sc, Seconds(intervalInSecs))
+  val numFeatures = 1000
+  val tf = new HashingTF(numFeatures)
+
+  def maybeTwitterAuth: Some[OAuthAuthorization] = Some(new OAuthAuthorization(new ConfigurationBuilder().build))
+
+  /** Create feature vectors by turning each tweet into bigrams of characters (an n-gram model)
+    * and then hashing those to a length-1000 feature vector that we can pass to MLlib.
+    * This is a common way to decrease the number of features in a model while still getting excellent accuracy
+    * (otherwise every pair of Unicode characters would potentially be a feature). */
+  def featurize(s: String): Vector = tf.transform(s.sliding(2).toSeq)
 }

@@ -19,10 +19,10 @@ class Predict(options: PredictOptions) extends StreamingSessionLike {
     val model: KMeansModel = new KMeansModel(sc.objectFile[Vector](modelDirectory.getCanonicalPath).collect)
 
     println("Materializing Twitter stream...")
-    TwitterUtils.createStream(ssc, Utils.maybeTwitterAuth)
+    TwitterUtils.createStream(ssc, maybeTwitterAuth)
       .map(_.getText)
       .foreachRDD { rdd =>
-        rdd.filter(t => model.predict(Utils.featurize(t)) == clusterNumber)
+        rdd.filter(t => model.predict(featurize(t)) == clusterNumber)
            .foreach(print)  // register DStream as an output stream and materialize it
       }
     println("Initialization complete, starting streaming computation.")

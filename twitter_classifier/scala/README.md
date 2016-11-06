@@ -39,8 +39,8 @@ The generated file will be called something like
  * `bin/options` contains settings for the following scripts.
    * `bin/collect` stores tweets in the `~/sparkTwitter/data/` subdirectory.
    * `bin/train` reads the tweets in the `~/sparkTwitter/data/` subdirectory, then stores a model into the `~/sparkTwitter/model/` subdirectory.
-   * `bin/predict` uses the model to filter the stream. I think maybe it is supposed to display similar tweets. 
-     This script allocates 8G RAM to the Spark app but it runs out of memory.
+   * `bin/predict` uses the model to filter the stream. I think maybe it is supposed to display similar tweets but I don't see any output before it runs out of memory. 
+     This script allocates 8G RAM.
 
 ```
 Exception in thread "RecurringTimer - JobGenerator" java.lang.OutOfMemoryError: GC overhead limit exceeded
