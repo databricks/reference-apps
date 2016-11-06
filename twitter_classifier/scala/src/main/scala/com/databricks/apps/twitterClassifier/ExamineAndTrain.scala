@@ -3,31 +3,22 @@ package com.databricks.apps.twitterClassifier
 import com.google.gson.{Gson, GsonBuilder, JsonParser}
 import org.apache.spark.mllib.clustering.{KMeans, KMeansModel}
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{Dataset, SparkSession}
+import org.apache.spark.sql.Dataset
 
 /** Examine collected tweets and train a model based on them */
 object ExamineAndTrain extends App {
   val options = ExamineAndTrainOptions.parse(args)
 
-  implicit val spark = SparkSession
-    .builder()
-    .appName(getClass.getSimpleName.replace("$", ""))
-    .getOrCreate()
-
   new ExamineAndTrain(options)
     .examineAndTrain()
 }
 
-class ExamineAndTrain(options: ExamineAndTrainOptions)
-                     (implicit spark: SparkSession) {
+class ExamineAndTrain(options: ExamineAndTrainOptions) extends SparkSessionLike {
   import options._
 
   def examineAndTrain(): Unit = {
     // For implicit conversions like converting RDDs to DataFrames
     import spark.implicits._
-
-    val sc = spark.sparkContext
-    val sqlContext = spark.sqlContext
 
     if (verbose) { // Pretty-print some of the tweets
       val tweets: RDD[String] = sc.textFile(tweetDirectory.getCanonicalPath)

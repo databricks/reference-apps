@@ -29,7 +29,7 @@ Upon successfully building the assembly, you should be able to run the various S
 
 To build the assembly, run SBT using the `assembly` target: 
 
-    $ ./sbt/sbt clean assembly
+    $ sbt/sbt clean assembly
 
 The generated file will be called something like
 `target/scala-2.11/spark-twitter-lang-classifier-assembly-2.0.0.jar`
@@ -39,4 +39,31 @@ The generated file will be called something like
  * `bin/options` contains settings for the following scripts.
    * `bin/collect` stores tweets in the `~/sparkTwitter/data/` subdirectory.
    * `bin/train` reads the tweets in the `~/sparkTwitter/data/` subdirectory, then stores a model into the `~/sparkTwitter/model/` subdirectory.
-   * `bin/predict` uses the model to filter the stream and display similar tweets; not sure exactly what this does.
+   * `bin/predict` uses the model to filter the stream. I think maybe it is supposed to display similar tweets. 
+     This script allocates 8G RAM to the Spark app but it runs out of memory.
+
+```
+Exception in thread "RecurringTimer - JobGenerator" java.lang.OutOfMemoryError: GC overhead limit exceeded
+	at org.apache.spark.streaming.scheduler.JobGenerator$$anonfun$1.apply$mcVJ$sp(JobGenerator.scala:61)
+	at org.apache.spark.streaming.util.RecurringTimer.triggerActionForNextInterval(RecurringTimer.scala:94)
+	at org.apache.spark.streaming.util.RecurringTimer.org$apache$spark$streaming$util$RecurringTimer$$loop(RecurringTimer.scala:106)
+	at org.apache.spark.streaming.util.RecurringTimer$$anon$1.run(RecurringTimer.scala:29)
+Exception in thread "Twitter Stream consumer-1[Receiving stream]" java.lang.OutOfMemoryError: GC overhead limit exceeded
+Exception in thread "JobGenerator" java.lang.OutOfMemoryError: GC overhead limit exceeded
+	at scala.collection.TraversableLike$class.flatMap(TraversableLike.scala:241)
+	at scala.collection.AbstractTraversable.flatMap(Traversable.scala:104)
+	at org.apache.spark.streaming.DStreamGraph.generateJobs(DStreamGraph.scala:116)
+	at org.apache.spark.streaming.scheduler.JobGenerator$$anonfun$3.apply(JobGenerator.scala:249)
+	at org.apache.spark.streaming.scheduler.JobGenerator$$anonfun$3.apply(JobGenerator.scala:247)
+	at scala.util.Try$.apply(Try.scala:192)
+	at org.apache.spark.streaming.scheduler.JobGenerator.generateJobs(JobGenerator.scala:247)
+	at org.apache.spark.streaming.scheduler.JobGenerator.org$apache$spark$streaming$scheduler$JobGenerator$$processEvent(JobGenerator.scala:183)
+	at org.apache.spark.streaming.scheduler.JobGenerator$$anon$1.onReceive(JobGenerator.scala:89)
+	at org.apache.spark.streaming.scheduler.JobGenerator$$anon$1.onReceive(JobGenerator.scala:88)
+	at org.apache.spark.util.EventLoop$$anon$1.run(EventLoop.scala:48)
+Exception in thread "Thread-19" java.lang.OutOfMemoryError: GC overhead limit exceeded
+16/11/06 08:49:44 ERROR TaskSchedulerImpl: Lost executor driver on localhost: Executor heartbeat timed out after 136655 ms
+Exception in thread "dispatcher-event-loop-0" java.lang.OutOfMemoryError: GC overhead limit exceeded
+16/11/06 08:50:11 ERROR Utils: uncaught error in thread Spark Context Cleaner, stopping SparkContext
+java.lang.OutOfMemoryError: GC overhead limit exceeded
+```

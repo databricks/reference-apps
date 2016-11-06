@@ -28,7 +28,9 @@ if [ -h == "$1" ] || \
    [ -z "$SPARK_TWITTER_ACCESS_TOKEN" ] || \
    [ -z "$SPARK_TWITTER_ACCESS_TOKEN_SECRET" ]; then help; fi
 
-spark-shell --master local[*] \
+spark-shell \
+  --master local[*] \
+  --conf spark.executor.memory=8g \
   --class com.databricks.apps.twitterClassifier.Predict \
   --jars target/scala-2.11/spark-twitter-lang-classifier-assembly-2.0.0.jar \
   --consumerKey $SPARK_TWITTER_CONSUMER_KEY \
