@@ -3,10 +3,8 @@ package com.databricks.apps
 package twitterClassifier {
   import org.apache.spark.SparkContext
   import org.apache.spark.sql.SparkSession
-  import org.apache.spark.streaming.{Seconds, StreamingContext}
 
-  object SparkSessionThing {
-    println("Initializing Streaming Spark Context...")
+  object SparkSetup {
     val spark = SparkSession
       .builder
       .appName(getClass.getSimpleName.replace("$", ""))

@@ -15,7 +15,7 @@ object ExamineAndTrain extends App {
 
 class ExamineAndTrain(options: ExamineAndTrainOptions) {
   import options._
-  import SparkSessionThing._
+  import SparkSetup._
 
   def examineAndTrain(): Unit = {
     // For implicit conversions like converting RDDs to DataFrames
