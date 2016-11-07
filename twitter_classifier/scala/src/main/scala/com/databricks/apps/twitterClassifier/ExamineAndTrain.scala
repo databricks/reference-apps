@@ -13,8 +13,9 @@ object ExamineAndTrain extends App {
     .examineAndTrain()
 }
 
-class ExamineAndTrain(options: ExamineAndTrainOptions) extends SparkSessionLike {
+class ExamineAndTrain(options: ExamineAndTrainOptions) {
   import options._
+  import SparkSessionThing._
 
   def examineAndTrain(): Unit = {
     // For implicit conversions like converting RDDs to DataFrames

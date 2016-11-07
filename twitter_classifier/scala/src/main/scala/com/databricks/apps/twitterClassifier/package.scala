@@ -5,11 +5,7 @@ package twitterClassifier {
   import org.apache.spark.sql.SparkSession
   import org.apache.spark.streaming.{Seconds, StreamingContext}
 
-  /** Sample Usage:
-    * class Collect(options: CollectOptions) extends SparkSessionLike {
-    *   // blah blah
-    * } */
-  trait SparkSessionLike {
+  object SparkSessionThing {
     println("Initializing Streaming Spark Context...")
     val spark = SparkSession
       .builder
@@ -22,30 +18,6 @@ package twitterClassifier {
     val sc: SparkContext = spark.sparkContext
     // Suppress "WARN BlockManager: Block input-0-1478266015800 replicated to only 0 peer(s) instead of 1 peers" messages
     sc.setLogLevel("ERROR")
-  }
-
-  /** Sample Usage:
-    * class Collect(options: CollectOptions) extends StreamingSessionLike {
-    *   val intervalInSecs = options.intervalInSecs
-    *   // blah blah
-    * } */
-  // FIXME why does mixing in this trait use all available memory?
-  trait StreamingSessionLike {
-    println("Initializing Streaming Spark Context...")
-    val spark = SparkSession
-      .builder
-      .appName(getClass.getSimpleName.replace("$", ""))
-      .master("local[*]")
-      .getOrCreate()
-
-    val sqlContext = spark.sqlContext
-
-    val sc: SparkContext = spark.sparkContext
-    // Suppress "WARN BlockManager: Block input-0-1478266015800 replicated to only 0 peer(s) instead of 1 peers" messages
-    sc.setLogLevel("ERROR")
-    def intervalInSecs: Int
-
-    val ssc = new StreamingContext(sc, Seconds(intervalInSecs))
   }
 }
 
