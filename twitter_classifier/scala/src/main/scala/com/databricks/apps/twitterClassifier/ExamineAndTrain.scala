@@ -40,14 +40,12 @@ class ExamineAndTrain(options: ExamineAndTrainOptions) extends SparkSessionLike 
       println("------Tweet table Schema---")
       tweetTable.printSchema()
       println("----Sample Tweet Text-----")
-    }
 
-    sqlContext
-      .sql("SELECT text FROM tweetTable LIMIT 10")
-      .collect
-      .foreach(println)
+      sqlContext
+        .sql("SELECT text FROM tweetTable LIMIT 10")
+        .collect
+        .foreach(println)
 
-    if (verbose) {
       println("------Sample Lang, Name, text---")
       sqlContext
         .sql("SELECT user.lang, user.name, text FROM tweetTable LIMIT 1000")
@@ -60,7 +58,7 @@ class ExamineAndTrain(options: ExamineAndTrainOptions) extends SparkSessionLike 
         .collect
         .foreach(println)
 
-      println("--- Training the model and persist it")
+      println("--- Training the model and persisting it")
     }
     val texts: Dataset[String] = sqlContext
       .sql("SELECT text from tweetTable")
