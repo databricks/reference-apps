@@ -1,10 +1,12 @@
 package com.databricks.apps.logs.chapter3;
 
-import com.databricks.apps.logs.ApacheAccessLog;
 import java.io.IOException;
+
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+
+import com.databricks.apps.logs.ApacheAccessLog;
 
 /**
  * LogAnalyzerExportRDD shows how to export data a set of files.

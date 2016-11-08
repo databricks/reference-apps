@@ -1,13 +1,14 @@
 package com.databricks.apps.logs.chapter2;
 
-import com.databricks.apps.logs.ApacheAccessLog;
-import com.databricks.apps.logs.LogAnalyzerRDD;
-import com.databricks.apps.logs.LogStatistics;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.streaming.Duration;
 import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
+
+import com.databricks.apps.logs.ApacheAccessLog;
+import com.databricks.apps.logs.LogAnalyzerRDD;
+import com.databricks.apps.logs.LogStatistics;
 
 /**
  * The LogAnalyzerImportStreamingFile illustrates how to run Spark Streaming,

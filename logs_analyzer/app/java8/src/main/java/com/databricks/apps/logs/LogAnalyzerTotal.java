@@ -1,14 +1,15 @@
 package com.databricks.apps.logs;
 
-import org.apache.spark.streaming.api.java.JavaDStream;
-import org.apache.spark.streaming.api.java.JavaPairDStream;
-import scala.Tuple2;
-import scala.Tuple4;
-
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+
+import scala.Tuple2;
+import scala.Tuple4;
+
+import org.apache.spark.streaming.api.java.JavaDStream;
+import org.apache.spark.streaming.api.java.JavaPairDStream;
 
 public class LogAnalyzerTotal implements Serializable {
   // These static variables stores the running content size values.

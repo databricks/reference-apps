@@ -4,10 +4,12 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.streaming.api.java.JavaDStream;
+
 import scala.Tuple2;
 import scala.Tuple4;
+
+import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.streaming.api.java.JavaDStream;
 
 public class LogAnalyzerWindowed implements Serializable {
   private LogStatistics logStatistics;

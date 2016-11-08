@@ -1,12 +1,15 @@
 package com.databricks.apps.logs.chapter1;
 
-import com.databricks.apps.logs.ApacheAccessLog;
 import java.util.List;
+
+import scala.Tuple2;
+
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
-import scala.Tuple2;
+
+import com.databricks.apps.logs.ApacheAccessLog;
 
 /**
  * LogAnalyzerSQL shows how to use SQL syntax with Spark.

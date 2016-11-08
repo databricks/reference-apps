@@ -1,14 +1,17 @@
 package com.databricks.apps.logs.chapter1;
 
-import com.databricks.apps.logs.ApacheAccessLog;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
+
+import scala.Tuple2;
+
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function2;
-import scala.Tuple2;
+
+import com.databricks.apps.logs.ApacheAccessLog;
 
 /**
  * The LogAnalyzer takes in an apache access log file and

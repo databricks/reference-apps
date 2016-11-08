@@ -3,13 +3,16 @@ package com.databricks.apps.logs;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
+
 import javax.annotation.Nullable;
+
+import scala.Tuple2;
+import scala.Tuple4;
+
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.Optional;
 import org.apache.spark.api.java.function.Function2;
-import scala.Tuple2;
-import scala.Tuple4;
 
 public class Functions {
   public static final Function2<Long, Long, Long> SUM_REDUCER = (a, b) -> a + b;

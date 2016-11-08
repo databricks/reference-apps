@@ -1,7 +1,9 @@
 package com.databricks.apps.logs.chapter1;
 
-import com.databricks.apps.logs.ApacheAccessLog;
 import java.util.List;
+
+import scala.Tuple2;
+
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Encoders;
@@ -11,7 +13,8 @@ import org.apache.spark.streaming.Duration;
 import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaReceiverInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
-import scala.Tuple2;
+
+import com.databricks.apps.logs.ApacheAccessLog;
 
 /**
  * The LogAnalyzerStreamingSQL is similar to LogAnalyzerStreaming, except

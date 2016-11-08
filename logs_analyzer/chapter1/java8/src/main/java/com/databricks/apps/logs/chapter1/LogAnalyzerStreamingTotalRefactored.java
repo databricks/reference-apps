@@ -1,10 +1,13 @@
 package com.databricks.apps.logs.chapter1;
 
-import com.databricks.apps.logs.ApacheAccessLog;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+
+import scala.Tuple2;
+import scala.Tuple4;
+
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -16,8 +19,8 @@ import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaPairDStream;
 import org.apache.spark.streaming.api.java.JavaReceiverInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
-import scala.Tuple2;
-import scala.Tuple4;
+
+import com.databricks.apps.logs.ApacheAccessLog;
 
 /**
  * This LogAnalyzerStreaming program reads the localhost 9999 socket

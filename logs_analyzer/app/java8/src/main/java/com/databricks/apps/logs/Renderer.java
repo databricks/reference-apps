@@ -1,13 +1,19 @@
 package com.databricks.apps.logs;
 
-import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.Serializable;
+import java.io.Writer;
+import java.util.List;
+import java.util.Map;
+
 import scala.Tuple2;
 import scala.Tuple4;
 
-import java.io.*;
-import java.util.List;
-import java.util.Map;
+import com.google.common.base.Charsets;
+import org.apache.commons.io.IOUtils;
 
 public class Renderer implements Serializable {
   private String fileTemplate;
@@ -15,7 +21,7 @@ public class Renderer implements Serializable {
   public void render(LogStatistics allOfTime, LogStatistics lastWindow)
       throws Exception {
     if (fileTemplate == null) {
-      InputStream inputStream = Renderer.class.getClassLoader().getResourceAsStream("index.html.template");
+        InputStream inputStream = Renderer.class.getClassLoader().getResourceAsStream("index.html.template");
       fileTemplate = IOUtils.toString(inputStream, Charsets.UTF_8);
     }
 

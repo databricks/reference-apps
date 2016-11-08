@@ -1,10 +1,11 @@
 package com.databricks.apps.logs.chapter2;
 
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.sql.SparkSession;
+
 import com.databricks.apps.logs.ApacheAccessLog;
 import com.databricks.apps.logs.LogAnalyzerRDD;
 import com.databricks.apps.logs.LogStatistics;
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.sql.SparkSession;
 
 /**
  * LogAnalyzerBatchImport shows how to import data from a file.

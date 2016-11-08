@@ -2,7 +2,6 @@ package com.databricks.apps.logs;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.text.ParseException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;

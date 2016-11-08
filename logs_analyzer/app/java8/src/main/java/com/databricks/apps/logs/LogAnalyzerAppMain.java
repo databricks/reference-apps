@@ -1,7 +1,8 @@
 package com.databricks.apps.logs;
 
-import com.google.common.collect.Iterators;
 import java.io.IOException;
+
+import com.google.common.collect.Iterators;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.spark.SparkConf;

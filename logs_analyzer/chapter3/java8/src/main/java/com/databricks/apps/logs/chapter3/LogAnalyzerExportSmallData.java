@@ -1,14 +1,17 @@
 package com.databricks.apps.logs.chapter3;
 
+import java.io.*;
+import java.util.List;
+
+import scala.Tuple2;
+import scala.Tuple4;
+
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.sql.SparkSession;
+
 import com.databricks.apps.logs.ApacheAccessLog;
 import com.databricks.apps.logs.LogAnalyzerRDD;
 import com.databricks.apps.logs.LogStatistics;
-import java.io.*;
-import java.util.List;
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.sql.SparkSession;
-import scala.Tuple2;
-import scala.Tuple4;
 
 /**
  * LogAnalyzerExportSmallData shows how to export data of small size to a file.
