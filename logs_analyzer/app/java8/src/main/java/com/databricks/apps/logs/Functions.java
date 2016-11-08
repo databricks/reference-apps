@@ -1,23 +1,25 @@
 package com.databricks.apps.logs;
 
-import com.google.common.base.Optional;
-import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.function.Function2;
-import scala.Tuple2;
-import scala.Tuple4;
-
-import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
+
+import javax.annotation.Nullable;
+
+import scala.Tuple2;
+import scala.Tuple4;
+
+import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.Optional;
+import org.apache.spark.api.java.function.Function2;
 
 public class Functions {
   public static final Function2<Long, Long, Long> SUM_REDUCER = (a, b) -> a + b;
 
   public static final class ValueComparator<K, V>
       implements Comparator<Tuple2<K, V>>, Serializable {
-    private Comparator<V> comparator;
+    private final Comparator<V> comparator;
 
     public ValueComparator(Comparator<V> comparator) {
       this.comparator = comparator;
@@ -79,4 +81,8 @@ public class Functions {
         .mapToPair(log -> new Tuple2<>(log.getEndpoint(), 1L))
         .reduceByKey(SUM_REDUCER);
   }
+
+    private Functions() {
+        // Utility class cannot have instances.
+    }
 }

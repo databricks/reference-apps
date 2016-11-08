@@ -1,9 +1,9 @@
 package com.databricks.apps.logs;
 
+import java.util.List;
+
 import scala.Tuple2;
 import scala.Tuple4;
-
-import java.util.List;
 
 public class LogStatistics {
   private Tuple4<Long, Long, Long, Long> contentSizeStats;

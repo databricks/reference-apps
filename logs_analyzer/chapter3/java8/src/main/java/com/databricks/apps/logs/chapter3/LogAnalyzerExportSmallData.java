@@ -1,61 +1,72 @@
 package com.databricks.apps.logs.chapter3;
 
-import com.databricks.apps.logs.ApacheAccessLog;
-import com.databricks.apps.logs.LogAnalyzerRDD;
-import com.databricks.apps.logs.LogStatistics;
-
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.sql.SQLContext;
+import java.io.*;
+import java.util.List;
 
 import scala.Tuple2;
 import scala.Tuple4;
 
-import java.io.*;
-import java.util.List;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.sql.SparkSession;
 
+import com.databricks.apps.logs.ApacheAccessLog;
+import com.databricks.apps.logs.LogAnalyzerRDD;
+import com.databricks.apps.logs.LogStatistics;
+
+/**
+ * LogAnalyzerExportSmallData shows how to export data of small size to a file.
+ * 
+  * Example command to run:
+ * %  ${YOUR_SPARK_HOME}/bin/spark-submit
+ *     --class "com.databricks.apps.logs.chapter3.LogAnalyzerExportSmallData"
+ *     --master spark://YOUR_SPARK_MASTER
+ *     target/log-analyzer-2.0.jar
+ *     ../../data/apache.access.log output.log
+ */
 public class LogAnalyzerExportSmallData {
+
   public static void main(String[] args) throws IOException {
-    // Create the spark context.
-    SparkConf conf = new SparkConf().setAppName("Log Analyzer SQL");
-    JavaSparkContext sc = new JavaSparkContext(conf);
-    SQLContext sqlContext = new SQLContext(sc);
+      // Initialize SparkSession instance.
+    SparkSession sparkSession = SparkSession
+            .builder()
+            .appName("Log Analyzer SQL")
+            .getOrCreate();
 
     if (args.length < 2) {
       System.out.println("Must specify an access logs file and an output file.");
       System.exit(-1);
     }
     String logFile = args[0];
-    JavaRDD<ApacheAccessLog> accessLogs = sc.textFile(logFile)
+    JavaRDD<ApacheAccessLog> accessLogs = sparkSession
+        .read()
+        .textFile(logFile)
+        .javaRDD()
         .map(ApacheAccessLog::parseFromLogLine);
 
-    LogAnalyzerRDD logAnalyzerRDD = new LogAnalyzerRDD(sqlContext);
+    LogAnalyzerRDD logAnalyzerRDD = new LogAnalyzerRDD(sparkSession);
     LogStatistics logStatistics = logAnalyzerRDD.processRdd(accessLogs);
 
     String outputFile = args[1];
-    Writer out = new BufferedWriter(
-        new OutputStreamWriter(new FileOutputStream(outputFile)));
+    try (Writer out = new BufferedWriter(
+            new OutputStreamWriter(new FileOutputStream(outputFile)))) {
+        Tuple4<Long, Long, Long, Long> contentSizeStats =
+                logStatistics.getContentSizeStats();
+        out.write(String.format("Content Size Avg: %s, Min: %s, Max: %s\n",
+                contentSizeStats._1() / contentSizeStats._2(),
+                contentSizeStats._3(),
+                contentSizeStats._4()));
 
-    Tuple4<Long, Long, Long, Long> contentSizeStats =
-        logStatistics.getContentSizeStats();
-    out.write(String.format("Content Size Avg: %s, Min: %s, Max: %s\n",
-        contentSizeStats._1() / contentSizeStats._2(),
-        contentSizeStats._3(),
-        contentSizeStats._4()));
+        List<Tuple2<Integer, Long>> responseCodeToCount =
+                logStatistics.getResponseCodeToCount();
+        out.write(String.format("Response code counts: %s\n", responseCodeToCount));
 
-    List<Tuple2<Integer, Long>> responseCodeToCount =
-        logStatistics.getResponseCodeToCount();
-    out.write(String.format("Response code counts: %s\n", responseCodeToCount));
+        List<String> ipAddresses = logStatistics.getIpAddresses();
+        out.write(String.format("IPAddresses > 10 times: %s\n", ipAddresses));
 
-    List<String> ipAddresses = logStatistics.getIpAddresses();
-    out.write(String.format("IPAddresses > 10 times: %s\n", ipAddresses));
+        List<Tuple2<String, Long>> topEndpoints = logStatistics.getTopEndpoints();
+        out.write(String.format("Top Endpoints: %s\n", topEndpoints));
+    }
 
-    List<Tuple2<String, Long>> topEndpoints = logStatistics.getTopEndpoints();
-    out.write(String.format("Top Endpoints: %s\n", topEndpoints));
-
-    out.close();
-
-    sc.stop();
+    sparkSession.stop();
   }
 }

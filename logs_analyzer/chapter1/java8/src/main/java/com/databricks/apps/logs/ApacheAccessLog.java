@@ -1,7 +1,6 @@
 package com.databricks.apps.logs;
 
 import java.io.Serializable;
-import java.lang.String;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -121,7 +120,7 @@ public class ApacheAccessLog implements Serializable {
   public static ApacheAccessLog parseFromLogLine(String logline) {
     Matcher m = PATTERN.matcher(logline);
     if (!m.find()) {
-      logger.log(Level.ALL, "Cannot parse logline" + logline);
+      logger.log(Level.ALL, "Cannot parse logline{0}", logline);
       throw new RuntimeException("Error parsing logline");
     }
 

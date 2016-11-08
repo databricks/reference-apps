@@ -1,14 +1,15 @@
 package com.databricks.apps.logs;
 
-import org.apache.spark.streaming.api.java.JavaDStream;
-import org.apache.spark.streaming.api.java.JavaPairDStream;
-import scala.Tuple2;
-import scala.Tuple4;
-
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+
+import scala.Tuple2;
+import scala.Tuple4;
+
+import org.apache.spark.streaming.api.java.JavaDStream;
+import org.apache.spark.streaming.api.java.JavaPairDStream;
 
 public class LogAnalyzerTotal implements Serializable {
   // These static variables stores the running content size values.
@@ -31,7 +32,6 @@ public class LogAnalyzerTotal implements Serializable {
             runningMin.set(Math.min(runningMin.get(), stats._3()));
             runningMax.set(Math.max(runningMax.get(), stats._4()));
           }
-          return null;
         }
     );
 
@@ -41,7 +41,6 @@ public class LogAnalyzerTotal implements Serializable {
         .updateStateByKey(Functions.COMPUTE_RUNNING_SUM);
     responseCodeCountDStream.foreachRDD(rdd -> {
       currentResponseCodeCounts = rdd.take(100);
-      return null;
     });
 
     // A DStream of ipAddressCounts.
@@ -51,7 +50,6 @@ public class LogAnalyzerTotal implements Serializable {
         .transform(Functions::filterIPAddress);
     ipAddressesDStream.foreachRDD(rdd -> {
       currentIPAddresses = rdd.take(100);
-      return null;
     });
 
     // A DStream of endpoint to count.
@@ -59,9 +57,8 @@ public class LogAnalyzerTotal implements Serializable {
         .transformToPair(Functions::endpointCount)
         .updateStateByKey(Functions.COMPUTE_RUNNING_SUM);
     endpointCountsDStream.foreachRDD(rdd -> {
-      currentTopEndpoints = rdd.takeOrdered(10,
+      currentTopEndpoints = rdd.top(10,
           new Functions.ValueComparator<>(Comparator.<Long>naturalOrder()));
-      return null;
     });
   }
 

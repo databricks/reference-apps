@@ -1,5 +1,6 @@
 package com.databricks.apps.logs;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -121,11 +122,11 @@ public class ApacheAccessLog implements Serializable {
       "^(\\S+) (\\S+) (\\S+) \\[([\\w:/]+\\s[+\\-]\\d{4})\\] \"(\\S+) (\\S+) (\\S+)\" (\\d{3}) (\\S+)";
   private static final Pattern PATTERN = Pattern.compile(LOG_ENTRY_PATTERN);
 
-  public static ApacheAccessLog parseFromLogLine(String logline) {
+  public static ApacheAccessLog parseFromLogLine(String logline) throws IOException {
     Matcher m = PATTERN.matcher(logline);
     if (!m.find()) {
-      logger.log(Level.ALL, "Cannot parse logline" + logline);
-      throw new RuntimeException("Error parsing logline");
+      logger.log(Level.ALL, "Cannot parse logline{0}", logline);
+      throw new IOException("Error parsing logline");
     }
 
     return new ApacheAccessLog(m.group(1), m.group(2), m.group(3), m.group(4),

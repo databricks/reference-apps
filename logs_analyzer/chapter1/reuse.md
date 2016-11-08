@@ -39,7 +39,6 @@ JavaPairDStream<Integer, Long> cumulativeResponseCodeCountDStream =
    responseCodeCountDStream.updateStateByKey(COMPUTE_RUNNING_SUM);
 cumulativeResponseCodeCountDStream.foreachRDD(rdd -> {
   System.out.println("Response code counts: " + rdd.take(100));
-  return null;
 });
 ```
 
@@ -54,7 +53,6 @@ JavaDStream<String> ipAddressesDStream = accessLogDStream
 ipAddressesDStream.foreachRDD(rdd -> {
   List<String> ipAddresses = rdd.take(100);
   System.out.println("All IPAddresses > 10 times: " + ipAddresses);
-  return null;
 });
 ```
 

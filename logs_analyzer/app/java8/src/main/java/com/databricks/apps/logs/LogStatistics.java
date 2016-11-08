@@ -1,13 +1,13 @@
 package com.databricks.apps.logs;
 
-import scala.Tuple2;
-import scala.Tuple4;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import scala.Tuple2;
+import scala.Tuple4;
 
 public class LogStatistics implements Serializable {
   public final static LogStatistics EMPTY_LOG_STATISTICS =

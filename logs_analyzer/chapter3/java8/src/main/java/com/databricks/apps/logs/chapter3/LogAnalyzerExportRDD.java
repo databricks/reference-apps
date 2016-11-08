@@ -1,12 +1,23 @@
 package com.databricks.apps.logs.chapter3;
 
-import com.databricks.apps.logs.ApacheAccessLog;
+import java.io.IOException;
+
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 
-import java.io.IOException;
+import com.databricks.apps.logs.ApacheAccessLog;
 
+/**
+ * LogAnalyzerExportRDD shows how to export data a set of files.
+ * 
+  * Example command to run:
+ * %  ${YOUR_SPARK_HOME}/bin/spark-submit
+ *     --class "com.databricks.apps.logs.chapter3.LogAnalyzerExportRDD"
+ *     --master spark://YOUR_SPARK_MASTER
+ *     target/log-analyzer-2.0.jar
+ *     ../../data/apache.access.log output_dir
+ */
 public class LogAnalyzerExportRDD {
   // Optionally modify this based as makes sense for your dataset.
   public static final int NUM_PARTITIONS = 2;

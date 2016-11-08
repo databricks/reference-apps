@@ -1,6 +1,11 @@
 package com.databricks.apps.logs.chapter1;
 
-import com.databricks.apps.logs.ApacheAccessLog;
+import java.io.Serializable;
+import java.util.Comparator;
+import java.util.List;
+
+import scala.Tuple2;
+
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -9,11 +14,8 @@ import org.apache.spark.streaming.Duration;
 import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaReceiverInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
-import scala.Tuple2;
 
-import java.io.Serializable;
-import java.util.Comparator;
-import java.util.List;
+import com.databricks.apps.logs.ApacheAccessLog;
 
 /**
  * The LogAnalyzerStreaming illustrates how to use logs with Spark Streaming to
@@ -27,17 +29,17 @@ import java.util.List;
  *
  * Example command to run:
  * %  ${YOUR_SPARK_HOME}/bin/spark-submit
- *     --class "com.databricks.apps.logs.chapter1.LogsAnalyzerStreaming"
+ *     --class "com.databricks.apps.logs.chapter1.LogAnalyzerStreaming"
  *     --master local[4]
- *     target/log-analyzer-1.0.jar
+ *     target/log-analyzer-2.0.jar
  */
 public class LogAnalyzerStreaming {
-  private static Function2<Long, Long, Long> SUM_REDUCER = (a, b) -> a + b;
+  private static final Function2<Long, Long, Long> SUM_REDUCER = (a, b) -> a + b;
 
   private static class ValueComparator<K, V> implements Comparator<Tuple2<K, V>>, Serializable {
-    private Comparator<V> comparator;
+    private final Comparator<V> comparator;
 
-    public ValueComparator(Comparator<V> comparator) {
+    ValueComparator(Comparator<V> comparator) {
       this.comparator = comparator;
     }
 
@@ -52,7 +54,7 @@ public class LogAnalyzerStreaming {
   // Stats will be computed every slide interval time.
   private static final Duration SLIDE_INTERVAL = new Duration(10 * 1000);
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws InterruptedException {
     SparkConf conf = new SparkConf().setAppName("Log Analyzer Streaming");
     JavaSparkContext sc = new JavaSparkContext(conf);
 
@@ -73,7 +75,7 @@ public class LogAnalyzerStreaming {
     windowDStream.foreachRDD(accessLogs -> {
       if (accessLogs.count() == 0) {
         System.out.println("No access logs in this time interval");
-        return null;
+        return;
       }
 
       // *** Note that this is code copied verbatim from LogAnalyzer.java.
@@ -108,8 +110,6 @@ public class LogAnalyzerStreaming {
           .reduceByKey(SUM_REDUCER)
           .top(10, new ValueComparator<>(Comparator.<Long>naturalOrder()));
       System.out.println(String.format("Top Endpoints: %s", topEndpoints));
-
-      return null;
     });
 
     // Start the streaming server.

@@ -1,15 +1,14 @@
 package com.databricks.apps.logs;
 
+import java.io.IOException;
+
+import com.google.common.collect.Iterators;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The LogAnalyzerAppMain is an sample logs analysis application.  For now,
@@ -32,9 +31,12 @@ import java.util.List;
  * %  ${YOUR_SPARK_HOME}/bin/spark-submit
  *     --class "com.databricks.apps.logs.LogAnalyzerAppMain"
  *     --master local[4]
- *     target/uber-log-analyzer-1.0.jar
+ *     target/uber-log-analyzer-2.0.jar
  *     --logs_directory /tmp/logs
  *     --output_html_file /tmp/log_stats.html
+ *     --window_length 30
+ *     --slide_interval 5
+ *     --checkpoint_directory /tmp/log-analyzer-streaming
  */
 public class LogAnalyzerAppMain {
   public static final String WINDOW_LENGTH = "window_length";
@@ -60,7 +62,7 @@ public class LogAnalyzerAppMain {
     return options;
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException, InterruptedException {
     Flags.setFromCommandLineArgs(THE_OPTIONS, args);
 
     // Startup the Spark Conf.
@@ -75,16 +77,16 @@ public class LogAnalyzerAppMain {
 
     // This methods monitors a directory for new files to read in for streaming.
     JavaDStream<String> logData = jssc.textFileStream(Flags.getInstance().getLogsDirectory());
-
+    
     JavaDStream<ApacheAccessLog> accessLogsDStream = logData.flatMap(
         line -> {
-          List<ApacheAccessLog> list = new ArrayList<>();
-          try {
-            list.add(ApacheAccessLog.parseFromLogLine(line));
-            return list;
-          } catch (RuntimeException e) {
-            return list;
-    }}).cache();
+            try {
+                return Iterators.singletonIterator(ApacheAccessLog.parseFromLogLine(line));
+            } catch (IOException e) {
+                return Iterators.emptyIterator();
+            }
+        }
+    ).cache();
 
     LogAnalyzerTotal logAnalyzerTotal = new LogAnalyzerTotal();
     LogAnalyzerWindowed logAnalyzerWindowed = new LogAnalyzerWindowed();
@@ -101,7 +103,6 @@ public class LogAnalyzerAppMain {
       // Call this to output the stats.
       renderer.render(logAnalyzerTotal.getLogStatistics(),
           logAnalyzerWindowed.getLogStatistics());
-      return null;
     });
 
     // Start the streaming server.
