@@ -17,7 +17,7 @@ in the previous example can be done using Spark SQL rather than calling
 Spark transformations and actions directly.  We walk through how to do that
 here.
 
-First, we need to create a SparkSession instance - an entry point for a Spark SQL application.
+First, we need to create a SparkSession instance - an entry point for every Spark SQL application.
 Using SparkSession, we read a text file and obtain a Dataset of Strings,
 where every string represents a line from the input file. Finally, we convert the
 Dataset of Strings to Dataset of ApacheAccessLog entries.
