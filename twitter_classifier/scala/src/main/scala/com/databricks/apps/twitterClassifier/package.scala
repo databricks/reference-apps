@@ -10,7 +10,6 @@ package twitterClassifier {
     val spark = SparkSession
       .builder
       .appName(getClass.getSimpleName.replace("$", ""))
-      .master("local[*]")
       .getOrCreate()
 
     val sqlContext = spark.sqlContext
