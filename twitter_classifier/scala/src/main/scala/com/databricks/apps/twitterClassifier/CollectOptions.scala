@@ -1,7 +1,7 @@
 package com.databricks.apps.twitterClassifier
 
-import java.io.File
 import com.github.acrisci.commander.Program
+import java.io.File
 
 abstract sealed case class CollectOptions(
   twitterOptions: TwitterOptions,

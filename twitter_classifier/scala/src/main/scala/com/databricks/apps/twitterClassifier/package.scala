@@ -3,10 +3,8 @@ package com.databricks.apps
 package twitterClassifier {
   import org.apache.spark.SparkContext
   import org.apache.spark.sql.SparkSession
-  import org.apache.spark.streaming.{Seconds, StreamingContext}
 
-  trait SparkSessionLike {
-    println("Initializing Streaming Spark Context...")
+  object SparkSetup {
     val spark = SparkSession
       .builder
       .appName(getClass.getSimpleName.replace("$", ""))
@@ -18,15 +16,9 @@ package twitterClassifier {
     // Suppress "WARN BlockManager: Block input-0-1478266015800 replicated to only 0 peer(s) instead of 1 peers" messages
     sc.setLogLevel("ERROR")
   }
-
-  trait StreamingSessionLike extends SparkSessionLike {
-    def intervalInSecs: Int
-
-    val ssc = new StreamingContext(sc, Seconds(intervalInSecs))
-  }
 }
 
-package object `twitterClassifier` {
+package object twitterClassifier {
   import org.apache.spark.mllib.linalg.Vector
   import org.apache.spark.mllib.feature.HashingTF
   import twitter4j.auth.OAuthAuthorization
