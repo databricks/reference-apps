@@ -1,8 +1,9 @@
 package com.databricks.apps.logs.chapter1
 
-import com.databricks.apps.logs.ApacheAccessLog
 import org.apache.spark.sql.SQLContext
-import org.apache.spark.{SparkContext, SparkConf}
+import org.apache.spark.{SparkConf, SparkContext}
+
+import com.databricks.apps.logs.ApacheAccessLog
 
 /**
  * LogAnalyzerSQL shows how to use SQL syntax with Spark.

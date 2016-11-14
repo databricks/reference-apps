@@ -2,11 +2,12 @@ package com.databricks.apps.logs.chapter1
 
 import java.util.concurrent.atomic.AtomicLong
 
-import com.databricks.apps.logs.{ApacheAccessLog, OrderingUtils}
-import org.apache.spark.{SparkContext, SparkConf}
-import org.apache.spark.streaming._
-import org.apache.spark.streaming.StreamingContext._
 import scala.math._
+
+import org.apache.spark.streaming.{Duration, StreamingContext}
+import org.apache.spark.{SparkConf, SparkContext}
+
+import com.databricks.apps.logs.{ApacheAccessLog, OrderingUtils}
 
 /**
  * This LogAnalyzerStreaming program reads the localhost 9999 socket

@@ -1,9 +1,9 @@
 package com.databricks.apps.logs.chapter1
 
+import org.apache.spark.streaming.{Duration, StreamingContext}
+import org.apache.spark.{SparkConf, SparkContext}
+
 import com.databricks.apps.logs.{ApacheAccessLog, OrderingUtils}
-import org.apache.spark.{SparkContext, SparkConf}
-import org.apache.spark.streaming.{StreamingContext, Duration}
-import org.apache.spark.SparkContext._
 
 /**
  * The LogAnalyzerStreaming illustrates how to use logs with Spark Streaming to
