@@ -1,35 +1,30 @@
-import AssemblyKeys._
-
 name := "spark-twitter-lang-classifier"
 
-version := "1.0"
+version := "2.0.0"
 
-scalaVersion := "2.10.4"
+scalaVersion := "2.11.8"
 
-libraryDependencies += "org.apache.spark" %% "spark-core" % "1.4.0" % "provided"
+libraryDependencies ++= {
+  val sparkVer = "2.0.1"
+  Seq(
+    "org.apache.spark"     %% "spark-core"              % sparkVer withSources(),
+    "org.apache.spark"     %% "spark-mllib"             % sparkVer withSources(),
+    "org.apache.spark"     %% "spark-sql"               % sparkVer withSources(),
+    "org.apache.spark"     %% "spark-streaming"         % sparkVer withSources(),
+    "org.apache.bahir"     %% "spark-streaming-twitter" % "2.0.0"  withSources(),
+    "com.google.code.gson" %  "gson"                    % "2.8.0"  withSources(),
+    "org.twitter4j"        %  "twitter4j-core"          % "4.0.5"  withSources(),
+    "com.github.acrisci"   %% "commander"               % "0.1.0"  withSources()
+  )
+}
 
-libraryDependencies += "org.apache.spark" %% "spark-mllib" % "1.4.0" % "provided"
-
-libraryDependencies += "org.apache.spark" %% "spark-sql" % "1.4.0" % "provided"
-
-libraryDependencies += "org.apache.spark" %% "spark-streaming" % "1.4.0" % "provided"
-
-libraryDependencies += "org.apache.spark" %% "spark-streaming-twitter" % "1.4.0"
-
-libraryDependencies += "com.google.code.gson" % "gson" % "2.3"
-
-libraryDependencies += "org.twitter4j" % "twitter4j-core" % "3.0.3"
-
-libraryDependencies += "commons-cli" % "commons-cli" % "1.2"
-
-resolvers += "Akka Repository" at "http://repo.akka.io/releases/"
-
-assemblySettings
-
-mergeStrategy in assembly := {
+assemblyMergeStrategy in assembly := {
+  case PathList("org", "apache", "spark", "streaming", "twitter", _*) => MergeStrategy.deduplicate
+  case PathList("org", "apache", "spark", _*)              => MergeStrategy.discard
+  case PathList("org", "spark_project", _*)                => MergeStrategy.discard
   case m if m.toLowerCase.endsWith("manifest.mf")          => MergeStrategy.discard
   case m if m.toLowerCase.matches("meta-inf.*\\.sf$")      => MergeStrategy.discard
-  case "log4j.properties"                                  => MergeStrategy.discard
+  case "log4j.properties"                                  => MergeStrategy.deduplicate
   case m if m.toLowerCase.startsWith("meta-inf/services/") => MergeStrategy.filterDistinctLines
   case "reference.conf"                                    => MergeStrategy.concat
   case _                                                   => MergeStrategy.first

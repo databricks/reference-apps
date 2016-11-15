@@ -1,0 +1,41 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$DIR/.."
+
+source bin/options
+
+function help {
+  echo "
+Runs Predict from a local Spark instance.
+Uses the model created by ExamineAndTrain in $MODEL_DIR using $NUM_CLUSTERS clusters.
+
+Before running this script, set the following environment variables to actual values:
+  export SPARK_TWITTER_CONSUMER_KEY=blahblah
+  export SPARK_TWITTER_CONSUMER_SECRET=blahblah
+  export SPARK_TWITTER_ACCESS_TOKEN=blahblah
+  export SPARK_TWITTER_ACCESS_TOKEN_SECRET=blahblah
+
+Values for the above environment variables can be obtained from https://apps.twitter.com.
+This Twitter app only needs read privileges; it does not create tweets.
+"
+  exit -1
+}
+
+if [ -h == "$1" ] || \
+   [ -z "$SPARK_TWITTER_CONSUMER_KEY" ] || \
+   [ -z "$SPARK_TWITTER_CONSUMER_SECRET" ] || \
+   [ -z "$SPARK_TWITTER_ACCESS_TOKEN" ] || \
+   [ -z "$SPARK_TWITTER_ACCESS_TOKEN_SECRET" ]; then help; fi
+
+spark-shell \
+  --master local[*] \
+  --conf spark.executor.memory=8g \
+  --class com.databricks.apps.twitterClassifier.Predict \
+  --jars target/scala-2.11/spark-twitter-lang-classifier-assembly-2.0.0.jar \
+  --consumerKey $SPARK_TWITTER_CONSUMER_KEY \
+  --consumerSecret $SPARK_TWITTER_CONSUMER_SECRET \
+  --accessToken $SPARK_TWITTER_ACCESS_TOKEN \
+  --accessTokenSecret $SPARK_TWITTER_ACCESS_TOKEN_SECRET \
+  --overWrite \
+  $MODEL_DIR $INTERVAL $NUM_CLUSTERS

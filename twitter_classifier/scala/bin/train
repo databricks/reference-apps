@@ -1,0 +1,20 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$DIR/.."
+
+source bin/options
+
+function help {
+  echo "
+Runs ExamineAndTrain from a local Spark instance.
+Stores the model into $MODEL_DIR using $NUM_CLUSTERS clusters and $NUM_ITERATIONS iterations.
+"
+  exit -1
+}
+
+spark-shell --master local[*] \
+  --class com.databricks.apps.twitterClassifier.ExamineAndTrain \
+  --jars target/scala-2.11/spark-twitter-lang-classifier-assembly-2.0.0.jar \
+  --overWrite \
+  $TWEET_DIR $MODEL_DIR $NUM_CLUSTERS $NUM_ITERATIONS

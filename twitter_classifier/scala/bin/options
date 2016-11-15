@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+export BASE_DIR=~/sparkTwitter
+
+export INTERVAL=5
+export MODEL_DIR=$BASE_DIR/model
+export NUM_CLUSTERS=1
+export NUM_ITERATIONS=10
+export NUM_TWEETS=1000
+export PARTITIONS=1
+export TWEET_DIR=$BASE_DIR/data
