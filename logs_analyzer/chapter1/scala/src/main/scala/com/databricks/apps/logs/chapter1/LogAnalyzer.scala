@@ -12,11 +12,10 @@ import com.databricks.apps.logs.{ApacheAccessLog, OrderingUtils}
  * % spark-submit
  *   --class "com.databricks.apps.logs.chapter1.LogAnalyzer"
  *   --master local[4]
- *   target/scala-2.10/spark-logs-analyzer_2.10-1.0.jar
+ *   target/scala-2.11/spark-logs-analyzer_2.11-2.0.jar
  *   ../../data/apache.access.log
  */
-object LogAnalyzer {
-  def main(args: Array[String]) {
+object LogAnalyzer extends App {
     val sparkConf = new SparkConf().setAppName("Log Analyzer in Scala")
     val sc = new SparkContext(sparkConf)
 
@@ -25,7 +24,7 @@ object LogAnalyzer {
     val accessLogs = sc.textFile(logFile).map(ApacheAccessLog.parseLogLine).cache()
 
     // Calculate statistics based on the content size.
-    val contentSizes = accessLogs.map(log => log.contentSize).cache()
+    val contentSizes = accessLogs.map(_.contentSize).cache()
     println("Content Size Avg: %s, Min: %s, Max: %s".format(
       contentSizes.reduce(_ + _) / contentSizes.count,
       contentSizes.min,
@@ -33,14 +32,14 @@ object LogAnalyzer {
 
     // Compute Response Code to Count.
     val responseCodeToCount = accessLogs
-      .map(log => (log.responseCode, 1))
+      .map(_.responseCode -> 1)
       .reduceByKey(_ + _)
       .take(100)
     println(s"""Response code counts: ${responseCodeToCount.mkString("[", ",", "]")}""")
 
     // Any IPAddress that has accessed the server more than 10 times.
     val ipAddresses = accessLogs
-      .map(log => (log.ipAddress, 1))
+      .map(_.ipAddress -> 1)
       .reduceByKey(_ + _)
       .filter(_._2 > 10)
       .map(_._1)
@@ -49,11 +48,10 @@ object LogAnalyzer {
 
     // Top Endpoints.
     val topEndpoints = accessLogs
-      .map(log => (log.endpoint, 1))
+      .map(_.endpoint -> 1)
       .reduceByKey(_ + _)
       .top(10)(OrderingUtils.SecondValueOrdering)
     println(s"""Top Endpoints: ${topEndpoints.mkString("[", ",", "]")}""")
 
     sc.stop()
-  }
 }
