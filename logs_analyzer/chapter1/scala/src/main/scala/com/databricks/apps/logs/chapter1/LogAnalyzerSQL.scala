@@ -14,8 +14,7 @@ import com.databricks.apps.logs.ApacheAccessLog
  *   target/scala-2.11/spark-logs-analyzer_2.11-2.0.jar
  *   ../../data/apache.access.log
  */
-object LogAnalyzerSQL {
-  def main(args: Array[String]) {
+object LogAnalyzerSQL extends App {
     val spark = SparkSession.builder().appName("Log Analyzer SQL in Scala").getOrCreate()
     import spark.implicits._
 
@@ -58,5 +57,4 @@ object LogAnalyzerSQL {
     println(s"""Top Endpoints: ${topEndpoints.mkString("[", ",", "]")}""")
 
     spark.stop()
-  }
 }
