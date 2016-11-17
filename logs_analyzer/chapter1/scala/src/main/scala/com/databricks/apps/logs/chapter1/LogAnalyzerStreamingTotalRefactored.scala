@@ -2,6 +2,8 @@ package com.databricks.apps.logs.chapter1
 
 import java.util.concurrent.atomic.AtomicLong
 
+import scala.math._
+
 import org.apache.spark.SparkConf
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.{Seconds, StreamingContext}
@@ -83,8 +85,8 @@ object LogAnalyzerStreamingTotalRefactored extends App {
       val currentContentSizes = contentSizeStats(rdd)
       runningCount.getAndAdd(currentContentSizes._1)
       runningSum.getAndAdd(currentContentSizes._2)
-      runningMin.set(currentContentSizes._3)
-      runningMax.set(currentContentSizes._4)
+      runningMin.set(min(runningMin.get(), currentContentSizes._3))
+      runningMax.set(max(runningMax.get(), currentContentSizes._4))
     }
     if (runningCount.get() == 0) {
       println("Content Size Avg: -, Min: -, Max: -")
