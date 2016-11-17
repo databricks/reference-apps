@@ -4,8 +4,8 @@ import java.util.concurrent.atomic.AtomicLong
 
 import scala.math._
 
-import org.apache.spark.streaming.{Duration, StreamingContext}
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.SparkConf
+import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 import com.databricks.apps.logs.{ApacheAccessLog, OrderingUtils}
 
@@ -25,14 +25,14 @@ import com.databricks.apps.logs.{ApacheAccessLog, OrderingUtils}
  * % spark-submit
  *   --class "com.databricks.apps.logs.chapter1.LogAnalyzerStreaming"
  *   --master local[4]
- *   target/scala-2.10/spark-logs-analyzer_2.10-1.0.jar
+ *   target/scala-2.11/spark-logs-analyzer_2.11-2.0.jar
  */
-object LogAnalyzerStreamingTotal {
-  val WINDOW_LENGTH = new Duration(30 * 1000)
-  val SLIDE_INTERVAL = new Duration(10 * 1000)
+object LogAnalyzerStreamingTotal extends App {
+  val WINDOW_LENGTH = Seconds(30)
+  val SLIDE_INTERVAL = Seconds(10)
 
   val computeRunningSum = (values: Seq[Long], state: Option[Long]) => {
-    val currentCount = values.foldLeft(0L)(_ + _)
+    val currentCount = values.sum
     val previousCount = state.getOrElse(0L)
     Some(currentCount + previousCount)
   }
@@ -42,11 +42,9 @@ object LogAnalyzerStreamingTotal {
   val runningMin = new AtomicLong(Long.MaxValue)
   val runningMax = new AtomicLong(Long.MinValue)
 
-  def main(args: Array[String]) {
     val sparkConf = new SparkConf().setAppName("Log Analyzer Streaming Total in Scala")
-    val sc = new SparkContext(sparkConf)
 
-    val streamingContext = new StreamingContext(sc, SLIDE_INTERVAL)
+    val streamingContext = new StreamingContext(sparkConf, SLIDE_INTERVAL)
 
     // NOTE: Checkpointing must be enabled to use updateStateByKey.
     streamingContext.checkpoint("/tmp/log-analyzer-streaming-total-scala")
@@ -55,7 +53,8 @@ object LogAnalyzerStreamingTotal {
 
     val accessLogsDStream = logLinesDStream.map(ApacheAccessLog.parseLogLine).cache()
 
-    val contentSizesDStream = accessLogsDStream.map(log => log.contentSize).cache()
+    // Calculate statistics based on the content size, and update variables to track this.
+    val contentSizesDStream = accessLogsDStream.map(_.contentSize).cache()
     contentSizesDStream.foreachRDD(rdd => {
       val count = rdd.count()
       if (count > 0) {
@@ -76,8 +75,9 @@ object LogAnalyzerStreamingTotal {
     })
 
     // Compute Response Code to Count.
+    // Note the use of updateStateByKey.
     val responseCodeCountDStream = accessLogsDStream
-      .map(log => (log.responseCode, 1L))
+      .map(_.responseCode -> 1L)
       .reduceByKey(_ + _)
     val cumulativeResponseCodeCountDStream = responseCodeCountDStream
       .updateStateByKey(computeRunningSum)
@@ -85,9 +85,10 @@ object LogAnalyzerStreamingTotal {
       val responseCodeToCount = rdd.take(100)
       println(s"""Response code counts: ${responseCodeToCount.mkString("[", ",", "]")}""")
     })
-    
+
+    // A DStream of ipAddresses accessed > 10 times.
     val ipAddressDStream = accessLogsDStream
-      .map(log => (log.ipAddress, 1L))
+      .map(_.ipAddress -> 1L)
       .reduceByKey(_ + _)
       .updateStateByKey(computeRunningSum)
       .filter(_._2 > 10)
@@ -97,8 +98,9 @@ object LogAnalyzerStreamingTotal {
       println(s"""IPAddresses > 10 times: ${ipAddresses.mkString("[", ",", "]")}""")
     })
 
+    // A DStream of endpoint to count.
     val endpointCountsDStream = accessLogsDStream
-      .map(log => (log.endpoint, 1L))
+      .map(_.endpoint -> 1L)
       .reduceByKey(_ + _)
       .updateStateByKey(computeRunningSum)
     endpointCountsDStream.foreachRDD(rdd => {
@@ -108,5 +110,4 @@ object LogAnalyzerStreamingTotal {
 
     streamingContext.start()
     streamingContext.awaitTermination()
-  }
 }
