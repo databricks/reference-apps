@@ -1,7 +1,7 @@
 package com.databricks.apps.logs.chapter1
 
+import org.apache.spark.SparkConf
 import org.apache.spark.streaming.{Duration, StreamingContext}
-import org.apache.spark.{SparkConf, SparkContext}
 
 import com.databricks.apps.logs.{ApacheAccessLog, OrderingUtils}
 
@@ -25,52 +25,52 @@ object LogAnalyzerStreaming extends App {
   val WINDOW_LENGTH = new Duration(30 * 1000)
   val SLIDE_INTERVAL = new Duration(10 * 1000)
 
-    val sparkConf = new SparkConf().setAppName("Log Analyzer Streaming in Scala")
-    val streamingContext = new StreamingContext(sparkConf, SLIDE_INTERVAL)
+  val sparkConf = new SparkConf().setAppName("Log Analyzer Streaming in Scala")
+  val streamingContext = new StreamingContext(sparkConf, SLIDE_INTERVAL)
 
-    val logLinesDStream = streamingContext.socketTextStream("localhost", 9999)
+  val logLinesDStream = streamingContext.socketTextStream("localhost", 9999)
 
-    val accessLogsDStream = logLinesDStream.map(ApacheAccessLog.parseLogLine).cache()
-    val windowDStream = accessLogsDStream.window(WINDOW_LENGTH, SLIDE_INTERVAL)
+  val accessLogsDStream = logLinesDStream.map(ApacheAccessLog.parseLogLine).cache()
+  val windowDStream = accessLogsDStream.window(WINDOW_LENGTH, SLIDE_INTERVAL)
 
-    windowDStream.foreachRDD(accessLogs => {
-      if (accessLogs.count() == 0) {
-        println("No access logs received in this time interval")
-      } else {
-        // Calculate statistics based on the content size.
-        val contentSizes = accessLogs.map(_.contentSize).cache()
-        println("Content Size Avg: %s, Min: %s, Max: %s".format(
-          contentSizes.reduce(_ + _) / contentSizes.count,
-          contentSizes.min,
-          contentSizes.max
-        ))
+  windowDStream.foreachRDD(accessLogs => {
+    if (accessLogs.count() == 0) {
+      println("No access logs received in this time interval")
+    } else {
+      // Calculate statistics based on the content size.
+      val contentSizes = accessLogs.map(_.contentSize).cache()
+      println("Content Size Avg: %s, Min: %s, Max: %s".format(
+        contentSizes.reduce(_ + _) / contentSizes.count,
+        contentSizes.min,
+        contentSizes.max
+      ))
 
-        // Compute Response Code to Count.
-        val responseCodeToCount = accessLogs
-          .map(_.responseCode -> 1)
-          .reduceByKey(_ + _)
-          .take(100)
-        println( s"""Response code counts: ${responseCodeToCount.mkString("[", ",", "]")}""")
+      // Compute Response Code to Count.
+      val responseCodeToCount = accessLogs
+        .map(_.responseCode -> 1)
+        .reduceByKey(_ + _)
+        .take(100)
+      println( s"""Response code counts: ${responseCodeToCount.mkString("[", ",", "]")}""")
 
-        // Any IPAddress that has accessed the server more than 10 times.
-        val ipAddresses = accessLogs
-          .map(_.ipAddress -> 1)
-          .reduceByKey(_ + _)
-          .filter(_._2 > 10)
-          .map(_._1)
-          .take(100)
-        println( s"""IPAddresses > 10 times: ${ipAddresses.mkString("[", ",", "]")}""")
+      // Any IPAddress that has accessed the server more than 10 times.
+      val ipAddresses = accessLogs
+        .map(_.ipAddress -> 1)
+        .reduceByKey(_ + _)
+        .filter(_._2 > 10)
+        .map(_._1)
+        .take(100)
+      println( s"""IPAddresses > 10 times: ${ipAddresses.mkString("[", ",", "]")}""")
 
-        // Top Endpoints.
-        val topEndpoints = accessLogs
-          .map(_.endpoint -> 1)
-          .reduceByKey(_ + _)
-          .top(10)(OrderingUtils.SecondValueOrdering)
-        println( s"""Top Endpoints: ${topEndpoints.mkString("[", ",", "]")}""")
-      }
-    })
+      // Top Endpoints.
+      val topEndpoints = accessLogs
+        .map(_.endpoint -> 1)
+        .reduceByKey(_ + _)
+        .top(10)(OrderingUtils.SecondValueOrdering)
+      println( s"""Top Endpoints: ${topEndpoints.mkString("[", ",", "]")}""")
+    }
+  })
 
-    // Start the streaming server.
-    streamingContext.start() // Start the computation
-    streamingContext.awaitTermination() // Wait for the computation to terminate
+  // Start the streaming server.
+  streamingContext.start() // Start the computation
+  streamingContext.awaitTermination() // Wait for the computation to terminate
 }
