@@ -2,9 +2,9 @@ package com.databricks.apps.logs.chapter1
 
 import java.util.concurrent.atomic.AtomicLong
 
+import org.apache.spark.SparkConf
 import org.apache.spark.rdd.RDD
-import org.apache.spark.streaming.{Duration, StreamingContext}
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 import com.databricks.apps.logs.{ApacheAccessLog, OrderingUtils}
 
@@ -24,35 +24,37 @@ import com.databricks.apps.logs.{ApacheAccessLog, OrderingUtils}
  * % spark-submit
  *   --class "com.databricks.apps.logs.chapter1.LogAnalyzerStreaming"
  *   --master local[4]
- *   target/scala-2.10/spark-logs-analyzer_2.10-1.0.jar
+ *   target/scala-2.11/spark-logs-analyzer_2.11-2.0.jar
  */
-object LogAnalyzerStreamingTotalRefactored {
-  val WINDOW_LENGTH = new Duration(30 * 1000)
-  val SLIDE_INTERVAL = new Duration(10 * 1000)
+object LogAnalyzerStreamingTotalRefactored extends App {
+  val WINDOW_LENGTH = Seconds(30)
+  val SLIDE_INTERVAL = Seconds(10)
 
   val computeRunningSum = (values: Seq[Long], state: Option[Long]) => {
-    val currentCount = values.foldLeft(0L)(_ + _)
+    val currentCount = values.sum
     val previousCount = state.getOrElse(0L)
     Some(currentCount + previousCount)
   }
 
+  // These static variables store the running content size values.
   val runningCount = new AtomicLong(0)
   val runningSum = new AtomicLong(0)
   val runningMin = new AtomicLong(Long.MaxValue)
   val runningMax = new AtomicLong(Long.MinValue)
 
+  // These functions below that could be shared with the batch library.
   val contentSizeStats = (accessLogRDD: RDD[ApacheAccessLog]) => {
-    val contentSizes = accessLogRDD.map(log => log.contentSize).cache()
+    val contentSizes = accessLogRDD.map(_.contentSize).cache()
     (contentSizes.count(), contentSizes.reduce(_ + _),
       contentSizes.min, contentSizes.max)
   }
 
   val responseCodeCount = (accessLogRDD: RDD[ApacheAccessLog]) => {
-    accessLogRDD.map(log => (log.responseCode, 1L)).reduceByKey(_ + _)
+    accessLogRDD.map(_.responseCode -> 1L).reduceByKey(_ + _)
   }
 
   val ipAddressCount = (accessLogRDD: RDD[ApacheAccessLog]) =>  {
-    accessLogRDD.map(log => (log.ipAddress, 1L)).reduceByKey(_ + _)
+    accessLogRDD.map(_.ipAddress -> 1L).reduceByKey(_ + _)
   }
 
   val filterIPAddress = (ipAddressCount: RDD[(String, Long)]) => {
@@ -60,14 +62,12 @@ object LogAnalyzerStreamingTotalRefactored {
   }
 
   val endpointCount = (accessLogRDD: RDD[ApacheAccessLog]) => {
-    accessLogRDD.map(log => (log.endpoint, 1L)).reduceByKey(_ + _)
+    accessLogRDD.map(_.endpoint -> 1L).reduceByKey(_ + _)
   }
 
-  def main(args: Array[String]) {
     val sparkConf = new SparkConf().setAppName("Log Analyzer Streaming Total in Scala")
-    val sc = new SparkContext(sparkConf)
 
-    val streamingContext = new StreamingContext(sc, SLIDE_INTERVAL)
+    val streamingContext = new StreamingContext(sparkConf, SLIDE_INTERVAL)
 
     // NOTE: Checkpointing must be enabled to use updateStateByKey.
     streamingContext.checkpoint("/tmp/log-analyzer-streaming-total-scala")
@@ -98,16 +98,19 @@ object LogAnalyzerStreamingTotalRefactored {
     })
 
     // Compute Response Code to Count.
+    // Notice the use of transform to produce the a DStream of
+    // response code counts, and then updateStateByKey to accumulate
+    // the response code counts for all of time.
     val responseCodeCountDStream = accessLogsDStream
       .transform(responseCodeCount)
     val cumulativeResponseCodeCountDStream = responseCodeCountDStream
       .updateStateByKey(computeRunningSum)
-
     cumulativeResponseCodeCountDStream .foreachRDD(rdd => {
       val responseCodeToCount = rdd.take(100)
       println( s"""Response code counts: ${responseCodeToCount.mkString("[", ",", "]")}""")
     })
 
+    // A DStream of ipAddresses accessed > 10 times.
     val ipAddressDStream = accessLogsDStream
       .transform(ipAddressCount)
       .updateStateByKey(computeRunningSum)
@@ -117,6 +120,7 @@ object LogAnalyzerStreamingTotalRefactored {
       println( s"""IPAddresses > 10 times: ${ipAddresses.mkString("[", ",", "]")}""")
     })
 
+    // A DStream of endpoint to count.
     val endpointCountsDStream = accessLogsDStream
       .transform(endpointCount)
       .updateStateByKey(computeRunningSum)
@@ -127,5 +131,4 @@ object LogAnalyzerStreamingTotalRefactored {
 
     streamingContext.start()
     streamingContext.awaitTermination()
-  }
 }
