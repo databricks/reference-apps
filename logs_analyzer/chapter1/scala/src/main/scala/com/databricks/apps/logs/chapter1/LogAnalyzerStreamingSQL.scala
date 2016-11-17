@@ -1,8 +1,7 @@
 package com.databricks.apps.logs.chapter1
 
-import org.apache.spark.sql.SQLContext
-import org.apache.spark.streaming.{Duration, StreamingContext}
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 import com.databricks.apps.logs.ApacheAccessLog
 
@@ -22,20 +21,16 @@ import com.databricks.apps.logs.ApacheAccessLog
  * % spark-submit
  *   --class "com.databricks.apps.logs.chapter1.LogAnalyzerStreaming"
  *   --master local[4]
- *   target/scala-2.10/spark-logs-analyzer_2.10-1.0.jar
+ *   target/scala-2.11/spark-logs-analyzer_2.11-2.0.jar
  */
 object LogAnalyzerStreamingSQL {
-  val WINDOW_LENGTH = new Duration(30 * 1000)
-  val SLIDE_INTERVAL = new Duration(10 * 1000)
+  val WINDOW_LENGTH = Seconds(30)
+  val SLIDE_INTERVAL = Seconds(10)
 
   def main(args: Array[String]) {
-    val sparkConf = new SparkConf().setAppName("Log Analyzer Streaming in Scala")
-    val sc = new SparkContext(sparkConf)
-
-    val sqlContext = new SQLContext(sc)
-    import sqlContext.implicits._
-
-    val streamingContext = new StreamingContext(sc, SLIDE_INTERVAL)
+    val spark = SparkSession.builder().appName("Log Analyzer Streaming in Scala").getOrCreate()
+    import spark.implicits._
+    val streamingContext = new StreamingContext(spark.sparkContext, SLIDE_INTERVAL)
 
     val logLinesDStream = streamingContext.socketTextStream("localhost", 9999)
 
@@ -45,13 +40,13 @@ object LogAnalyzerStreamingSQL {
 
     windowDStream.foreachRDD(accessLogs => {
       if (accessLogs.count() == 0) {
-        println("No access com.databricks.app.logs received in this time interval")
+        println("No access logs received in this time interval")
       } else {
-        accessLogs.toDF().registerTempTable("com/databricks/app/logs")
+        accessLogs.toDF().createOrReplaceTempView("logs")
 
         // Calculate statistics based on the content size.
-        val contentSizeStats = sqlContext
-          .sql("SELECT SUM(contentSize), COUNT(*), MIN(contentSize), MAX(contentSize) FROM com.databricks.app.logs")
+        val contentSizeStats = spark
+          .sql("SELECT SUM(contentSize), COUNT(*), MIN(contentSize), MAX(contentSize) FROM logs")
           .first()
         println("Content Size Avg: %s, Min: %s, Max: %s".format(
           contentSizeStats.getLong(0) / contentSizeStats.getLong(1),
@@ -59,28 +54,30 @@ object LogAnalyzerStreamingSQL {
           contentSizeStats(3)))
 
         // Compute Response Code to Count.
-        val responseCodeToCount = sqlContext
-          .sql("SELECT responseCode, COUNT(*) FROM com.databricks.app.logs GROUP BY responseCode")
+        val responseCodeToCount = spark
+          .sql("SELECT responseCode, COUNT(*) FROM logs GROUP BY responseCode")
           .map(row => (row.getInt(0), row.getLong(1)))
           .take(1000)
         println(s"""Response code counts: ${responseCodeToCount.mkString("[", ",", "]")}""")
 
         // Any IPAddress that has accessed the server more than 10 times.
-        val ipAddresses =sqlContext
-          .sql("SELECT ipAddress, COUNT(*) AS total FROM com.databricks.app.logs GROUP BY ipAddress HAVING total > 10")
+        val ipAddresses = spark
+          .sql("SELECT ipAddress, COUNT(*) AS total FROM logs GROUP BY ipAddress HAVING total > 10")
           .map(row => row.getString(0))
           .take(100)
         println(s"""IPAddresses > 10 times: ${ipAddresses.mkString("[", ",", "]")}""")
 
-        val topEndpoints = sqlContext
-          .sql("SELECT endpoint, COUNT(*) AS total FROM com.databricks.app.logs GROUP BY endpoint ORDER BY total DESC LIMIT 10")
+        // Top Endpoints.
+        val topEndpoints = spark
+          .sql("SELECT endpoint, COUNT(*) AS total FROM logs GROUP BY endpoint ORDER BY total DESC LIMIT 10")
           .map(row => (row.getString(0), row.getLong(1)))
           .collect()
         println(s"""Top Endpoints: ${topEndpoints.mkString("[", ",", "]")}""")
       }
     })
 
-    streamingContext.start()
-    streamingContext.awaitTermination()
+    // Start the streaming server.
+    streamingContext.start() // Start the computation
+    streamingContext.awaitTermination() // Wait for the computation to terminate
   }
 }
