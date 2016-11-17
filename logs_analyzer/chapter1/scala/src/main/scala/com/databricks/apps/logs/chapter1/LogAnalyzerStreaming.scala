@@ -1,7 +1,7 @@
 package com.databricks.apps.logs.chapter1
 
 import org.apache.spark.SparkConf
-import org.apache.spark.streaming.{Duration, StreamingContext}
+import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 import com.databricks.apps.logs.{ApacheAccessLog, OrderingUtils}
 
@@ -22,8 +22,8 @@ import com.databricks.apps.logs.{ApacheAccessLog, OrderingUtils}
  *   target/scala-2.11/spark-logs-analyzer_2.11-2.0.jar
  */
 object LogAnalyzerStreaming extends App {
-  val WINDOW_LENGTH = new Duration(30 * 1000)
-  val SLIDE_INTERVAL = new Duration(10 * 1000)
+  val WINDOW_LENGTH = Seconds(30)
+  val SLIDE_INTERVAL = Seconds(10)
 
   val sparkConf = new SparkConf().setAppName("Log Analyzer Streaming in Scala")
   val streamingContext = new StreamingContext(sparkConf, SLIDE_INTERVAL)
