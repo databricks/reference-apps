@@ -65,70 +65,70 @@ object LogAnalyzerStreamingTotalRefactored extends App {
     accessLogRDD.map(_.endpoint -> 1L).reduceByKey(_ + _)
   }
 
-    val sparkConf = new SparkConf().setAppName("Log Analyzer Streaming Total in Scala")
+  val sparkConf = new SparkConf().setAppName("Log Analyzer Streaming Total in Scala")
 
-    val streamingContext = new StreamingContext(sparkConf, SLIDE_INTERVAL)
+  val streamingContext = new StreamingContext(sparkConf, SLIDE_INTERVAL)
 
-    // NOTE: Checkpointing must be enabled to use updateStateByKey.
-    streamingContext.checkpoint("/tmp/log-analyzer-streaming-total-scala")
+  // NOTE: Checkpointing must be enabled to use updateStateByKey.
+  streamingContext.checkpoint("/tmp/log-analyzer-streaming-total-scala")
 
-    val logLinesDStream = streamingContext.socketTextStream("localhost", 9999)
+  val logLinesDStream = streamingContext.socketTextStream("localhost", 9999)
 
-    val accessLogsDStream = logLinesDStream.map(ApacheAccessLog.parseLogLine).cache()
+  val accessLogsDStream = logLinesDStream.map(ApacheAccessLog.parseLogLine).cache()
 
-    // Calculate statistics based on the content size.
-    accessLogsDStream.foreachRDD(rdd => {
-      val count = rdd.count()
-      if (count > 0) {
-        val currentContentSizes = contentSizeStats(rdd)
-        runningCount.getAndAdd(currentContentSizes._1)
-        runningSum.getAndAdd(currentContentSizes._2)
-        runningMin.set(currentContentSizes._3)
-        runningMax.set(currentContentSizes._4)
-      }
-      if (runningCount.get() == 0) {
-        println("Content Size Avg: -, Min: -, Max: -")
-      } else {
-        println("Content Size Avg: %s, Min: %s, Max: %s".format(
-          runningSum.get() / runningCount.get(),
-          runningMin.get(),
-          runningMax.get()
-        ))
-      }
-    })
+  // Calculate statistics based on the content size.
+  accessLogsDStream.foreachRDD(rdd => {
+    val count = rdd.count()
+    if (count > 0) {
+      val currentContentSizes = contentSizeStats(rdd)
+      runningCount.getAndAdd(currentContentSizes._1)
+      runningSum.getAndAdd(currentContentSizes._2)
+      runningMin.set(currentContentSizes._3)
+      runningMax.set(currentContentSizes._4)
+    }
+    if (runningCount.get() == 0) {
+      println("Content Size Avg: -, Min: -, Max: -")
+    } else {
+      println("Content Size Avg: %s, Min: %s, Max: %s".format(
+        runningSum.get() / runningCount.get(),
+        runningMin.get(),
+        runningMax.get()
+      ))
+    }
+  })
 
-    // Compute Response Code to Count.
-    // Notice the use of transform to produce the a DStream of
-    // response code counts, and then updateStateByKey to accumulate
-    // the response code counts for all of time.
-    val responseCodeCountDStream = accessLogsDStream
-      .transform(responseCodeCount)
-    val cumulativeResponseCodeCountDStream = responseCodeCountDStream
-      .updateStateByKey(computeRunningSum)
-    cumulativeResponseCodeCountDStream .foreachRDD(rdd => {
-      val responseCodeToCount = rdd.take(100)
-      println( s"""Response code counts: ${responseCodeToCount.mkString("[", ",", "]")}""")
-    })
+  // Compute Response Code to Count.
+  // Notice the use of transform to produce the a DStream of
+  // response code counts, and then updateStateByKey to accumulate
+  // the response code counts for all of time.
+  val responseCodeCountDStream = accessLogsDStream
+    .transform(responseCodeCount)
+  val cumulativeResponseCodeCountDStream = responseCodeCountDStream
+    .updateStateByKey(computeRunningSum)
+  cumulativeResponseCodeCountDStream .foreachRDD(rdd => {
+    val responseCodeToCount = rdd.take(100)
+    println( s"""Response code counts: ${responseCodeToCount.mkString("[", ",", "]")}""")
+  })
 
-    // A DStream of ipAddresses accessed > 10 times.
-    val ipAddressDStream = accessLogsDStream
-      .transform(ipAddressCount)
-      .updateStateByKey(computeRunningSum)
-      .transform(filterIPAddress)
-    ipAddressDStream.foreachRDD(rdd => {
-      val ipAddresses = rdd.take(100)
-      println( s"""IPAddresses > 10 times: ${ipAddresses.mkString("[", ",", "]")}""")
-    })
+  // A DStream of ipAddresses accessed > 10 times.
+  val ipAddressDStream = accessLogsDStream
+    .transform(ipAddressCount)
+    .updateStateByKey(computeRunningSum)
+    .transform(filterIPAddress)
+  ipAddressDStream.foreachRDD(rdd => {
+    val ipAddresses = rdd.take(100)
+    println( s"""IPAddresses > 10 times: ${ipAddresses.mkString("[", ",", "]")}""")
+  })
 
-    // A DStream of endpoint to count.
-    val endpointCountsDStream = accessLogsDStream
-      .transform(endpointCount)
-      .updateStateByKey(computeRunningSum)
-    endpointCountsDStream.foreachRDD(rdd => {
-      val topEndpoints = rdd.top(10)(OrderingUtils.SecondValueLongOrdering)
-      println( s"""Top Endpoints: ${topEndpoints.mkString("[", ",", "]")}""")
-    })
+  // A DStream of endpoint to count.
+  val endpointCountsDStream = accessLogsDStream
+    .transform(endpointCount)
+    .updateStateByKey(computeRunningSum)
+  endpointCountsDStream.foreachRDD(rdd => {
+    val topEndpoints = rdd.top(10)(OrderingUtils.SecondValueLongOrdering)
+    println( s"""Top Endpoints: ${topEndpoints.mkString("[", ",", "]")}""")
+  })
 
-    streamingContext.start()
-    streamingContext.awaitTermination()
+  streamingContext.start()
+  streamingContext.awaitTermination()
 }
