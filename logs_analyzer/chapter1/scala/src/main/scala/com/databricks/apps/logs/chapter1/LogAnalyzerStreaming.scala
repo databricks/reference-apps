@@ -19,16 +19,14 @@ import com.databricks.apps.logs.{ApacheAccessLog, OrderingUtils}
  * % spark-submit
  *   --class "com.databricks.apps.logs.chapter1.LogAnalyzerStreaming"
  *   --master local[4]
- *   target/scala-2.10/spark-logs-analyzer_2.10-1.0.jar
+ *   target/scala-2.11/spark-logs-analyzer_2.11-2.0.jar
  */
-object LogAnalyzerStreaming {
+object LogAnalyzerStreaming extends App {
   val WINDOW_LENGTH = new Duration(30 * 1000)
   val SLIDE_INTERVAL = new Duration(10 * 1000)
 
-  def main(args: Array[String]) {
     val sparkConf = new SparkConf().setAppName("Log Analyzer Streaming in Scala")
-    val sc = new SparkContext(sparkConf)
-    val streamingContext = new StreamingContext(sc, SLIDE_INTERVAL)
+    val streamingContext = new StreamingContext(sparkConf, SLIDE_INTERVAL)
 
     val logLinesDStream = streamingContext.socketTextStream("localhost", 9999)
 
@@ -37,10 +35,10 @@ object LogAnalyzerStreaming {
 
     windowDStream.foreachRDD(accessLogs => {
       if (accessLogs.count() == 0) {
-        println("No access com.databricks.app.logs received in this time interval")
+        println("No access logs received in this time interval")
       } else {
         // Calculate statistics based on the content size.
-        val contentSizes = accessLogs.map(log => log.contentSize).cache()
+        val contentSizes = accessLogs.map(_.contentSize).cache()
         println("Content Size Avg: %s, Min: %s, Max: %s".format(
           contentSizes.reduce(_ + _) / contentSizes.count,
           contentSizes.min,
@@ -49,14 +47,14 @@ object LogAnalyzerStreaming {
 
         // Compute Response Code to Count.
         val responseCodeToCount = accessLogs
-          .map(log => (log.responseCode, 1))
+          .map(_.responseCode -> 1)
           .reduceByKey(_ + _)
           .take(100)
         println( s"""Response code counts: ${responseCodeToCount.mkString("[", ",", "]")}""")
 
         // Any IPAddress that has accessed the server more than 10 times.
         val ipAddresses = accessLogs
-          .map(log => (log.ipAddress, 1))
+          .map(_.ipAddress -> 1)
           .reduceByKey(_ + _)
           .filter(_._2 > 10)
           .map(_._1)
@@ -65,14 +63,14 @@ object LogAnalyzerStreaming {
 
         // Top Endpoints.
         val topEndpoints = accessLogs
-          .map(log => (log.endpoint, 1))
+          .map(_.endpoint -> 1)
           .reduceByKey(_ + _)
           .top(10)(OrderingUtils.SecondValueOrdering)
         println( s"""Top Endpoints: ${topEndpoints.mkString("[", ",", "]")}""")
       }
     })
 
-    streamingContext.start()
-    streamingContext.awaitTermination()
-  }
+    // Start the streaming server.
+    streamingContext.start() // Start the computation
+    streamingContext.awaitTermination() // Wait for the computation to terminate
 }
