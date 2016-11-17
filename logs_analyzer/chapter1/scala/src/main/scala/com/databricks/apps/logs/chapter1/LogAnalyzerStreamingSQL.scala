@@ -23,11 +23,10 @@ import com.databricks.apps.logs.ApacheAccessLog
  *   --master local[4]
  *   target/scala-2.11/spark-logs-analyzer_2.11-2.0.jar
  */
-object LogAnalyzerStreamingSQL {
+object LogAnalyzerStreamingSQL extends App {
   val WINDOW_LENGTH = Seconds(30)
   val SLIDE_INTERVAL = Seconds(10)
 
-  def main(args: Array[String]) {
     val spark = SparkSession.builder().appName("Log Analyzer Streaming in Scala").getOrCreate()
     import spark.implicits._
     val streamingContext = new StreamingContext(spark.sparkContext, SLIDE_INTERVAL)
@@ -79,5 +78,4 @@ object LogAnalyzerStreamingSQL {
     // Start the streaming server.
     streamingContext.start() // Start the computation
     streamingContext.awaitTermination() // Wait for the computation to terminate
-  }
 }
