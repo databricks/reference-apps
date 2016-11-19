@@ -1,11 +1,8 @@
 package com.databricks.apps.logs
 
-import java.io.IOException
-
 /**
   * An entry of Apache access log.
   */
-// TODO Unify across all Scala chapters.
 case class ApacheAccessLog(ipAddress: String,
                            clientIdentd: String,
                            userId: String,
@@ -22,17 +19,17 @@ object ApacheAccessLog {
 
   /**
     * Parse log entry from a string.
+    *
     * @param log A string, typically a line from a log file
     * @return An entry of Apache access log
-    * @throws IOException Unable to parse the string
+    * @throws RuntimeException Unable to parse the string
     */
   def parseLogLine(log: String): ApacheAccessLog = {
-    val apacheAccessLog: ApacheAccessLog = log match {
+    log match {
       case PATTERN(ipAddress, clientIdentd, userId, dateTime, method, endpoint, protocol, responseCode, contentSize)
       => ApacheAccessLog(ipAddress, clientIdentd, userId, dateTime, method, endpoint, protocol, responseCode.toInt,
         contentSize.toLong)
       case _ => throw new RuntimeException(s"""Cannot parse log line: $log""")
     }
-    return apacheAccessLog
   }
 }
