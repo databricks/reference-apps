@@ -20,7 +20,7 @@ import com.databricks.apps.logs.LogStatistics;
 public class LogAnalyzerBatchImport {
 
     public static void main(String[] args) {
-    SparkSession sparkSession = SparkSession
+    SparkSession spark = SparkSession
             .builder()
             .appName("Log Analyzer SQL")
             .getOrCreate();
@@ -30,16 +30,16 @@ public class LogAnalyzerBatchImport {
       System.exit(-1);
     }
     String logFile = args[0];
-    JavaRDD<ApacheAccessLog> accessLogs = sparkSession
+    JavaRDD<ApacheAccessLog> accessLogs = spark
         .read()
         .textFile(logFile)
         .javaRDD()
         .map(ApacheAccessLog::parseFromLogLine);
 
-    LogAnalyzerRDD logAnalyzerRDD = new LogAnalyzerRDD(sparkSession);
+    LogAnalyzerRDD logAnalyzerRDD = new LogAnalyzerRDD(spark);
     LogStatistics logStatistics = logAnalyzerRDD.processRdd(accessLogs);
     logStatistics.printToStandardOut();
 
-    sparkSession.stop();
+    spark.stop();
   }
 }

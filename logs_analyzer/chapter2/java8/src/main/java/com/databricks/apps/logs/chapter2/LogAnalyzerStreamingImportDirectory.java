@@ -30,11 +30,11 @@ public class LogAnalyzerStreamingImportDirectory {
   private static final Duration SLIDE_INTERVAL = new Duration(10 * 1000);
 
   public static void main(String[] args) throws InterruptedException {
-    SparkSession sparkSession = SparkSession
+    SparkSession spark = SparkSession
             .builder()
             .appName("Log Analyzer Import Streaming HDFS")
             .getOrCreate();
-    JavaSparkContext sc = new JavaSparkContext(sparkSession.sparkContext());
+    JavaSparkContext sc = new JavaSparkContext(spark.sparkContext());
     JavaStreamingContext jssc = new JavaStreamingContext(sc, SLIDE_INTERVAL);
 
     // Specify a directory to monitor for log files.
@@ -44,7 +44,7 @@ public class LogAnalyzerStreamingImportDirectory {
     }
     String directory = args[0];
 
-    // This methods monitors a directory for new files to read in for streaming.
+    // This method monitors a directory for new files to read in for streaming.
     JavaDStream<String> logData = jssc.textFileStream(directory);
 
     JavaDStream<ApacheAccessLog> accessLogsDStream
@@ -53,7 +53,7 @@ public class LogAnalyzerStreamingImportDirectory {
     JavaDStream<ApacheAccessLog> windowDStream = accessLogsDStream.window(
         WINDOW_LENGTH, SLIDE_INTERVAL);
 
-    final LogAnalyzerRDD logAnalyzerRDD = new LogAnalyzerRDD(sparkSession);
+    final LogAnalyzerRDD logAnalyzerRDD = new LogAnalyzerRDD(spark);
     windowDStream.foreachRDD(accessLogs -> {
       if (accessLogs.count() == 0) {
         System.out.println("No access logs in this time interval");
