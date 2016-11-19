@@ -2,7 +2,7 @@ package com.databricks.apps.logs.chapter2
 
 import org.apache.spark.sql.SparkSession
 
-import com.databricks.apps.logs.{ApacheAccessLog, LogAnalyzerRDD, LogStatistics}
+import com.databricks.apps.logs.{ApacheAccessLog, LogAnalyzerRDD}
 
 /**
   * LogAnalyzerBatchImport shows how to import data from a file.
