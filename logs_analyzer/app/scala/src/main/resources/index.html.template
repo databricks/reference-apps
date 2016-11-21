@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Databricks Sample Application: Logs Analysis with Spark</title>
+  <meta http-equiv="refresh" content="5"/>
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+</head>
+<body>
+
+<div class="page-header">
+    <div class="row">
+    <div class="col-md-3"><img src="http://databricks.com/wp-content/themes/twentytwelve/images/logo-revamped.png" width="150" /></div>
+    <div class="col-md-6" ><h2>The Log Analyzer Application in Spark</h2></div>
+    </div>
+</div>
+
+  <div class="container theme-showcase" role="main">
+
+    <h3>Log Lines Received</h3>
+    ${logLinesTable}
+
+    <h3>Content Size Statistics</h3>
+    ${contentSizesTable}
+
+    <h3>Response Code Counts</h3>
+    ${responseCodeTable}
+
+    <h3>Top Endpoints</h3>
+    ${topEndpointsTable}
+
+    <h3>Frequent IPAddresses</h3>
+    ${frequentIpAddressTable}
+
+  </div>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+</body>
+</html>
