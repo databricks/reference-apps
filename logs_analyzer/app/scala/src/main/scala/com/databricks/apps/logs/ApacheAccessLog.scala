@@ -1,10 +1,9 @@
 package com.databricks.apps.logs
 
-import java.io.IOException
-
 /**
   * An entry of Apache access log.
   */
+
 case class ApacheAccessLog(ipAddress: String,
                            clientIdentd: String,
                            userId: String,
@@ -13,7 +12,7 @@ case class ApacheAccessLog(ipAddress: String,
                            endpoint: String,
                            protocol: String,
                            responseCode: Int,
-                           contentSize: Long) {
+                           contentSize: Long) extends Serializable {
 }
 
 object ApacheAccessLog {
@@ -23,15 +22,21 @@ object ApacheAccessLog {
     * Parse log entry from a string.
     *
     * @param log A string, typically a line from a log file
-    * @return An entry of Apache access log
-    * @throws IOException Unable to parse the string
+    * @return An entry of Apache access log, an empty value if cannot parse the line
     */
-  def parseLogLine(log: String): ApacheAccessLog = {
+  def parseLogLine(log: String): Option[ApacheAccessLog] = {
     log match {
       case PATTERN(ipAddress, clientIdentd, userId, dateTime, method, endpoint, protocol, responseCode, contentSize)
-      => ApacheAccessLog(ipAddress, clientIdentd, userId, dateTime, method, endpoint, protocol, responseCode.toInt,
-        contentSize.toLong)
-      case _ => throw new IOException(s"""Cannot parse log line: $log""")
+      => Some(ApacheAccessLog(ipAddress,
+        clientIdentd,
+        userId,
+        dateTime,
+        method,
+        endpoint,
+        protocol,
+        responseCode.toInt,
+        contentSize.toLong))
+      case _ => None
     }
   }
 }
