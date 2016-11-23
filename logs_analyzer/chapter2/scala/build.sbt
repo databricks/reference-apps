@@ -12,7 +12,7 @@ libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.0.1" % "provided"
 
 libraryDependencies += "org.apache.spark" %% "spark-streaming" % "2.0.1" % "provided"
 
-libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.0"
+libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.0" % "test"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.0" % "test"
 
