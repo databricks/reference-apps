@@ -10,7 +10,7 @@
 
 <div class="page-header">
     <div class="row">
-    <div class="col-md-3"><img src="http://databricks.com/wp-content/themes/twentytwelve/images/logo-revamped.png" width="150" /></div>
+    <div class="col-md-3"><img src="http://databricks.com/wp-content/uploads/2016/03/default-open-graph.png" width="150" /></div>
     <div class="col-md-6" ><h2>The Log Analyzer Application in Spark</h2></div>
     </div>
 </div>
