@@ -1,6 +1,5 @@
 package com.databricks.apps.logs;
 
-import com.google.common.collect.Iterators;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.spark.SparkConf;
@@ -9,6 +8,7 @@ import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 
 import java.io.IOException;
+import java.util.Collections;
 
 /**
  * The LogAnalyzerAppMain is an sample logs analysis application.  For now,
@@ -90,9 +90,9 @@ public class LogAnalyzerAppMain {
     JavaDStream<ApacheAccessLog> accessLogsDStream = logData.flatMap(
         line -> {
             try {
-                return Iterators.singletonIterator(ApacheAccessLog.parseFromLogLine(line));
+                return Collections.singleton(ApacheAccessLog.parseFromLogLine(line)).iterator();
             } catch (IOException e) {
-                return Iterators.emptyIterator();
+                return Collections.emptyIterator();
             }
         }
     ).cache();
