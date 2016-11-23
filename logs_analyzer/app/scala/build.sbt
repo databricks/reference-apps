@@ -12,7 +12,6 @@ libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.0.1" % "provided"
 
 libraryDependencies += "org.apache.spark" %% "spark-streaming" % "2.0.1" % "provided"
 
-//TODO Report an issue
 libraryDependencies += "com.github.acrisci" %% "commander" % "0.1.0" excludeAll (
   ExclusionRule(organization = "org.scalatest")
   )
