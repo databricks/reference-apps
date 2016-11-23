@@ -38,13 +38,13 @@ class ApacheAccessLogTest extends FlatSpec {
     assert(
       ApacheAccessLog.parseLogLine(
         """64.242.88.10 - - [07/Mar/2004:16:20:55 -0800] "GET /twiki/bin/view/Main/DCCAndPostFix HTTP/1.1" 200 52-3""")
-      .isEmpty)
+        .isEmpty)
   }
 
   it should "return empty value for a string with incorrect timezone" in {
     assert(
       ApacheAccessLog.parseLogLine(
         """64.242.88.10 - - [07/Mar/2004:16:20:55 -080] "GET /twiki/bin/view/Main/DCCAndPostFix HTTP/1.1" 200 5253""")
-      .isEmpty)
+        .isEmpty)
   }
 }

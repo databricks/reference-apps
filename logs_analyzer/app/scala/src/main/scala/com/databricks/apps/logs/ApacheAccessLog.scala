@@ -16,7 +16,7 @@ case class ApacheAccessLog(ipAddress: String,
 }
 
 object ApacheAccessLog {
-  val PATTERN = """^(\S+) (\S+) (\S+) \[([\w:/]+\s[+\-]\d{4})\] "(\S+) (\S+) (\S+)" (\d{3}) (\d+)""".r
+  private val PATTERN = """^(\S+) (\S+) (\S+) \[([\w:/]+\s[+\-]\d{4})\] "(\S+) (\S+) (\S+)" (\d{3}) (\d+)""".r
 
   /**
     * Parse log entry from a string.

@@ -14,6 +14,7 @@ object CmdlineArgumentsParser {
   /**
     * Parse command line arguments.
     * If unable to parse, then print help message and exit the application.
+    *
     * @param args Array of command line arguments
     * @return Application options.
     */
