@@ -24,7 +24,7 @@ import com.databricks.apps.logs.ApacheAccessLog
  * Example command to run:
  * % spark-submit
  *   --class "com.databricks.apps.logs.chapter1.LogAnalyzerStreaming"
- *   --master local[4]
+ *   --master local[*]
  *   target/scala-2.11/spark-logs-analyzer_2.11-2.0.jar
  */
 object LogAnalyzerStreamingTotal extends App {

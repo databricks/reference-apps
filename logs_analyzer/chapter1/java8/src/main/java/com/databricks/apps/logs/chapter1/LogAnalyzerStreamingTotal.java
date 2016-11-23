@@ -34,7 +34,7 @@ import com.databricks.apps.logs.ApacheAccessLog;
  * Example command to run:
  * %  ${YOUR_SPARK_HOME}/bin/spark-submit
  *     --class "com.databricks.apps.logs.chapter1.LogAnalyzerStreamingTotal"
- *     --master local[4]
+ *     --master local[*]
  *     target/log-analyzer-2.0.jar
  */
 public class LogAnalyzerStreamingTotal {
