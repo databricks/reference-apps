@@ -2,7 +2,7 @@ package com.databricks.apps.logs.chapter1
 
 import org.apache.spark.{SparkConf, SparkContext}
 
-import com.databricks.apps.logs.{ApacheAccessLog, OrderingUtils}
+import com.databricks.apps.logs.ApacheAccessLog
 
 /**
  * The LogAnalyzer takes in an apache access log file and
@@ -32,14 +32,14 @@ object LogAnalyzer extends App {
 
   // Compute Response Code to Count.
   val responseCodeToCount = accessLogs
-    .map(_.responseCode -> 1)
+    .map(_.responseCode -> 1L)
     .reduceByKey(_ + _)
     .take(100)
   println(s"""Response code counts: ${responseCodeToCount.mkString("[", ",", "]")}""")
 
   // Any IPAddress that has accessed the server more than 10 times.
   val ipAddresses = accessLogs
-    .map(_.ipAddress -> 1)
+    .map(_.ipAddress -> 1L)
     .reduceByKey(_ + _)
     .filter(_._2 > 10)
     .map(_._1)
@@ -48,9 +48,9 @@ object LogAnalyzer extends App {
 
   // Top Endpoints.
   val topEndpoints = accessLogs
-    .map(_.endpoint -> 1)
+    .map(_.endpoint -> 1L)
     .reduceByKey(_ + _)
-    .top(10)(OrderingUtils.SecondValueOrdering)
+    .top(10)(Ordering.by[(String, Long), Long](_._2))
   println(s"""Top Endpoints: ${topEndpoints.mkString("[", ",", "]")}""")
 
   sc.stop()

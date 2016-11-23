@@ -8,7 +8,7 @@ import org.apache.spark.SparkConf
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 
-import com.databricks.apps.logs.{ApacheAccessLog, OrderingUtils}
+import com.databricks.apps.logs.ApacheAccessLog
 
 /**
  * This LogAnalyzerStreaming program reads the localhost 9999 socket
@@ -29,7 +29,6 @@ import com.databricks.apps.logs.{ApacheAccessLog, OrderingUtils}
  *   target/scala-2.11/spark-logs-analyzer_2.11-2.0.jar
  */
 object LogAnalyzerStreamingTotalRefactored extends App {
-  val WINDOW_LENGTH = Seconds(30)
   val SLIDE_INTERVAL = Seconds(10)
 
   val computeRunningSum = (values: Seq[Long], state: Option[Long]) => {
@@ -107,7 +106,7 @@ object LogAnalyzerStreamingTotalRefactored extends App {
     .transform(responseCodeCount)
   val cumulativeResponseCodeCountDStream = responseCodeCountDStream
     .updateStateByKey(computeRunningSum)
-  cumulativeResponseCodeCountDStream .foreachRDD(rdd => {
+  cumulativeResponseCodeCountDStream.foreachRDD(rdd => {
     val responseCodeToCount = rdd.take(100)
     println( s"""Response code counts: ${responseCodeToCount.mkString("[", ",", "]")}""")
   })
@@ -127,7 +126,7 @@ object LogAnalyzerStreamingTotalRefactored extends App {
     .transform(endpointCount)
     .updateStateByKey(computeRunningSum)
   endpointCountsDStream.foreachRDD(rdd => {
-    val topEndpoints = rdd.top(10)(OrderingUtils.SecondValueLongOrdering)
+    val topEndpoints = rdd.top(10)(Ordering.by[(String, Long), Long](_._2))
     println( s"""Top Endpoints: ${topEndpoints.mkString("[", ",", "]")}""")
   })
 

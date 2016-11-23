@@ -3,7 +3,7 @@ package com.databricks.apps.logs.chapter1
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 
-import com.databricks.apps.logs.{ApacheAccessLog, OrderingUtils}
+import com.databricks.apps.logs.ApacheAccessLog
 
 /**
  * The LogAnalyzerStreaming illustrates how to use logs with Spark Streaming to
@@ -47,14 +47,14 @@ object LogAnalyzerStreaming extends App {
 
       // Compute Response Code to Count.
       val responseCodeToCount = accessLogs
-        .map(_.responseCode -> 1)
+        .map(_.responseCode -> 1L)
         .reduceByKey(_ + _)
         .take(100)
       println( s"""Response code counts: ${responseCodeToCount.mkString("[", ",", "]")}""")
 
       // Any IPAddress that has accessed the server more than 10 times.
       val ipAddresses = accessLogs
-        .map(_.ipAddress -> 1)
+        .map(_.ipAddress -> 1L)
         .reduceByKey(_ + _)
         .filter(_._2 > 10)
         .map(_._1)
@@ -63,9 +63,9 @@ object LogAnalyzerStreaming extends App {
 
       // Top Endpoints.
       val topEndpoints = accessLogs
-        .map(_.endpoint -> 1)
+        .map(_.endpoint -> 1L)
         .reduceByKey(_ + _)
-        .top(10)(OrderingUtils.SecondValueOrdering)
+        .top(10)(Ordering.by[(String, Long), Long](_._2))
       println( s"""Top Endpoints: ${topEndpoints.mkString("[", ",", "]")}""")
     }
   })
