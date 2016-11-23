@@ -1,57 +1,46 @@
 package com.databricks.apps.logs;
 
-import java.io.BufferedWriter;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.Serializable;
-import java.io.Writer;
+import java.io.*;
 import java.util.List;
 import java.util.Map;
 
 import scala.Tuple2;
 import scala.Tuple4;
 
-import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
-
 public class Renderer implements Serializable {
-  private String fileTemplate;
+  private final String fileTemplate;
+  private final int windowLengthSec;
 
-  public void render(LogStatistics allOfTime, LogStatistics lastWindow)
-      throws Exception {
-    if (fileTemplate == null) {
-        InputStream inputStream = Renderer.class.getClassLoader().getResourceAsStream("index.html.template");
-      fileTemplate = IOUtils.toString(inputStream, Charsets.UTF_8);
-    }
-
-    // TODO: Replace this hacky String replace with a proper HTML templating library.
-    String output = fileTemplate;
-    output = output.replace("${logLinesTable}", logLinesTable(allOfTime, lastWindow));
-    output = output.replace("${contentSizesTable}", contentSizesTable(allOfTime, lastWindow));
-    output = output.replace("${responseCodeTable}", responseCodeTable(allOfTime, lastWindow));
-    output = output.replace("${topEndpointsTable}", topEndpointsTable(allOfTime, lastWindow));
-    output = output.replace("${frequentIpAddressTable}", frequentIpAddressTable(allOfTime, lastWindow));
-
-    Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
-        Flags.getInstance().getOutputHtmlFile())));
-    out.write(output);
-    out.close();
+  public Renderer() throws IOException {
+    this.windowLengthSec = (int) (Flags.getInstance().getWindowLength().milliseconds() / 1000);
+    this.fileTemplate = TemplateProvider.fromResource("index.html.template");
   }
 
-  public String logLinesTable(LogStatistics allOfTime, LogStatistics lastWindow) {
+  public void render(LogStatistics allOfTime, LogStatistics lastWindow) throws IOException {
+    // TODO: Replace this hacky String replace with a proper HTML templating library.
+    String output = fileTemplate
+            .replace("${logLinesTable}", logLinesTable(allOfTime, lastWindow))
+            .replace("${contentSizesTable}", contentSizesTable(allOfTime, lastWindow))
+            .replace("${responseCodeTable}", responseCodeTable(allOfTime, lastWindow))
+            .replace("${topEndpointsTable}", topEndpointsTable(allOfTime, lastWindow))
+            .replace("${frequentIpAddressTable}", frequentIpAddressTable(allOfTime, lastWindow));
+    writeOutput(output);
+  }
+
+  private String logLinesTable(LogStatistics allOfTime, LogStatistics lastWindow) {
     return "<table class=\"table table-striped\">" +
         String.format("<tr><th>All Of Time:</th><td>%s</td></tr>",
             allOfTime.getContentSizeStats()._1()) +
-        String.format("<tr><th>Last Time Window:</th><td>%s</td></tr>",
+        String.format("<tr><th>Last %s seconds:</th><td>%s</td></tr>", windowLengthSec,
             lastWindow.getContentSizeStats()._1()) +
         "</table>";
   }
 
-  public String contentSizesTable(LogStatistics allOfTime, LogStatistics lastWindow) {
+  private String contentSizesTable(LogStatistics allOfTime, LogStatistics lastWindow) {
     StringBuilder builder = new StringBuilder();
     builder.append("<table class=\"table table-striped\">");
-    builder.append("<tr><th></th><th>All of Time</th><th> Last Time Window</th></tr>");
+    builder.append(String.format("<tr><th>Content Size</th><th>All of Time</th><th>Last %s seconds</th></tr>",
+            windowLengthSec));
     Tuple4<Long, Long, Long, Long> totalStats = allOfTime.getContentSizeStats();
     Tuple4<Long, Long, Long, Long> lastStats = lastWindow.getContentSizeStats();
     builder.append(String.format("<tr><th>Avg:</th><td>%s</td><td>%s</td>",
@@ -67,25 +56,27 @@ public class Renderer implements Serializable {
     return builder.toString();
   }
 
-  public String responseCodeTable(
+  private String responseCodeTable(
       LogStatistics allOfTime, LogStatistics lastWindow) {
     StringBuilder buffer = new StringBuilder();
     buffer.append("<table class=\"table table-striped\">");
-    buffer.append("<tr><th>Response Code</th><th>All of Time</th><th> Last Time Window</th></tr>");
+    buffer.append(String.format("<tr><th>Response Code</th><th>All of Time</th><th>Last %s seconds</th></tr>",
+            windowLengthSec));
     Map<Integer, Long> lastWindowMap = lastWindow.getResponseCodeToCount();
     for(Map.Entry<Integer, Long> entry: allOfTime.getResponseCodeToCount().entrySet()) {
       buffer.append(String.format("<tr><td>%s</td><td>%s</td><td>%s</td>",
-        entry.getKey(), entry.getValue(), lastWindowMap.get(entry.getKey())));
+        entry.getKey(), entry.getValue(), lastWindowMap.getOrDefault(entry.getKey(), 0L)));
     }
     buffer.append("</table>");
     return buffer.toString();
   }
 
-  public String frequentIpAddressTable(
+  private String frequentIpAddressTable(
       LogStatistics allOfTime, LogStatistics lastWindow) {
     StringBuilder builder = new StringBuilder();
     builder.append("<table class=\"table table-striped\">");
-    builder.append("<tr><th>All of Time</th><th> Last Time Window</th></tr>");
+    builder.append(String.format("<tr><th>All of Time</th><th>Last %s seconds</th></tr>",
+            windowLengthSec));
     List<String> totalIpAddresses = allOfTime.getIpAddresses();
     List<String> windowIpAddresses = lastWindow.getIpAddresses();
     for (int i = 0; i < totalIpAddresses.size(); i++) {
@@ -97,11 +88,12 @@ public class Renderer implements Serializable {
     return builder.toString();
   }
 
-  public String topEndpointsTable(
+  private String topEndpointsTable(
       LogStatistics allOfTime, LogStatistics lastWindow) {
     StringBuilder builder = new StringBuilder();
     builder.append("<table class=\"table table-striped\">");
-    builder.append("<tr><th>All of Time</th><th>Last Time Window</th></tr>");
+    builder.append(String.format("<tr><th>All of Time</th><th>Last %s seconds</th></tr>",
+            windowLengthSec));
     List<Tuple2<String, Long>> totalTopEndpoints = allOfTime.getTopEndpoints();
     List<Tuple2<String, Long>> windowTopEndpoints = lastWindow.getTopEndpoints();
     for (int i = 0; i < totalTopEndpoints.size(); i++) {
@@ -111,5 +103,11 @@ public class Renderer implements Serializable {
     }
     builder.append("</table>");
     return builder.toString();
+  }
+
+  private void writeOutput(String output) throws IOException {
+    try (Writer out = new BufferedWriter(new FileWriter(Flags.getInstance().getOutputHtmlFile()))) {
+      out.write(output);
+    }
   }
 }
