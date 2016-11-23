@@ -1,14 +1,15 @@
 package com.databricks.apps.logs;
 
+import java.io.IOException;
+import java.util.Collections;
+
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
+
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
-
-import java.io.IOException;
-import java.util.Collections;
 
 /**
  * The LogAnalyzerAppMain is an sample logs analysis application.  For now,
