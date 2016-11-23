@@ -56,9 +56,10 @@ object LogAnalyzerAppMain extends App {
   val logAnalyzerWindowed = new LogAnalyzerWindowed(appOptions.windowLength, appOptions.slideInterval)
   logAnalyzerWindowed.processAccessLogs(accessLogsDStream)
 
-  //TODO Complete Renderer
-  accessLogsDStream.foreachRDD(rdd => {println(logAnalyzerTotal.getLogStatistics)
-    println(logAnalyzerWindowed.getLogStatistics)})
+  // Render the output each time there is a new RDD in the accessLogsDStream.
+  val renderer = new Renderer(appOptions.outputHtmlFile, appOptions.windowLength)
+  accessLogsDStream.foreachRDD(rdd =>
+    renderer.render(logAnalyzerTotal.getLogStatistics, logAnalyzerWindowed.getLogStatistics))
 
   // Start the streaming server.
   streamingContext.start() // Start the computation

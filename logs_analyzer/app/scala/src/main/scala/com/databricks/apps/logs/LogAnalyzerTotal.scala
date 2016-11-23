@@ -14,9 +14,9 @@ class LogAnalyzerTotal extends AnalyzeFunctions with Serializable {
   val runningSum = new AtomicLong(0)
   val runningMin = new AtomicLong(0)
   val runningMax = new AtomicLong(0)
-  var currentResponseCodeCounts: Option[Array[(Int, Long)]] = None
-  var currentIPAddresses: Option[Array[String]] = None
-  var currentTopEndpoints: Option[Array[(String, Long)]] = None
+  var currentResponseCodeCounts: Map[Int, Long] = Map.empty
+  var currentIPAddresses: Array[String] = Array.empty
+  var currentTopEndpoints: Map[String, Long] = Map.empty
 
   def processAccessLogs(accessLogsDStream: DStream[ApacheAccessLog]): Unit = {
     // Calculate statistics based on the content size, and update the static variables to track this.
@@ -34,21 +34,21 @@ class LogAnalyzerTotal extends AnalyzeFunctions with Serializable {
     val responseCodeCountDStream = accessLogsDStream
       .transform(responseCodeCount)
       .updateStateByKey(computeRunningSum)
-    responseCodeCountDStream.foreachRDD(rdd => currentResponseCodeCounts = Some(rdd.take(100)))
+    responseCodeCountDStream.foreachRDD(rdd => currentResponseCodeCounts = rdd.take(100).toMap)
 
     // A DStream of ipAddressCounts.
     val ipAddressesDStream = accessLogsDStream
       .transform(ipAddressCount)
       .updateStateByKey(computeRunningSum)
       .transform(filterIPAddress)
-    ipAddressesDStream.foreachRDD(rdd => currentIPAddresses = Some(rdd.take(100)))
+    ipAddressesDStream.foreachRDD(rdd => currentIPAddresses = rdd.take(100))
 
     // A DStream of endpoint to count.
     val endpointCountsDStream = accessLogsDStream
       .transform(endpointCount)
       .updateStateByKey(computeRunningSum)
     endpointCountsDStream
-      .foreachRDD(rdd => currentTopEndpoints = Some(rdd.top(10)(Ordering.by[(String, Long), Long](_._2))))
+      .foreachRDD(rdd => currentTopEndpoints = rdd.top(10)(Ordering.by[(String, Long), Long](_._2)).toMap)
   }
 
   def getLogStatistics: LogStatistics = {
@@ -57,8 +57,8 @@ class LogAnalyzerTotal extends AnalyzeFunctions with Serializable {
         runningSum.get(),
         runningMin.get(),
         runningMax.get()),
-      currentResponseCodeCounts.getOrElse(Array.empty),
-      currentIPAddresses.getOrElse(Array.empty),
-      currentTopEndpoints.getOrElse(Array.empty))
+      currentResponseCodeCounts,
+      currentIPAddresses,
+      currentTopEndpoints)
   }
 }
