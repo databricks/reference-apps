@@ -2,6 +2,7 @@
 **.iml
 *.log
 out/**
+**/logs/**
 **/*.pyc
 **/.idea/**
 **/target/**
