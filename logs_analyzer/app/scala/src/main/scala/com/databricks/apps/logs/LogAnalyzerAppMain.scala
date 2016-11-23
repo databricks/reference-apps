@@ -23,7 +23,7 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
   * Example command to run:
   * %  ${YOUR_SPARK_HOME}/bin/spark-submit
   * --class "com.databricks.apps.logs.LogAnalyzerAppMain"
-  * --master local[4]
+  * --master spark://YOUR_SPARK_MASTER
   * target/scala-2.11/spark-logs-analyzer_2.11-2.0-assembly.jar
   * --logs-directory /tmp/logs
   * --output-html-file /tmp/log_stats.html
@@ -31,7 +31,6 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
   * --slide-interval 5
   * --checkpoint-directory /tmp/log-analyzer-streaming
   */
-//TODO Use Scala ARM for output resources
 object LogAnalyzerAppMain extends App {
   val appOptions = CmdlineArgumentsParser.parse(args)
 
