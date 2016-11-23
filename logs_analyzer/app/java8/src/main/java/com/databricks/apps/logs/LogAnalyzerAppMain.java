@@ -1,14 +1,14 @@
 package com.databricks.apps.logs;
 
-import java.io.IOException;
-
 import com.google.common.collect.Iterators;
-import org.apache.commons.cli.Option;
+import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
+
+import java.io.IOException;
 
 /**
  * The LogAnalyzerAppMain is an sample logs analysis application.  For now,
@@ -30,40 +30,49 @@ import org.apache.spark.streaming.api.java.JavaStreamingContext;
  * Example command to run:
  * %  ${YOUR_SPARK_HOME}/bin/spark-submit
  *     --class "com.databricks.apps.logs.LogAnalyzerAppMain"
- *     --master local[4]
+ *     --master spark://YOUR_SPARK_MASTER
  *     target/uber-log-analyzer-2.0.jar
- *     --logs_directory /tmp/logs
- *     --output_html_file /tmp/log_stats.html
- *     --window_length 30
- *     --slide_interval 5
- *     --checkpoint_directory /tmp/log-analyzer-streaming
+ *     --logs-directory /tmp/logs
+ *     --output-html-file /tmp/log_stats.html
+ *     --window-length 30
+ *     --slide-interval 5
+ *     --checkpoint-directory /tmp/log-analyzer-streaming
  */
 public class LogAnalyzerAppMain {
-  public static final String WINDOW_LENGTH = "window_length";
-  public static final String SLIDE_INTERVAL = "slide_interval";
-  public static final String LOGS_DIRECTORY = "logs_directory";
-  public static final String OUTPUT_HTML_FILE = "output_html_file";
-  public static final String CHECKPOINT_DIRECTORY = "checkpoint_directory";
+  static final String WINDOW_LENGTH = "w";
+  static final String SLIDE_INTERVAL = "s";
+  static final String LOGS_DIRECTORY = "l";
+  static final String OUTPUT_HTML_FILE = "o";
+  static final String CHECKPOINT_DIRECTORY = "c";
+  static final String HELP = "h";
 
   private static final Options THE_OPTIONS = createOptions();
+
   private static Options createOptions() {
     Options options = new Options();
-
-    options.addOption(
-        new Option(WINDOW_LENGTH, true, "The window length in seconds"));
-    options.addOption(
-        new Option(SLIDE_INTERVAL, true, "The slide interval in seconds"));
-    options.addOption(
-        new Option(LOGS_DIRECTORY, true, "The directory where logs are written"));
-    options.addOption(
-        new Option(OUTPUT_HTML_FILE, true, "Where to write output html file"));
-    options.addOption(
-        new Option(CHECKPOINT_DIRECTORY, true, "The checkpoint directory."));
+    options.addOption(LOGS_DIRECTORY, "logs-directory", true, "Directory with input log files");
+    options.addOption(OUTPUT_HTML_FILE, "output-html-file", true, "Output HTML file to write statistics");
+    options.addOption(WINDOW_LENGTH, "window-length", true, "Length of the aggregate window in seconds");
+    options.addOption(SLIDE_INTERVAL, "slide-interval", true, "Slide interval in seconds");
+    options.addOption(CHECKPOINT_DIRECTORY, "checkpoint-directory", true, "Directory for Spark checkpoints");
+    options.addOption(HELP, "help", false, "Print help");
     return options;
   }
 
+  private static void helpAndExit(int status) {
+    HelpFormatter helpFormatter = new HelpFormatter();
+    helpFormatter.printHelp("Program [options]", THE_OPTIONS);
+    System.exit(status);
+  }
+
   public static void main(String[] args) throws IOException, InterruptedException {
+    if (args.length == 0) {
+      helpAndExit(1);
+    }
     Flags.setFromCommandLineArgs(THE_OPTIONS, args);
+    if (Flags.getInstance().isHelp()) {
+      helpAndExit(0);
+    }
 
     // Startup the Spark Conf.
     SparkConf conf = new SparkConf()
