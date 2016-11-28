@@ -54,24 +54,20 @@ object LogAnalyzerStreamingTotalRefactored extends App {
   }
 
   val responseCodeCount: RDD[ApacheAccessLog] => RDD[(Int, Long)]
-  = (accessLogRDD: RDD[ApacheAccessLog]) => {
+  = (accessLogRDD: RDD[ApacheAccessLog]) =>
     accessLogRDD.map(_.responseCode -> 1L).reduceByKey(_ + _)
-  }
 
   val ipAddressCount: RDD[ApacheAccessLog] => RDD[(String, Long)]
-  = (accessLogRDD: RDD[ApacheAccessLog]) =>  {
+  = (accessLogRDD: RDD[ApacheAccessLog]) =>
     accessLogRDD.map(_.ipAddress -> 1L).reduceByKey(_ + _)
-  }
 
   val filterIPAddress: RDD[(String, Long)] => RDD[String]
-  = (ipAddressCount: RDD[(String, Long)]) => {
+  = (ipAddressCount: RDD[(String, Long)]) =>
     ipAddressCount.filter(_._2 > 10).map(_._1)
-  }
 
   val endpointCount: RDD[ApacheAccessLog] => RDD[(String, Long)]
-  = (accessLogRDD: RDD[ApacheAccessLog]) => {
+  = (accessLogRDD: RDD[ApacheAccessLog]) =>
     accessLogRDD.map(_.endpoint -> 1L).reduceByKey(_ + _)
-  }
 
   val sparkConf = new SparkConf().setAppName("Log Analyzer Streaming Total in Scala")
 
