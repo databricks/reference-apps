@@ -17,13 +17,13 @@ class Renderer(outputHtmlFile: String, windowLengthSec: Int) {
     writeOutput(output)
   }
 
-  private def logLinesTable(allOfTime: LogStatistics, lastWindow: LogStatistics) =
+  private def logLinesTable(allOfTime: LogStatistics, lastWindow: LogStatistics): String =
     ("""<table class="table table-striped">"""
       + s"<tr><th>All Of Time:</th><td>${allOfTime.contentSizeStats._1}</td></tr>"
       + s"<tr><th>Last $windowLengthSec seconds:</th><td>${lastWindow.contentSizeStats._1}</td></tr>"
       + "</table>")
 
-  private def contentSizesTable(allOfTime: LogStatistics, lastWindow: LogStatistics) = {
+  private def contentSizesTable(allOfTime: LogStatistics, lastWindow: LogStatistics): String = {
     val totalStats = allOfTime.contentSizeStats
     val lastStats = lastWindow.contentSizeStats
     ("""<table class="table table-striped">"""
@@ -37,7 +37,7 @@ class Renderer(outputHtmlFile: String, windowLengthSec: Int) {
       + "</table>")
   }
 
-  private def responseCodeTable(allOfTime: LogStatistics, lastWindow: LogStatistics) = {
+  private def responseCodeTable(allOfTime: LogStatistics, lastWindow: LogStatistics): String = {
     val lastWindowResponseCodes = lastWindow.responseCodeToCount
     ("""<table class="table table-striped">"""
       + s"<tr><th>Response Code</th><th>All of Time</th><th>Last $windowLengthSec seconds</th></tr>"
@@ -47,26 +47,23 @@ class Renderer(outputHtmlFile: String, windowLengthSec: Int) {
       + "</table>")
   }
 
-  private def frequentIpAddressTable(allOfTime: LogStatistics, lastWindow: LogStatistics) = {
+  private def frequentIpAddressTable(allOfTime: LogStatistics, lastWindow: LogStatistics): String =
     ("""<table class="table table-striped">"""
       + s"<tr><th>All of Time</th><th>Last $windowLengthSec seconds</th></tr>"
       + allOfTime.ipAddresses
       .zipAll(lastWindow.ipAddresses, "-", "-")
       .map(e => s"<tr><td>${e._1}</td><td>${e._2}</td></tr>").mkString
       + "</table>")
-  }
 
-  private def topEndpointsTable(allOfTime: LogStatistics, lastWindow: LogStatistics) = {
+  private def topEndpointsTable(allOfTime: LogStatistics, lastWindow: LogStatistics): String =
     ("""<table class="table table-striped">"""
       + s"<tr><th>All of Time</th><th>Last $windowLengthSec seconds</th></tr>"
       + allOfTime.topEndpoints.keys
       .zipAll(lastWindow.topEndpoints.keys, "-", "-")
       .map(e => s"<tr><td>${e._1}</td><td>${e._2}</td></tr>").mkString
-      + "</table>"
-      )
-  }
+      + "</table>")
 
-  private def writeOutput(output: String) = {
+  private def writeOutput(output: String): Unit = {
     import resource._
     for (out <- managed(new BufferedWriter(new FileWriter(outputHtmlFile)))) {
       out.write(output)

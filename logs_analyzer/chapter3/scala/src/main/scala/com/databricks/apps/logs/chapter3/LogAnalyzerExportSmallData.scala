@@ -2,6 +2,7 @@ package com.databricks.apps.logs.chapter3
 
 import java.io.{BufferedWriter, FileWriter, PrintWriter}
 
+import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
 
 import com.databricks.apps.logs.{ApacheAccessLog, LogAnalyzerRDD}
@@ -18,11 +19,17 @@ import com.databricks.apps.logs.{ApacheAccessLog, LogAnalyzerRDD}
   */
 object LogAnalyzerExportSmallData extends App {
   // Initialize SparkSession instance.
-  val spark = SparkSession.builder().appName("Log Analyzer SQL in Scala").getOrCreate()
+  val spark = SparkSession
+    .builder()
+    .appName("Log Analyzer SQL in Scala")
+    .getOrCreate()
 
   val logFile = args(0)
 
-  val accessLogs = spark.sparkContext.textFile(logFile).map(ApacheAccessLog.parseLogLine)
+  val accessLogs: RDD[ApacheAccessLog] = spark
+    .sparkContext
+    .textFile(logFile)
+    .map(ApacheAccessLog.parseLogLine)
 
   val logAnalyzerRDD = LogAnalyzerRDD(spark)
   val logStatistics = logAnalyzerRDD.processRdd(accessLogs)

@@ -29,20 +29,20 @@ class LogAnalyzerTotal extends AnalyzeFunctions with Serializable {
     })
 
     // A DStream of Response Code Counts;
-    val responseCodeCountDStream = accessLogsDStream
+    val responseCodeCountDStream: DStream[(Int, Long)] = accessLogsDStream
       .transform(responseCodeCount)
       .updateStateByKey(computeRunningSum)
     responseCodeCountDStream.foreachRDD(rdd => currentResponseCodeCounts = rdd.take(100).toMap)
 
     // A DStream of ipAddressCounts.
-    val ipAddressesDStream = accessLogsDStream
+    val ipAddressesDStream: DStream[String] = accessLogsDStream
       .transform(ipAddressCount)
       .updateStateByKey(computeRunningSum)
       .transform(filterIPAddress)
     ipAddressesDStream.foreachRDD(rdd => currentIPAddresses = rdd.take(100))
 
     // A DStream of endpoint to count.
-    val endpointCountsDStream = accessLogsDStream
+    val endpointCountsDStream: DStream[(String, Long)] = accessLogsDStream
       .transform(endpointCount)
       .updateStateByKey(computeRunningSum)
     endpointCountsDStream

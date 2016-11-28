@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicLong
 import scala.math._
 
 import org.apache.spark.SparkConf
+import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 import com.databricks.apps.logs.ApacheAccessLog
@@ -30,7 +31,8 @@ import com.databricks.apps.logs.ApacheAccessLog
 object LogAnalyzerStreamingTotal extends App {
   val SLIDE_INTERVAL = Seconds(10)
 
-  val computeRunningSum = (values: Seq[Long], state: Option[Long]) => {
+  val computeRunningSum: (Seq[Long], Option[Long]) => Option[Long]
+    = (values: Seq[Long], state: Option[Long]) => {
     val currentCount = values.sum
     val previousCount = state.getOrElse(0L)
     Some(currentCount + previousCount)
@@ -48,12 +50,12 @@ object LogAnalyzerStreamingTotal extends App {
   // NOTE: Checkpointing must be enabled to use updateStateByKey.
   streamingContext.checkpoint("/tmp/log-analyzer-streaming-total-scala")
 
-  val logLinesDStream = streamingContext.socketTextStream("localhost", 9999)
+  val logLinesDStream: DStream[String] = streamingContext.socketTextStream("localhost", 9999)
 
-  val accessLogsDStream = logLinesDStream.map(ApacheAccessLog.parseLogLine).cache()
+  val accessLogsDStream: DStream[ApacheAccessLog] = logLinesDStream.map(ApacheAccessLog.parseLogLine).cache()
 
   // Calculate statistics based on the content size, and update variables to track this.
-  val contentSizesDStream = accessLogsDStream.map(_.contentSize).cache()
+  val contentSizesDStream: DStream[Long] = accessLogsDStream.map(_.contentSize).cache()
   contentSizesDStream.foreachRDD(rdd => {
     val count = rdd.count()
     if (count > 0) {
@@ -75,10 +77,10 @@ object LogAnalyzerStreamingTotal extends App {
 
   // Compute Response Code to Count.
   // Note the use of updateStateByKey.
-  val responseCodeCountDStream = accessLogsDStream
+  val responseCodeCountDStream: DStream[(Int, Long)] = accessLogsDStream
     .map(_.responseCode -> 1L)
     .reduceByKey(_ + _)
-  val cumulativeResponseCodeCountDStream = responseCodeCountDStream
+  val cumulativeResponseCodeCountDStream: DStream[(Int, Long)] = responseCodeCountDStream
     .updateStateByKey(computeRunningSum)
   cumulativeResponseCodeCountDStream.foreachRDD(rdd => {
     val responseCodeToCount = rdd.take(100)
@@ -86,7 +88,7 @@ object LogAnalyzerStreamingTotal extends App {
   })
 
   // A DStream of ipAddresses accessed > 10 times.
-  val ipAddressDStream = accessLogsDStream
+  val ipAddressDStream: DStream[String] = accessLogsDStream
     .map(_.ipAddress -> 1L)
     .reduceByKey(_ + _)
     .updateStateByKey(computeRunningSum)
@@ -98,7 +100,7 @@ object LogAnalyzerStreamingTotal extends App {
   })
 
   // A DStream of endpoint to count.
-  val endpointCountsDStream = accessLogsDStream
+  val endpointCountsDStream: DStream[(String, Long)] = accessLogsDStream
     .map(_.endpoint -> 1L)
     .reduceByKey(_ + _)
     .updateStateByKey(computeRunningSum)

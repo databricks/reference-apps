@@ -1,6 +1,7 @@
 package com.databricks.apps.logs.chapter1
 
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 import com.databricks.apps.logs.ApacheAccessLog
@@ -27,15 +28,18 @@ object LogAnalyzerStreamingSQL extends App {
   val WINDOW_LENGTH = Seconds(30)
   val SLIDE_INTERVAL = Seconds(10)
 
-  val spark = SparkSession.builder().appName("Log Analyzer Streaming in Scala").getOrCreate()
+  val spark = SparkSession
+    .builder()
+    .appName("Log Analyzer Streaming in Scala")
+    .getOrCreate()
   import spark.implicits._
   val streamingContext = new StreamingContext(spark.sparkContext, SLIDE_INTERVAL)
 
-  val logLinesDStream = streamingContext.socketTextStream("localhost", 9999)
+  val logLinesDStream: DStream[String] = streamingContext.socketTextStream("localhost", 9999)
 
-  val accessLogsDStream = logLinesDStream.map(ApacheAccessLog.parseLogLine).cache()
+  val accessLogsDStream: DStream[ApacheAccessLog] = logLinesDStream.map(ApacheAccessLog.parseLogLine).cache()
 
-  val windowDStream = accessLogsDStream.window(WINDOW_LENGTH, SLIDE_INTERVAL)
+  val windowDStream: DStream[ApacheAccessLog] = accessLogsDStream.window(WINDOW_LENGTH, SLIDE_INTERVAL)
 
   windowDStream.foreachRDD(accessLogs => {
     if (accessLogs.count() == 0) {
@@ -44,7 +48,7 @@ object LogAnalyzerStreamingSQL extends App {
       accessLogs.toDF().createOrReplaceTempView("logs")
 
       // Calculate statistics based on the content size.
-      val contentSizeStats = spark
+      val contentSizeStats: Row = spark
         .sql("SELECT SUM(contentSize), COUNT(*), MIN(contentSize), MAX(contentSize) FROM logs")
         .first()
       println("Content Size Avg: %s, Min: %s, Max: %s".format(
@@ -53,21 +57,21 @@ object LogAnalyzerStreamingSQL extends App {
         contentSizeStats(3)))
 
       // Compute Response Code to Count.
-      val responseCodeToCount = spark
+      val responseCodeToCount: Array[(Int, Long)] = spark
         .sql("SELECT responseCode, COUNT(*) FROM logs GROUP BY responseCode")
         .map(row => (row.getInt(0), row.getLong(1)))
         .take(1000)
       println(s"""Response code counts: ${responseCodeToCount.mkString("[", ",", "]")}""")
 
       // Any IPAddress that has accessed the server more than 10 times.
-      val ipAddresses = spark
+      val ipAddresses: Array[String] = spark
         .sql("SELECT ipAddress, COUNT(*) AS total FROM logs GROUP BY ipAddress HAVING total > 10")
         .map(row => row.getString(0))
         .take(100)
       println(s"""IPAddresses > 10 times: ${ipAddresses.mkString("[", ",", "]")}""")
 
       // Top Endpoints.
-      val topEndpoints = spark
+      val topEndpoints: Array[(String, Long)] = spark
         .sql("SELECT endpoint, COUNT(*) AS total FROM logs GROUP BY endpoint ORDER BY total DESC LIMIT 10")
         .map(row => (row.getString(0), row.getLong(1)))
         .collect()

@@ -1,6 +1,7 @@
 package com.databricks.apps.logs.chapter2
 
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 import com.databricks.apps.logs.{ApacheAccessLog, LogAnalyzerRDD}
@@ -24,16 +25,19 @@ object LogAnalyzerStreamingImportDirectory extends App {
   val WINDOW_LENGTH = Seconds(30)
   val SLIDE_INTERVAL = Seconds(10)
 
-  val spark = SparkSession.builder().appName("Log Analyzer Import Streaming HDFS").getOrCreate()
+  val spark = SparkSession
+    .builder()
+    .appName("Log Analyzer Import Streaming HDFS")
+    .getOrCreate()
   val streamingContext = new StreamingContext(spark.sparkContext, SLIDE_INTERVAL)
 
   val directory = args(0)
 
   // This method monitors a directory for new files to read in for streaming.
-  val logData = streamingContext.textFileStream(directory)
+  val logData: DStream[String] = streamingContext.textFileStream(directory)
 
-  val accessLogsDStream = logData.map(ApacheAccessLog.parseLogLine)
-  val windowDStream = accessLogsDStream.window(WINDOW_LENGTH, SLIDE_INTERVAL)
+  val accessLogsDStream: DStream[ApacheAccessLog] = logData.map(ApacheAccessLog.parseLogLine)
+  val windowDStream: DStream[ApacheAccessLog] = accessLogsDStream.window(WINDOW_LENGTH, SLIDE_INTERVAL)
 
   val logAnalyzerRDD = LogAnalyzerRDD(spark)
   windowDStream.foreachRDD(accessLogs => {

@@ -1,5 +1,6 @@
 package com.databricks.apps.logs.chapter1
 
+import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 
 import com.databricks.apps.logs.ApacheAccessLog
@@ -21,24 +22,26 @@ object LogAnalyzer extends App {
 
   val logFile = args(0)
 
-  val accessLogs = sc.textFile(logFile).map(ApacheAccessLog.parseLogLine).cache()
+  val accessLogs: RDD[ApacheAccessLog] = sc.
+    textFile(logFile).
+    map(ApacheAccessLog.parseLogLine).cache()
 
   // Calculate statistics based on the content size.
-  val contentSizes = accessLogs.map(_.contentSize).cache()
+  val contentSizes: RDD[Long] = accessLogs.map(_.contentSize).cache()
   println("Content Size Avg: %s, Min: %s, Max: %s".format(
     contentSizes.reduce(_ + _) / contentSizes.count,
     contentSizes.min,
     contentSizes.max))
 
   // Compute Response Code to Count.
-  val responseCodeToCount = accessLogs
+  val responseCodeToCount: Array[(Int, Long)] = accessLogs
     .map(_.responseCode -> 1L)
     .reduceByKey(_ + _)
     .take(100)
   println(s"""Response code counts: ${responseCodeToCount.mkString("[", ",", "]")}""")
 
   // Any IPAddress that has accessed the server more than 10 times.
-  val ipAddresses = accessLogs
+  val ipAddresses: Array[String] = accessLogs
     .map(_.ipAddress -> 1L)
     .reduceByKey(_ + _)
     .filter(_._2 > 10)
@@ -47,7 +50,7 @@ object LogAnalyzer extends App {
   println(s"""IPAddresses > 10 times: ${ipAddresses.mkString("[", ",", "]")}""")
 
   // Top Endpoints.
-  val topEndpoints = accessLogs
+  val topEndpoints: Array[(String, Long)] = accessLogs
     .map(_.endpoint -> 1L)
     .reduceByKey(_ + _)
     .top(10)(Ordering.by[(String, Long), Long](_._2))

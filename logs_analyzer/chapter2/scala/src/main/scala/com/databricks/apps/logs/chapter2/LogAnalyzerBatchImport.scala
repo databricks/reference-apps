@@ -1,5 +1,6 @@
 package com.databricks.apps.logs.chapter2
 
+import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
 
 import com.databricks.apps.logs.{ApacheAccessLog, LogAnalyzerRDD}
@@ -15,11 +16,16 @@ import com.databricks.apps.logs.{ApacheAccessLog, LogAnalyzerRDD}
   * ../../data/apache.access.log
   */
 object LogAnalyzerBatchImport extends App {
-  val spark = SparkSession.builder().appName("Log Analyzer SQL in Scala").getOrCreate()
+  val spark = SparkSession
+    .builder()
+    .appName("Log Analyzer SQL in Scala")
+    .getOrCreate()
 
   val logFile = args(0)
 
-  val accessLogs = spark.sparkContext.textFile(logFile).map(ApacheAccessLog.parseLogLine)
+  val accessLogs: RDD[ApacheAccessLog] = spark.sparkContext
+    .textFile(logFile)
+    .map(ApacheAccessLog.parseLogLine)
 
   val logAnalyzerRDD = LogAnalyzerRDD(spark)
   val logStatistics = logAnalyzerRDD.processRdd(accessLogs)

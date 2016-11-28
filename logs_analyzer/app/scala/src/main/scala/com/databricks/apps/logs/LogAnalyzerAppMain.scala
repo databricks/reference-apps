@@ -1,6 +1,7 @@
 package com.databricks.apps.logs
 
 import org.apache.spark.SparkConf
+import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 /**
@@ -42,10 +43,12 @@ object LogAnalyzerAppMain extends App {
   streamingContext.checkpoint(appOptions.checkpointDirectory)
 
   // This methods monitors a directory for new files to read in for streaming.
-  val logData = streamingContext.textFileStream(appOptions.logsDirectory)
+  val logData: DStream[String] = streamingContext.textFileStream(appOptions.logsDirectory)
 
   // Create DStream of Apache log entries
-  val accessLogsDStream = logData.flatMap(line => ApacheAccessLog.parseLogLine(line).iterator).cache()
+  val accessLogsDStream: DStream[ApacheAccessLog] = logData
+    .flatMap(line => ApacheAccessLog.parseLogLine(line).iterator)
+    .cache()
 
   // Process the DStream which gathers stats for all of time.
   val logAnalyzerTotal = new LogAnalyzerTotal()

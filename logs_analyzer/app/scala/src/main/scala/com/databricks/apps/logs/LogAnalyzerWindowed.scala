@@ -13,7 +13,8 @@ class LogAnalyzerWindowed(val windowLength: Int, val slideInterval: Int) extends
   var logStatistics = EMPTY_LOG_STATISTICS
 
   def processAccessLogs(accessLogsDStream: DStream[ApacheAccessLog]): Unit = {
-    val windowDStream = accessLogsDStream.window(Seconds(windowLength), Seconds(slideInterval))
+    val windowDStream: DStream[ApacheAccessLog] = accessLogsDStream
+      .window(Seconds(windowLength), Seconds(slideInterval))
     windowDStream.foreachRDD(accessLogs => {
       if (accessLogs.count() == 0) {
         logStatistics = EMPTY_LOG_STATISTICS

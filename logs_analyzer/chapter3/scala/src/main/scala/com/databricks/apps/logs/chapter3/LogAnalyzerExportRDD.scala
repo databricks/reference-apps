@@ -1,5 +1,6 @@
 package com.databricks.apps.logs.chapter3
 
+import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 
 import com.databricks.apps.logs.ApacheAccessLog
@@ -25,7 +26,7 @@ object LogAnalyzerExportRDD extends App {
   val inputFile = args(0)
   val outputDirectory = args(1)
 
-  val accessLogs = sc.textFile(inputFile)
+  val accessLogs: RDD[ApacheAccessLog] = sc.textFile(inputFile)
     .map(ApacheAccessLog.parseLogLine)
     .repartition(NUM_PARTITIONS) // Optionally, change this.
   accessLogs.saveAsTextFile(outputDirectory)
