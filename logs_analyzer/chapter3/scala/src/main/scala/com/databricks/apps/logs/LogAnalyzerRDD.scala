@@ -3,9 +3,7 @@ package com.databricks.apps.logs
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
 
-/**
-  * Analyzer for RDD of ApacheAccessLog entries.
-  */
+/** Analyzer for RDD of ApacheAccessLog entries. */
 case class LogAnalyzerRDD(spark: SparkSession) {
   def processRdd(accessLogs: RDD[ApacheAccessLog]): LogStatistics = {
     // For implicit conversions from RDDs to DataFrames

@@ -2,9 +2,7 @@ package com.databricks.apps.logs
 
 import org.apache.spark.rdd.RDD
 
-/**
-  * Functions to analyze Apache logs.
-  */
+/** Functions to analyze Apache logs. */
 trait AnalyzeFunctions {
 
   def computeRunningSum: (Seq[Long], Option[Long]) => Option[Long]

@@ -6,9 +6,7 @@ import scala.math._
 
 import org.apache.spark.streaming.dstream.DStream
 
-/**
-  * Collects total statistics from the moment application started.
-  */
+/** Collects total statistics from the moment application started. */
 class LogAnalyzerTotal extends AnalyzeFunctions with Serializable {
   val runningCount = new AtomicLong(0)
   val runningSum = new AtomicLong(0)

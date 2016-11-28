@@ -2,9 +2,7 @@ package com.databricks.apps.logs
 
 import java.io.{BufferedWriter, FileWriter}
 
-/**
-  * Renders statistics in HTML file.
-  */
+/** Renders statistics in HTML file. */
 class Renderer(outputHtmlFile: String, windowLengthSec: Int) {
   private val template = TemplateProvider.fromResource("index.html.template")
 

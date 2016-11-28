@@ -1,8 +1,6 @@
 package com.databricks.apps.logs
 
-/**
-  * Aggregates log statistics.
-  */
+/** Aggregates log statistics. */
 case class LogStatistics(contentSizeStats: (Long, Long, Long, Long),
                          responseCodeToCount: Map[Int, Long],
                          ipAddresses: Array[String],

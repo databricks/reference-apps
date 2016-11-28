@@ -1,9 +1,6 @@
 package com.databricks.apps.logs
 
-/**
-  * An entry of Apache access log.
-  */
-
+/** An entry of Apache access log. */
 case class ApacheAccessLog(ipAddress: String,
                            clientIdentd: String,
                            userId: String,

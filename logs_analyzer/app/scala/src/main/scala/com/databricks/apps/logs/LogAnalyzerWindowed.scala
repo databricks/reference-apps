@@ -5,9 +5,7 @@ import scala.math.Ordering
 import org.apache.spark.streaming.Seconds
 import org.apache.spark.streaming.dstream.DStream
 
-/**
-  * Collects statistics within a window.
-  */
+/** Collects statistics within a window. */
 class LogAnalyzerWindowed(val windowLength: Int, val slideInterval: Int) extends AnalyzeFunctions with Serializable {
 
   import LogStatistics.EMPTY_LOG_STATISTICS

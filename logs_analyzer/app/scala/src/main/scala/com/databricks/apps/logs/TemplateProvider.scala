@@ -4,9 +4,7 @@ import java.io.IOException
 
 import scala.io.Source
 
-/**
-  * Provides HTML template for Renderer.
-  */
+/** Provides HTML template for Renderer. */
 object TemplateProvider {
 
   /**

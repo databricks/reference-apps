@@ -1,8 +1,6 @@
 package com.databricks.apps.logs
 
-/**
-  * Container for the application options.
-  */
+/** Container for the application options. */
 sealed case class AppOptions(logsDirectory: String,
                              outputHtmlFile: String,
                              windowLength: Int,
