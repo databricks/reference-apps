@@ -118,7 +118,7 @@ public class LogAnalyzerStreamingTotalRefactored {
        new Duration(10000));  // This sets the update window to be every 10 seconds.
 
     // Checkpointing must be enabled to use the updateStateByKey function.
-    jssc.checkpoint("/tmp/log-analyzer-streaming");
+    jssc.checkpoint("checkpoints-log-analyzer-streaming-total");
 
     JavaReceiverInputDStream<String> logDataDStream =
        jssc.socketTextStream("localhost", 9999);

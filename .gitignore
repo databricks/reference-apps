@@ -1,8 +1,8 @@
 **~
 **.iml
-*.log
+*.log*
 out/**
-**/logs/**
+**/checkpoints*
 **/*.pyc
 **/.idea/**
 **/target/**

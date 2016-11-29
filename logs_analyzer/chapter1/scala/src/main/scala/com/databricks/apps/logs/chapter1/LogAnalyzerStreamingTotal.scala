@@ -48,7 +48,7 @@ object LogAnalyzerStreamingTotal extends App {
   val streamingContext = new StreamingContext(sparkConf, SLIDE_INTERVAL)
 
   // NOTE: Checkpointing must be enabled to use updateStateByKey.
-  streamingContext.checkpoint("/tmp/log-analyzer-streaming-total-scala")
+  streamingContext.checkpoint("checkpoints-log-analyzer-streaming-total")
 
   val logLinesDStream: DStream[String] = streamingContext.socketTextStream("localhost", 9999)
 
