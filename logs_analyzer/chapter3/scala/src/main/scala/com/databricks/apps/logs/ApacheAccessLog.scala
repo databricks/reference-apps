@@ -2,14 +2,14 @@ package com.databricks.apps.logs
 
 /** An entry of Apache access log. */
 case class ApacheAccessLog(ipAddress: String,
-                           clientIdentd: String,
-                           userId: String,
-                           dateTime: String,
-                           method: String,
-                           endpoint: String,
-                           protocol: String,
-                           responseCode: Int,
-                           contentSize: Long) {
+  clientIdentd: String,
+  userId: String,
+  dateTime: String,
+  method: String,
+  endpoint: String,
+  protocol: String,
+  responseCode: Int,
+  contentSize: Long) {
 }
 
 object ApacheAccessLog {
