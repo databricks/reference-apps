@@ -27,6 +27,11 @@ import com.databricks.apps.logs.ApacheAccessLog
  *   --class "com.databricks.apps.logs.chapter1.LogAnalyzerStreaming"
  *   --master local[*]
  *   target/scala-2.11/spark-logs-analyzer_2.11-2.0.jar
+ *
+ * On another console, run the shell script that emulates network stream
+ * by periodically sending portions of the sample log file to a network socket:
+ * % cd ../../data
+ * % ./stream.sh apache.access.log
  */
 object LogAnalyzerStreamingTotal extends App {
   val SLIDE_INTERVAL = Seconds(10)

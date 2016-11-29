@@ -33,6 +33,11 @@ import com.databricks.apps.logs.ApacheAccessLog;
  *     --class "com.databricks.apps.logs.chapter1.LogAnalyzerStreamingSQL"
  *     --master local[*]
  *     target/log-analyzer-2.0.jar
+ *
+ * On another console, run the shell script that emulates network stream
+ * by periodically sending portions of the sample log file to a network socket:
+ * % cd ../../data
+ * % ./stream.sh apache.access.log
  */
 public class LogAnalyzerStreamingSQL {
   // Stats will be computed for the last window length of time.

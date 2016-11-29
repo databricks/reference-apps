@@ -18,7 +18,7 @@ Before we can begin, we need two things:
 * **An Apache access log file**: If you have one, it's more interesting to use real
 data.
   * This is trivial sample one provided at
- [data/apache.access.log](../data/apache.accesslog).
+ [data/apache.access.log](../data/apache.access.log).
   * Or download a better example here: http://www.monitorware.com/en/logsamples/apache.php
 * **A parser and model for the log file**: See
  [ApacheAccessLog.java](java8/src/main/java/com/databricks/apps/logs/ApacheAccessLog.java).
