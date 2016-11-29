@@ -18,19 +18,19 @@
   <div class="container theme-showcase" role="main">
 
     <h3>Log Lines Received</h3>
-    ${logLinesTable}
+    @{logLinesTable}
 
     <h3>Content Size Statistics</h3>
-    ${contentSizesTable}
+    @{contentSizesTable}
 
     <h3>Response Code Counts</h3>
-    ${responseCodeTable}
+    @{responseCodeTable}
 
     <h3>Top Endpoints</h3>
-    ${topEndpointsTable}
+    @{topEndpointsTable}
 
     <h3>Frequent IPAddresses</h3>
-    ${frequentIpAddressTable}
+    @{frequentIpAddressTable}
 
   </div>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>

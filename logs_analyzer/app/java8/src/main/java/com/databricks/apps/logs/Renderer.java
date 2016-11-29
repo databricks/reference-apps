@@ -19,11 +19,11 @@ public class Renderer implements Serializable {
   public void render(LogStatistics allOfTime, LogStatistics lastWindow) throws IOException {
     // TODO: Replace this hacky String replace with a proper HTML templating library.
     String output = fileTemplate
-            .replace("${logLinesTable}", logLinesTable(allOfTime, lastWindow))
-            .replace("${contentSizesTable}", contentSizesTable(allOfTime, lastWindow))
-            .replace("${responseCodeTable}", responseCodeTable(allOfTime, lastWindow))
-            .replace("${topEndpointsTable}", topEndpointsTable(allOfTime, lastWindow))
-            .replace("${frequentIpAddressTable}", frequentIpAddressTable(allOfTime, lastWindow));
+            .replace("@{logLinesTable}", logLinesTable(allOfTime, lastWindow))
+            .replace("@{contentSizesTable}", contentSizesTable(allOfTime, lastWindow))
+            .replace("@{responseCodeTable}", responseCodeTable(allOfTime, lastWindow))
+            .replace("@{topEndpointsTable}", topEndpointsTable(allOfTime, lastWindow))
+            .replace("@{frequentIpAddressTable}", frequentIpAddressTable(allOfTime, lastWindow));
     writeOutput(output);
   }
 

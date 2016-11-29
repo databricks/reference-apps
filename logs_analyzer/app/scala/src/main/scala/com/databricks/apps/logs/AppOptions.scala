@@ -3,8 +3,8 @@ package com.databricks.apps.logs
 /** Container for the application options. */
 sealed case class AppOptions(logsDirectory: String,
                              outputHtmlFile: String,
-                             windowLength: Int,
-                             slideInterval: Int,
+                             windowLength: Long,
+                             slideInterval: Long,
                              checkpointDirectory: String)
 
 object CmdlineArgumentsParser {
@@ -22,17 +22,16 @@ object CmdlineArgumentsParser {
       .version("2.0")
       .option("-l, --logs-directory [path]", "Directory with input log files", required = true)
       .option("-o, --output-html-file [path]", "Output HTML file to write statistics", required = true)
-      .option("-w, --window-length [number]", "Length of the aggregate window in seconds", required = true, fn = _.toInt)
-      .option("-s, --slide-interval [number]", "Slide interval in seconds", required = true, fn = _.toInt)
+      .option("-w, --window-length [number]", "Length of the aggregate window in seconds", required = true, fn = _.toLong)
+      .option("-s, --slide-interval [number]", "Slide interval in seconds", required = true, fn = _.toLong)
       .option("-c, --checkpoint-directory [path]", "Directory for Spark checkpoints", required = true)
     if (args.isEmpty)
       program.help()
     program = program.parse(args)
-
-    AppOptions(program.logsDirectory,
-      program.outputHtmlFile,
-      program.windowLength,
-      program.slideInterval,
-      program.checkpointDirectory)
+    AppOptions(program.logsDirectory[String],
+      program.outputHtmlFile[String],
+      program.windowLength[Long],
+      program.slideInterval[Long],
+      program.checkpointDirectory[String])
   }
 }

@@ -3,17 +3,17 @@ package com.databricks.apps.logs
 import java.io.{BufferedWriter, FileWriter}
 
 /** Renders statistics in HTML file. */
-class Renderer(outputHtmlFile: String, windowLengthSec: Int) {
+class Renderer(outputHtmlFile: String, windowLengthSec: Long) {
   private val template = TemplateProvider.fromResource("index.html.template")
 
   def render(allOfTime: LogStatistics, lastWindow: LogStatistics): Unit = {
     // TODO: Replace this hacky String replace with a proper HTML templating library.
     val output = template
-      .replace("${logLinesTable}", logLinesTable(allOfTime, lastWindow))
-      .replace("${contentSizesTable}", contentSizesTable(allOfTime, lastWindow))
-      .replace("${responseCodeTable}", responseCodeTable(allOfTime, lastWindow))
-      .replace("${topEndpointsTable}", topEndpointsTable(allOfTime, lastWindow))
-      .replace("${frequentIpAddressTable}", frequentIpAddressTable(allOfTime, lastWindow))
+      .replace("@{logLinesTable}", logLinesTable(allOfTime, lastWindow))
+      .replace("@{contentSizesTable}", contentSizesTable(allOfTime, lastWindow))
+      .replace("@{responseCodeTable}", responseCodeTable(allOfTime, lastWindow))
+      .replace("@{topEndpointsTable}", topEndpointsTable(allOfTime, lastWindow))
+      .replace("@{frequentIpAddressTable}", frequentIpAddressTable(allOfTime, lastWindow))
     writeOutput(output)
   }
 
