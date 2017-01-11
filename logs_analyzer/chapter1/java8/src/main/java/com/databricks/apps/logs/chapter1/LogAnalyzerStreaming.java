@@ -30,8 +30,13 @@ import com.databricks.apps.logs.ApacheAccessLog;
  * Example command to run:
  * %  ${YOUR_SPARK_HOME}/bin/spark-submit
  *     --class "com.databricks.apps.logs.chapter1.LogAnalyzerStreaming"
- *     --master local[4]
+ *     --master local[*]
  *     target/log-analyzer-2.0.jar
+ *
+ * On another console, run the shell script that emulates network stream
+ * by periodically sending portions of the sample log file to a network socket:
+ * % cd ../../data
+ * % ./stream.sh apache.access.log
  */
 public class LogAnalyzerStreaming {
   private static final Function2<Long, Long, Long> SUM_REDUCER = (a, b) -> a + b;

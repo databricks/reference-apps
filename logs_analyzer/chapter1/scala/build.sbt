@@ -1,14 +1,23 @@
 name := "Spark Logs Analyzer"
-
-version := "1.0"
-
-scalaVersion := "2.10.4"
-
-libraryDependencies += "org.apache.spark" %% "spark-core" % "1.4.0" % "provided"
-
-libraryDependencies += "org.apache.spark" %% "spark-sql" % "1.4.0" % "provided"
-
-libraryDependencies += "org.apache.spark" %% "spark-streaming" % "1.4.0" % "provided"
-
-resolvers += "Akka Repository" at "http://repo.akka.io/releases/"
+version := "2.0"
+scalaVersion := "2.11.8"
+scalacOptions ++= Seq(
+  "-deprecation",
+  "-encoding", "UTF-8",
+  "-feature",
+  "-target:jvm-1.8",
+  "-unchecked",
+  "-Ywarn-adapted-args",
+  "-Ywarn-dead-code",
+  "-Ywarn-numeric-widen",
+  "-Ywarn-unused",
+  "-Ywarn-value-discard",
+  "-Xfuture",
+  "-Xlint"
+)
+libraryDependencies ++= Seq(
+  "org.apache.spark" %% "spark-core" % "2.0.1" % "provided",
+  "org.apache.spark" %% "spark-sql" % "2.0.1" % "provided",
+  "org.apache.spark" %% "spark-streaming" % "2.0.1" % "provided"
+)
 

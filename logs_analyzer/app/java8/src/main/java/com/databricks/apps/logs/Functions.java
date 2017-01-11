@@ -3,7 +3,6 @@ package com.databricks.apps.logs;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
-
 import javax.annotation.Nullable;
 
 import scala.Tuple2;

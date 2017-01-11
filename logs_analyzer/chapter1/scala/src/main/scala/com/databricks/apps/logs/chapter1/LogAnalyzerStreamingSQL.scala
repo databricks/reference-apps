@@ -1,9 +1,10 @@
 package com.databricks.apps.logs.chapter1
 
+import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.streaming.dstream.DStream
+import org.apache.spark.streaming.{Seconds, StreamingContext}
+
 import com.databricks.apps.logs.ApacheAccessLog
-import org.apache.spark.sql.SQLContext
-import org.apache.spark.{SparkContext, SparkConf}
-import org.apache.spark.streaming.{StreamingContext, Duration}
 
 /**
  * The LogAnalyzerStreamingSQL is similar to LogAnalyzerStreaming, except
@@ -20,66 +21,70 @@ import org.apache.spark.streaming.{StreamingContext, Duration}
  * Example command to run:
  * % spark-submit
  *   --class "com.databricks.apps.logs.chapter1.LogAnalyzerStreaming"
- *   --master local[4]
- *   target/scala-2.10/spark-logs-analyzer_2.10-1.0.jar
+ *   --master local[*]
+ *   target/scala-2.11/spark-logs-analyzer_2.11-2.0.jar
+ *
+ * On another console, run the shell script that emulates network stream
+ * by periodically sending portions of the sample log file to a network socket:
+ * % cd ../../data
+ * % ./stream.sh apache.access.log
  */
-object LogAnalyzerStreamingSQL {
-  val WINDOW_LENGTH = new Duration(30 * 1000)
-  val SLIDE_INTERVAL = new Duration(10 * 1000)
+object LogAnalyzerStreamingSQL extends App {
+  val WINDOW_LENGTH = Seconds(30)
+  val SLIDE_INTERVAL = Seconds(10)
 
-  def main(args: Array[String]) {
-    val sparkConf = new SparkConf().setAppName("Log Analyzer Streaming in Scala")
-    val sc = new SparkContext(sparkConf)
+  val spark = SparkSession
+    .builder()
+    .appName("Log Analyzer Streaming in Scala")
+    .getOrCreate()
+  import spark.implicits._
+  val streamingContext = new StreamingContext(spark.sparkContext, SLIDE_INTERVAL)
 
-    val sqlContext = new SQLContext(sc)
-    import sqlContext.implicits._
+  val logLinesDStream: DStream[String] = streamingContext.socketTextStream("localhost", 9999)
 
-    val streamingContext = new StreamingContext(sc, SLIDE_INTERVAL)
+  val accessLogsDStream: DStream[ApacheAccessLog] = logLinesDStream.map(ApacheAccessLog.parseLogLine).cache()
 
-    val logLinesDStream = streamingContext.socketTextStream("localhost", 9999)
+  val windowDStream: DStream[ApacheAccessLog] = accessLogsDStream.window(WINDOW_LENGTH, SLIDE_INTERVAL)
 
-    val accessLogsDStream = logLinesDStream.map(ApacheAccessLog.parseLogLine).cache()
+  windowDStream.foreachRDD(accessLogs => {
+    if (accessLogs.count() == 0) {
+      println("No access logs received in this time interval")
+    } else {
+      accessLogs.toDF().createOrReplaceTempView("logs")
 
-    val windowDStream = accessLogsDStream.window(WINDOW_LENGTH, SLIDE_INTERVAL)
+      // Calculate statistics based on the content size.
+      val contentSizeStats: Row = spark
+        .sql("SELECT SUM(contentSize), COUNT(*), MIN(contentSize), MAX(contentSize) FROM logs")
+        .first()
+      println("Content Size Avg: %s, Min: %s, Max: %s".format(
+        contentSizeStats.getLong(0) / contentSizeStats.getLong(1),
+        contentSizeStats(2),
+        contentSizeStats(3)))
 
-    windowDStream.foreachRDD(accessLogs => {
-      if (accessLogs.count() == 0) {
-        println("No access com.databricks.app.logs received in this time interval")
-      } else {
-        accessLogs.toDF().registerTempTable("com/databricks/app/logs")
+      // Compute Response Code to Count.
+      val responseCodeToCount: Array[(Int, Long)] = spark
+        .sql("SELECT responseCode, COUNT(*) FROM logs GROUP BY responseCode")
+        .map(row => (row.getInt(0), row.getLong(1)))
+        .take(1000)
+      println(s"""Response code counts: ${responseCodeToCount.mkString("[", ",", "]")}""")
 
-        // Calculate statistics based on the content size.
-        val contentSizeStats = sqlContext
-          .sql("SELECT SUM(contentSize), COUNT(*), MIN(contentSize), MAX(contentSize) FROM com.databricks.app.logs")
-          .first()
-        println("Content Size Avg: %s, Min: %s, Max: %s".format(
-          contentSizeStats.getLong(0) / contentSizeStats.getLong(1),
-          contentSizeStats(2),
-          contentSizeStats(3)))
+      // Any IPAddress that has accessed the server more than 10 times.
+      val ipAddresses: Array[String] = spark
+        .sql("SELECT ipAddress, COUNT(*) AS total FROM logs GROUP BY ipAddress HAVING total > 10")
+        .map(row => row.getString(0))
+        .take(100)
+      println(s"""IPAddresses > 10 times: ${ipAddresses.mkString("[", ",", "]")}""")
 
-        // Compute Response Code to Count.
-        val responseCodeToCount = sqlContext
-          .sql("SELECT responseCode, COUNT(*) FROM com.databricks.app.logs GROUP BY responseCode")
-          .map(row => (row.getInt(0), row.getLong(1)))
-          .take(1000)
-        println(s"""Response code counts: ${responseCodeToCount.mkString("[", ",", "]")}""")
+      // Top Endpoints.
+      val topEndpoints: Array[(String, Long)] = spark
+        .sql("SELECT endpoint, COUNT(*) AS total FROM logs GROUP BY endpoint ORDER BY total DESC LIMIT 10")
+        .map(row => (row.getString(0), row.getLong(1)))
+        .collect()
+      println(s"""Top Endpoints: ${topEndpoints.mkString("[", ",", "]")}""")
+    }
+  })
 
-        // Any IPAddress that has accessed the server more than 10 times.
-        val ipAddresses =sqlContext
-          .sql("SELECT ipAddress, COUNT(*) AS total FROM com.databricks.app.logs GROUP BY ipAddress HAVING total > 10")
-          .map(row => row.getString(0))
-          .take(100)
-        println(s"""IPAddresses > 10 times: ${ipAddresses.mkString("[", ",", "]")}""")
-
-        val topEndpoints = sqlContext
-          .sql("SELECT endpoint, COUNT(*) AS total FROM com.databricks.app.logs GROUP BY endpoint ORDER BY total DESC LIMIT 10")
-          .map(row => (row.getString(0), row.getLong(1)))
-          .collect()
-        println(s"""Top Endpoints: ${topEndpoints.mkString("[", ",", "]")}""")
-      }
-    })
-
-    streamingContext.start()
-    streamingContext.awaitTermination()
-  }
+  // Start the streaming server.
+  streamingContext.start() // Start the computation
+  streamingContext.awaitTermination() // Wait for the computation to terminate
 }

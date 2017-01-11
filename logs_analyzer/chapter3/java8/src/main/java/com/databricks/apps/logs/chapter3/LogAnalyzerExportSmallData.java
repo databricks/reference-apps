@@ -27,7 +27,7 @@ public class LogAnalyzerExportSmallData {
 
   public static void main(String[] args) throws IOException {
       // Initialize SparkSession instance.
-    SparkSession sparkSession = SparkSession
+    SparkSession spark = SparkSession
             .builder()
             .appName("Log Analyzer SQL")
             .getOrCreate();
@@ -37,13 +37,13 @@ public class LogAnalyzerExportSmallData {
       System.exit(-1);
     }
     String logFile = args[0];
-    JavaRDD<ApacheAccessLog> accessLogs = sparkSession
+    JavaRDD<ApacheAccessLog> accessLogs = spark
         .read()
         .textFile(logFile)
         .javaRDD()
         .map(ApacheAccessLog::parseFromLogLine);
 
-    LogAnalyzerRDD logAnalyzerRDD = new LogAnalyzerRDD(sparkSession);
+    LogAnalyzerRDD logAnalyzerRDD = new LogAnalyzerRDD(spark);
     LogStatistics logStatistics = logAnalyzerRDD.processRdd(accessLogs);
 
     String outputFile = args[1];
@@ -67,6 +67,6 @@ public class LogAnalyzerExportSmallData {
         out.write(String.format("Top Endpoints: %s\n", topEndpoints));
     }
 
-    sparkSession.stop();
+    spark.stop();
   }
 }

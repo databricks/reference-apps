@@ -26,7 +26,16 @@ In a terminal window, just run this command on a logfile which you will append t
 If you don't have a live log file that is being updated on the fly, you
 can add lines manually with the included data file or another your own log file:
 ```
-% cat ../../data/apache.accesslog >> [[YOUR_LOG_FILE]]
+% cat ../../data/apache.access.log >> [[YOUR_LOG_FILE]]
+```
+
+You can use a convenience script that emulates a network stream. The script `stream.sh`
+is located in the same directory as the sample log file `apache.access.log`. This script
+periodically sends portions of the sample file to a network socket.
+Run the script on another console:
+```
+% cd ../../data
+% ./stream.sh apache.access.log
 ```
 
 When data is streamed into Spark, there are two common use cases covered:

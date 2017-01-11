@@ -10,8 +10,8 @@ import com.databricks.apps.logs.ApacheAccessLog;
 
 /**
  * LogAnalyzerExportRDD shows how to export data a set of files.
- * 
-  * Example command to run:
+ *
+ * Example command to run:
  * %  ${YOUR_SPARK_HOME}/bin/spark-submit
  *     --class "com.databricks.apps.logs.chapter3.LogAnalyzerExportRDD"
  *     --master spark://YOUR_SPARK_MASTER

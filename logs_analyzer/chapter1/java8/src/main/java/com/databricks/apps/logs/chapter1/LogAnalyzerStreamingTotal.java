@@ -34,8 +34,13 @@ import com.databricks.apps.logs.ApacheAccessLog;
  * Example command to run:
  * %  ${YOUR_SPARK_HOME}/bin/spark-submit
  *     --class "com.databricks.apps.logs.chapter1.LogAnalyzerStreamingTotal"
- *     --master local[4]
+ *     --master local[*]
  *     target/log-analyzer-2.0.jar
+ *
+ * On another console, run the shell script that emulates network stream
+ * by periodically sending portions of the sample log file to a network socket:
+ * % cd ../../data
+ * % ./stream.sh apache.access.log
  */
 public class LogAnalyzerStreamingTotal {
   private static final Function2<Long, Long, Long> SUM_REDUCER = (a, b) -> a + b;
@@ -77,7 +82,7 @@ public class LogAnalyzerStreamingTotal {
         new Duration(10000));  // This sets the update window to be every 10 seconds.
 
     // Checkpointing must be enabled to use the updateStateByKey function.
-    jssc.checkpoint("/tmp/log-analyzer-streaming");
+    jssc.checkpoint("checkpoints-log-analyzer-streaming-total");
 
     JavaReceiverInputDStream<String> logDataDStream =
         jssc.socketTextStream("localhost", 9999);
