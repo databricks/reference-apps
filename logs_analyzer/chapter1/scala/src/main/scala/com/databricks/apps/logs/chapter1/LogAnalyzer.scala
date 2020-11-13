@@ -34,26 +34,15 @@ object LogAnalyzer extends App {
     contentSizes.max))
 
   // Compute Response Code to Count.
-  val responseCodeToCount: Array[(Int, Long)] = accessLogs
-    .map(_.responseCode -> 1L)
-    .reduceByKey(_ + _)
-    .take(100)
+  val responseCodeToCount: Array[(Int, Long)] = accessLogs.groupBy(_.responseCode).mapValues(_.size).take(100)
   println(s"""Response code counts: ${responseCodeToCount.mkString("[", ",", "]")}""")
 
   // Any IPAddress that has accessed the server more than 10 times.
-  val ipAddresses: Array[String] = accessLogs
-    .map(_.ipAddress -> 1L)
-    .reduceByKey(_ + _)
-    .filter(_._2 > 10)
-    .map(_._1)
-    .take(100)
+  val ipAddresses: Array[String] = accessLogs.groupBy(_.ipAddress).mapValues(_.size).filter(_._2>10).map(_._1).take(100)
   println(s"""IPAddresses > 10 times: ${ipAddresses.mkString("[", ",", "]")}""")
 
   // Top Endpoints.
-  val topEndpoints: Array[(String, Long)] = accessLogs
-    .map(_.endpoint -> 1L)
-    .reduceByKey(_ + _)
-    .top(10)(Ordering.by[(String, Long), Long](_._2))
+  val topEndpoints: Array[(String, Long)] = accessLogs.groupBy(_.endpoint).mapValues(_.size).top(10)(Ordering.by(_._2))
   println(s"""Top Endpoints: ${topEndpoints.mkString("[", ",", "]")}""")
 
   sc.stop()
